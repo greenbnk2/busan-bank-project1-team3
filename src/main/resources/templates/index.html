@@ -16,12 +16,12 @@
         <div class="header-top">
             <div class="container">
                 <div class="logo">
-                    <a href="/">
+                    <a th:href="@{/}">
                         <img th:src="@{/images/main/h1_busanbank_new.png}" alt="BNK부산은행">
                     </a>
                 </div>
                 <div class="header-utils">
-                    <a href="#" class="util-link">로그인</a>
+                    <a th:href="@{/member/login}" class="util-link">로그인</a>
                     <button type="button" class="btn-search" title="검색하기">검색하기</button>
                     <button type="button" class="btn-allmenu" title="전체메뉴">전체메뉴</button>
                 </div>
@@ -30,7 +30,7 @@
         <nav class="nav">
             <div class="container">
                 <ul class="nav-menu">
-                    <li><a href="/bnk/productList">펀드상품</a></li>
+                    <li><a th:href="@{/productList}">펀드상품</a></li>
                     <li><a href="#">펀드케어</a></li>
                     <li><a href="#">펀드정보센터</a></li>
                     <li><a href="#">펀드이용가이드</a></li>
@@ -59,7 +59,7 @@
                 <h2 class="section-title">나의 투자성향에 맞는 <strong>다양한 펀드</strong>를 확인해보세요</h2>
                 <div class="category-grid">
                     <div class="category-card">
-                        <a href="/bnk/productList">
+                        <a th:href="@{/productList}">
                             <div class="category-icon">
                                 <img th:src="@{/images/main/fnd_prod_1.png}" alt="추천펀드">
                             </div>
@@ -67,7 +67,7 @@
                         </a>
                     </div>
                     <div class="category-card">
-                        <a href="/bnk/productList">
+                        <a th:href="@{/productList}">
                             <div class="category-icon">
                                 <img th:src="@{/images/main/fnd_prod_2.png}" alt="수익률 BEST">
                             </div>
@@ -75,7 +75,7 @@
                         </a>
                     </div>
                     <div class="category-card">
-                        <a href="/bnk/productList">
+                        <a th:href="@{/productList}">
                             <div class="category-icon">
                                 <img th:src="@{/images/main/fnd_prod_3.png}" alt="판매 BEST">
                             </div>

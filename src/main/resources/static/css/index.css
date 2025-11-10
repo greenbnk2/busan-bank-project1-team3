@@ -31,9 +31,9 @@ img {
 /* ==================== CONTAINER STYLES ==================== */
 /* 메인 페이지용 컨테이너 */
 .container {
-    max-width: 1080px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0;
 }
 
 /* 사이드바 레이아웃용 컨테이너 */
@@ -368,8 +368,8 @@ img {
 
 /* ========== 사이드바 ========== */
 .sidebar {
-    flex: 0 0 220px;
-    width: 220px;
+    flex: 0 0 170px;
+    width: 170px;
     background-color: #fff;
     border-right: 1px solid #e5e5e5;
     padding-bottom: 30px;

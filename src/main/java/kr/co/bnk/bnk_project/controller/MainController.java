@@ -11,9 +11,4 @@ public class MainController {
         return "index";
     }
 
-    @GetMapping("/sidebar")
-    public String sidebar(){
-        return "sidebar";
-    }
-
 }

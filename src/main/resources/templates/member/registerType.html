@@ -4,14 +4,20 @@
         <div class="content-wrapper">
             <!--  사이드바 시작 -->
             <aside class="sidebar">
-                <div class="title-divider-light"></div>
+                <h2 class="sidebar-title">회원가입</h2>
                 <nav class="sidebar-nav">
-                    <h2 class="sidebar-title">펀드상품안내</h2>
-                    <a href="/bnk/productList" class="sidebar-link active">펀드상품 <span class="arrow">→</span></a>
-                    <a href="/bnk/fundGuide" class="sidebar-link">펀드케어 <span class="arrow">→</span></a>
-                    <a href="/bnk/fundInformation" class="sidebar-link">펀드정보센터 <span class="arrow">→</span></a>
-                    <a href="/bnk/dopisitGuide" class="sidebar-link">이용안내 <span class="arrow">→</span></a>
-                    <a href="/bnk/FAQ" class="sidebar-link">FAQ(자주묻는질문) <span class="arrow">→</span></a>
+                    <a href="/bnk/member/guide" class="sidebar-link active">
+                        안내
+                        <span class="arrow">▶</span>
+                    </a>
+                    <a href="/bnk/member/findId" class="sidebar-link">
+                        아이디조회
+                        <span class="arrow">▶</span>
+                    </a>
+                    <a href="/bnk/member/findPassword" class="sidebar-link">
+                        비밀번호찾기
+                        <span class="arrow">▶</span>
+                    </a>
                 </nav>
                 <div class="sidebar-icons">
                     <div class="sidebar-icon-item">
@@ -32,7 +38,80 @@
 
             <!-- 메인 컨텐츠 시작 -->
             <div class="main-content">
+                <div class="register-type-container">
+                    <!-- 페이지 제목 -->
+                    <h1 class="page-title">회원유형선택</h1>
 
+                    <!-- 안내 박스 -->
+                    <div class="info-box">
+                        <button class="info-toggle" type="button" onclick="toggleInfoBox()">
+                            <span class="toggle-icon">▲</span>
+                        </button>
+                        <div class="info-summary">
+                            이용가이드를 참고해 주십시오.
+                        </div>
+                        <div class="info-content">
+                            <p>· 고객님께서 해당하시는 회원의 유형을 선택해 주세요</p>
+                            <p>· 회원증류에 따라 가입절차에 등록하는 항목에 차이가 있으니 반드시 해당하는 유형으로 선택해 주시기 바랍니다.</p>
+                        </div>
+                    </div>
+
+                    <!-- 회원 유형 카드 -->
+                    <div class="member-type-grid">
+                        <!-- 일반회원(개인) -->
+                        <div class="member-card card-light-blue">
+                            <h3 class="card-title">일반회원(개인)</h3>
+                            <p class="card-description">
+                                영업점에서 인터넷뱅킹을 신청하지 않아도 홈페이지 신청 가능함.
+                            </p>
+                            <button class="card-button" type="button">바로가기</button>
+                        </div>
+
+                        <!-- 개인사업자 -->
+                        <div class="member-card card-blue">
+                            <h3 class="card-title">개인사업자</h3>
+                            <p class="card-description">
+                                개인이 운영하는 사업체를 가지고 계신 고객
+                            </p>
+                            <button class="card-button" type="button">바로가기</button>
+                        </div>
+
+                        <!-- 법인 -->
+                        <div class="member-card card-dark">
+                            <h3 class="card-title">법인</h3>
+                            <p class="card-description">
+                                영리 또는 비영리를 목적으로 사업 체를 가지고 계신 고객
+                            </p>
+                            <button class="card-button" type="button">바로가기</button>
+                        </div>
+
+                        <!-- 개인(여권번호) -->
+                        <div class="member-card card-light-blue">
+                            <h3 class="card-title">개인(여권번호)</h3>
+                            <p class="card-description">
+                                영업점에서 인터넷뱅킹을 신청하지 않아도 홈페이지 신청 가능함
+                            </p>
+                            <button class="card-button" type="button">바로가기</button>
+                        </div>
+                    </div>
+
+                    <!-- Service Information -->
+                    <div class="service-info-section">
+                        <div class="service-info-left">
+                            <h2 class="service-title">Service</h2>
+                            <h2 class="service-title">information</h2>
+                        </div>
+                        <div class="service-info-right">
+                            <h3 class="service-subtitle">부산은행만의 또 다른 <span style="color: #5a7ba6;">새상!</span></h3>
+                            <p class="service-description">
+                                온라인으로 회원 가입하시면 좀더 편리하고 안전하게 은행 거래를 하실 수 있습니다.
+                            </p>
+                            <p class="service-description">
+                                여러분들에게 다양하고 유익한 정보의 습득은 물론, 회원으로 가입하시면 이벤트, 사이버지점 등 부산은행만의 서비스를 경험 하실 수 있습니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!--  메인 컨텐츠 끝 -->
         </div>

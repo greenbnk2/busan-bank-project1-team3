@@ -123,3 +123,266 @@
     margin-bottom: 25px;
     margin-left: 17.5%;
 }
+
+/* ======================= 회원가입 사이드바 ======================= */
+/* 사이드바 제목 */
+.sidebar .sidebar-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    padding: 12px 16px;
+    margin: 0;
+    border-top: 2px solid #28282b;
+    border-bottom: 1px solid #e0e0e1;
+    background-color: #fff;
+}
+
+/* 사이드바 네비게이션 */
+.sidebar .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 사이드바 링크 */
+.sidebar .sidebar-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    border-bottom: 1px solid #e0e0e1;
+    background-color: #fff;
+    transition: all 0.2s;
+}
+
+.sidebar .sidebar-link:hover {
+    background-color: #f8f8fa;
+    color: #d32f2f;
+}
+
+/* 활성화된 링크 (안내 메뉴) */
+.sidebar .sidebar-link.active {
+    background-color: #fff;
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.sidebar .sidebar-link .arrow {
+    font-size: 12px;
+    color: inherit;
+}
+
+/* 사이드바 하단 아이콘 */
+.sidebar .sidebar-icons {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 10px;
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e1;
+}
+
+.sidebar .sidebar-icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.sidebar .icon-bubble,
+.sidebar .icon-envelope,
+.sidebar .icon-question {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background-color: #f5f5f5;
+    border-radius: 50%;
+}
+
+.sidebar .sidebar-icon-item span {
+    font-size: 11px;
+    color: #666;
+}
+
+/* ======================= 회원유형선택 페이지 ======================= */
+.register-type-container {
+    padding: 30px 40px;
+}
+
+/* 페이지 제목 */
+.page-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #333;
+}
+
+/* 안내 박스 */
+.info-box {
+    position: relative;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 20px 50px 20px 20px;
+    margin-bottom: 40px;
+}
+
+.info-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.toggle-icon {
+    font-size: 14px;
+    color: #666;
+}
+
+.info-content p {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.8;
+    margin: 5px 0;
+}
+
+/* 회원 유형 카드 그리드 */
+.member-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 60px;
+}
+
+.member-card {
+    border-radius: 8px;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 200px;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.card-description {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.card-button {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px 30px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.card-button:hover {
+    background: #f5f5f5;
+    border-color: #999;
+}
+
+/* 카드 배경색 */
+.card-light-blue {
+    background-color: #e8f1f5;
+}
+
+.card-blue {
+    background-color: #5a7ba6;
+}
+
+.card-blue .card-title,
+.card-blue .card-description {
+    color: #fff;
+}
+
+.card-dark {
+    background-color: #6b6b6b;
+}
+
+.card-dark .card-title,
+.card-dark .card-description {
+    color: #fff;
+}
+
+/* Service Information 섹션 */
+.service-info-section {
+    display: flex;
+    gap: 40px;
+    padding: 40px 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.service-info-left {
+    flex: 0 0 200px;
+}
+
+.service-title {
+    font-size: 32px;
+    font-weight: 300;
+    color: #999;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.service-info-right {
+    flex: 1;
+}
+
+.service-subtitle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.service-description {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 10px;
+}
+
+/* 안내 박스 접힌 상태 요약 텍스트 */
+.info-summary {
+    font-size: 13px;
+    color: #555;
+    display: none;
+}
+
+/* 접힌 상태 */
+.info-box.collapsed .info-content {
+    display: none;
+}
+
+.info-box.collapsed .info-summary {
+    display: block;
+}
+
+.info-box.collapsed .toggle-icon {
+    transform: rotate(180deg);
+}
