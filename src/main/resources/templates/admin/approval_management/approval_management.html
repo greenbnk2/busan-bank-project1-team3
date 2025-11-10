@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결재(승인) 관리</title>
+    <link rel="stylesheet" href="approval_styles.css">
+    <script src="sidebar-script.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="header-content">
+            <a href="adminMain.html">
+                <img src="logo.png" alt="BNK 부산은행" class="sidebar-logo">
+            </a>
+            <span class="admin-label">관리자</span>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <ul>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">상품관리</a>
+                <ul class="submenu">
+                    <li><a href="adminMain.html">상품 목록</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">정보/공시</a>
+                <ul class="submenu">
+                    <li><a href="disclosure_documents.html">공시자료</a></li>
+                    <li><a href="ad-hoc_disclosure.html">수시공시</a></li>
+                    <li><a href="fund_infomation.html">펀드정보</a></li>
+                    <li><a href="guide.html">가이드</a></li>
+                    <li><a href="fund_market.html">펀드시황 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">고객지원</a>
+                <ul class="submenu">
+                    <li><a href="#">FAQ 관리</a></li>
+                    <li><a href="#">백문백답 관리</a></li>
+                    <li><a href="#">Q&amp;A 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">환경설정</a>
+                <ul class="submenu">
+                    <li><a href="search_keyword.html">검색어 관리</a></li>
+                    <li><a href="category_management.html">상품 카테고리 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="approval_management.html" class="active">결재(승인) 관리</a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<div class="main-content">
+    <header class="main-header">
+        <div class="header-right">
+            <span class="user-name">관리자님</span>
+            <span class="header-divider">|</span>
+            <a href="#" class="logout-link">로그아웃</a>
+        </div>
+    </header>
+
+    <div class="main-content-body">
+        <div class="container">
+            <header class="page-header">
+                <h1>결재(승인) 관리</h1>
+            </header>
+
+            <section class="section-block approval-overview">
+                <h2 class="section-title">상품 결재 현황</h2>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">전체 요청</span>
+                        <span class="stat-value" data-metric="total">0건</span>
+                        <span class="stat-subtext">최근 30일</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">대기</span>
+                        <span class="stat-value" data-metric="pending">0건</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">승인</span>
+                        <span class="stat-value" data-metric="approved">0건</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">반려</span>
+                        <span class="stat-value" data-metric="rejected">0건</span>
+                    </div>
+                </div>
+                <ul class="summary-list">
+                    <li>상품 신규 등록 및 수정 요청만 확인합니다.</li>
+                    <li>승인 시 즉시 상품 관리 화면에 반영됩니다.</li>
+                </ul>
+            </section>
+
+            <section class="section-block approval-filter">
+                <h2 class="section-title">결재 요청 검색</h2>
+                <form class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-field">
+                            <label for="filterKeyword">검색어</label>
+                            <input type="text" id="filterKeyword" placeholder="결재 ID 또는 요청자를 입력하세요">
+                        </div>
+                        <div class="filter-field">
+                            <label for="filterStatus">상태</label>
+                            <select id="filterStatus">
+                                <option>전체</option>
+                                <option>대기</option>
+                                <option>승인</option>
+                                <option>반려</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-field">
+                            <label for="filterRequester">요청자</label>
+                            <input type="text" id="filterRequester" placeholder="요청자 이름을 입력하세요">
+                        </div>
+                        <div class="filter-field">
+                            <label for="filterDateFrom">시작일</label>
+                            <input type="date" id="filterDateFrom">
+                        </div>
+                        <div class="filter-field">
+                            <label for="filterDateTo">종료일</label>
+                            <input type="date" id="filterDateTo">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="button" class="btn btn-secondary">초기화</button>
+                        <button type="submit" class="btn btn-primary">검색</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="section-block">
+                <h2 class="section-title">상품 결재 대기 목록</h2>
+                <div class="history-table">
+                    <div class="table-info">
+                        <span>총 <strong>2</strong>건</span>
+                        <span class="pagination-info">1 / 1 page</span>
+                    </div>
+                    <table class="fund-table" id="pendingTable">
+                        <caption>결재 대기 상품 요청 목록</caption>
+                        <thead>
+                        <tr>
+                            <th>결재 ID</th>
+                            <th>상품명</th>
+                            <th>결재 유형</th>
+                            <th>요청자</th>
+                            <th>요청 일시</th>
+                            <th>상태</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="approval-row selected" data-id="APR-2024-021" data-product="BNK 스마트 적금" data-product-code="BNK-001" data-type="상품 신규 등록" data-requester="김운용" data-requested="2024-05-02 09:30" data-status="대기" data-status-key="pending" data-reason="신규 BNK 스마트 적금 상품 출시 결재 요청입니다." data-attachment="BNK_스마트적금_상품설명서.pdf" data-attachment-url="#">
+                            <td class="table-ellipsis">APR-2024-021</td>
+                            <td class="table-ellipsis">BNK 스마트 적금</td>
+                            <td class="table-ellipsis emphasis">상품 신규 등록</td>
+                            <td class="table-ellipsis">김운용</td>
+                            <td class="table-ellipsis">2024-05-02 09:30</td>
+                            <td class="table-ellipsis"><span class="status-badge status-pending">대기</span></td>
+                        </tr>
+                        <tr class="approval-row" data-id="APR-2024-020" data-product="BNK 기업대출상품" data-product-code="BNK-102" data-type="상품 수정" data-requester="박심사" data-requested="2024-05-01 14:10" data-status="대기" data-status-key="pending" data-reason="기업대출상품 금리 조건 변경에 대한 승인 요청입니다." data-attachment="기업대출상품_변경내역.pdf" data-attachment-url="#">
+                            <td class="table-ellipsis">APR-2024-020</td>
+                            <td class="table-ellipsis">BNK 기업대출상품</td>
+                            <td class="table-ellipsis emphasis">상품 수정</td>
+                            <td class="table-ellipsis">박심사</td>
+                            <td class="table-ellipsis">2024-05-01 14:10</td>
+                            <td class="table-ellipsis"><span class="status-badge status-pending">대기</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination">
+                        <button class="page-btn" disabled>이전</button>
+                        <button class="page-number active">1</button>
+                        <button class="page-btn" disabled>다음</button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="split-layout">
+                <section class="section-block approval-detail">
+                    <h2 class="section-title">결재 상세</h2>
+                    <div class="detail-panel">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">결재 ID</span>
+                                <span class="detail-value" id="detailId">APR-2024-021</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">결재 유형</span>
+                                <span class="detail-value" id="detailType">상품 신규 등록</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">상품명</span>
+                                <span class="detail-value" id="detailProduct">BNK 스마트 적금</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">상품 코드</span>
+                                <span class="detail-value" id="detailProductCode">BNK-001</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">요청자</span>
+                                <span class="detail-value" id="detailRequester">김운용</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">요청 일시</span>
+                                <span class="detail-value" id="detailRequestedAt">2024-05-02 09:30</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">상태</span>
+                                <span class="detail-value" id="detailStatus"><span class="status-badge status-pending">대기</span></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">첨부 문서</span>
+                                <a href="#" class="detail-link" id="detailAttachment">BNK_스마트적금_상품설명서.pdf</a>
+                            </div>
+                            <div class="detail-item span-2">
+                                <span class="detail-label">요청 사유</span>
+                                <span class="detail-desc" id="detailReason">신규 BNK 스마트 적금 상품 출시 결재 요청입니다.</span>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="approvalComment">결재 의견</label>
+                            <textarea id="approvalComment" placeholder="승인 또는 반려 사유를 입력하세요."></textarea>
+                        </div>
+                        <div class="error-message" id="approvalError" aria-live="polite"></div>
+                        <div class="detail-actions">
+                            <button type="button" class="btn btn-primary" id="approveButton">승인</button>
+                            <button type="button" class="btn btn-secondary" id="rejectButton">반려</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section-block approval-history">
+                    <h2 class="section-title">최근 결재 이력</h2>
+                    <div class="history-table">
+                        <div class="table-info">
+                            <span>총 <strong>2</strong>건</span>
+                            <span class="pagination-info">1 / 1 page</span>
+                        </div>
+                        <table class="fund-table" id="historyTable">
+                            <caption>완료된 상품 결재 이력</caption>
+                            <thead>
+                            <tr>
+                                <th>결재 ID</th>
+                                <th>상품명</th>
+                                <th>결재 유형</th>
+                                <th>최종 처리자</th>
+                                <th>처리 일시</th>
+                                <th>결과</th>
+                                <th>비고</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr data-status-key="approved">
+                                <td class="table-ellipsis">APR-2024-013</td>
+                                <td class="table-ellipsis">BNK 더드림 펀드</td>
+                                <td class="table-ellipsis emphasis">상품 신규 등록</td>
+                                <td class="table-ellipsis">홍관리</td>
+                                <td class="table-ellipsis">2024-04-20 14:05</td>
+                                <td class="table-ellipsis"><span class="status-badge status-approved">승인</span></td>
+                                <td class="remark">상품 신규 등록 승인</td>
+                            </tr>
+                            <tr data-status-key="rejected">
+                                <td class="table-ellipsis">APR-2024-012</td>
+                                <td class="table-ellipsis">BNK 하모니 적립식</td>
+                                <td class="table-ellipsis emphasis">상품 수정</td>
+                                <td class="table-ellipsis">홍관리</td>
+                                <td class="table-ellipsis">2024-04-19 11:20</td>
+                                <td class="table-ellipsis"><span class="status-badge status-rejected">반려</span></td>
+                                <td class="remark">근거 자료 부족</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <button class="page-btn" disabled>이전</button>
+                            <button class="page-number active">1</button>
+                            <button class="page-btn" disabled>다음</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const rows = Array.from(document.querySelectorAll('.approval-row'));
+        const detailId = document.getElementById('detailId');
+        const detailType = document.getElementById('detailType');
+        const detailRequester = document.getElementById('detailRequester');
+        const detailRequestedAt = document.getElementById('detailRequestedAt');
+        const detailStatus = document.getElementById('detailStatus');
+        const detailReason = document.getElementById('detailReason');
+        const detailAttachment = document.getElementById('detailAttachment');
+        const detailProduct = document.getElementById('detailProduct');
+        const detailProductCode = document.getElementById('detailProductCode');
+        const commentField = document.getElementById('approvalComment');
+        const errorBox = document.getElementById('approvalError');
+        const approveButton = document.getElementById('approveButton');
+        const rejectButton = document.getElementById('rejectButton');
+        const overviewMap = {
+            total: document.querySelector('[data-metric="total"]'),
+            pending: document.querySelector('[data-metric="pending"]'),
+            approved: document.querySelector('[data-metric="approved"]'),
+            rejected: document.querySelector('[data-metric="rejected"]')
+        };
+
+        function setDetail(row) {
+            rows.forEach((r) => r.classList.remove('selected'));
+            row.classList.add('selected');
+
+            detailId.textContent = row.dataset.id;
+            detailType.textContent = row.dataset.type || '';
+            detailRequester.textContent = row.dataset.requester;
+            detailRequestedAt.textContent = row.dataset.requested;
+
+            const statusKey = row.dataset.statusKey || 'pending';
+            const statusLabel = row.dataset.status || row.dataset.statusKey;
+            detailStatus.innerHTML = `<span class="status-badge status-${statusKey}">${statusLabel}</span>`;
+
+            detailReason.textContent = row.dataset.reason || '';
+            if (row.dataset.attachment) {
+                detailAttachment.textContent = row.dataset.attachment;
+                detailAttachment.href = row.dataset.attachmentUrl || '#';
+                detailAttachment.style.display = '';
+            } else {
+                detailAttachment.textContent = '첨부 파일 없음';
+                detailAttachment.removeAttribute('href');
+            }
+            detailProduct.textContent = row.dataset.product || '-';
+            detailProductCode.textContent = row.dataset.productCode || '-';
+
+            commentField.value = '';
+            errorBox.textContent = '';
+        }
+
+        function updateOverviewCounts() {
+            const counts = { total: 0, pending: 0, approved: 0, rejected: 0 };
+
+            document.querySelectorAll('#pendingTable tbody tr').forEach((row) => {
+                const key = row.dataset.statusKey || 'pending';
+                counts.total += 1;
+                if (counts[key] !== undefined) counts[key] += 1;
+            });
+
+            document.querySelectorAll('#historyTable tbody tr').forEach((row) => {
+                const key = row.dataset.statusKey;
+                counts.total += 1;
+                if (counts[key] !== undefined) counts[key] += 1;
+            });
+
+            Object.entries(overviewMap).forEach(([key, el]) => {
+                if (el) {
+                    el.textContent = `${counts[key]}건`;
+                }
+            });
+        }
+
+        rows.forEach((row) => {
+            row.addEventListener('click', () => setDetail(row));
+        });
+
+        approveButton.addEventListener('click', () => {
+            errorBox.textContent = '';
+            // 승인 로직 연결 시 이곳에서 처리
+        });
+
+        rejectButton.addEventListener('click', () => {
+            if (!commentField.value.trim()) {
+                errorBox.textContent = '반려 사유를 입력해주세요.';
+                commentField.focus();
+                return;
+            }
+            errorBox.textContent = '';
+            // 반려 처리 로직 추가 가능
+        });
+
+        commentField.addEventListener('input', () => {
+            if (commentField.value.trim()) {
+                errorBox.textContent = '';
+            }
+        });
+
+        if (rows.length) {
+            setDetail(rows[0]);
+        }
+        updateOverviewCounts();
+    });
+</script>
+</body>
+</html>
+

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가이드 관리</title>
+    <link rel="stylesheet" href="info_disclosure.css">
+    <script src="sidebar-script.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="header-content">
+            <a href="adminMain.html">
+                <img src="logo.png" alt="BNK 부산은행" class="sidebar-logo">
+            </a>
+            <span class="admin-label">관리자</span>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <ul>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">상품관리</a>
+                <ul class="submenu">
+                    <li><a href="adminMain.html">상품 목록</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu open">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">정보/공시</a>
+                <ul class="submenu">
+                    <li><a href="disclosure_documents.html">공시자료</a></li>
+                    <li><a href="ad-hoc_disclosure.html">수시공시</a></li>
+                    <li><a href="fund_infomation.html">펀드정보</a></li>
+                    <li><a href="guide.html" class="active">가이드</a></li>
+                    <li><a href="fund_market.html">펀드시황 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">고객지원</a>
+                <ul class="submenu">
+                    <li><a href="#">FAQ 관리</a></li>
+                    <li><a href="#">백문백답 관리</a></li>
+                    <li><a href="#">Q&amp;A 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">환경설정</a>
+                <ul class="submenu">
+                    <li><a href="search_keyword.html">검색어 관리</a></li>
+                    <li><a href="category_management.html">상품 카테고리 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="approval_management.html">결재(승인) 관리</a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<div class="main-content">
+    <header class="main-header">
+        <div class="header-right">
+            <span class="user-name">관리자님</span>
+            <span class="header-divider">|</span>
+            <a href="#" class="logout-link">로그아웃</a>
+        </div>
+    </header>
+
+    <div class="main-content-body">
+        <div class="container">
+            <header class="page-header">
+                <h1>가이드 관리</h1>
+                <div class="header-actions">
+                    <button type="button" id="openGuideModal" class="btn btn-primary">등록</button>
+                </div>
+            </header>
+
+            <section class="section-block">
+                <div class="table-info">
+                    <span>총 <strong>3</strong>건</span>
+                    <span class="pagination-info">1 / 1 page</span>
+                </div>
+                <table class="fund-table">
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>가이드명</th>
+                        <th>카테고리</th>
+                        <th>등록일</th>
+                        <th>상태</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>3</td>
+                        <td class="text-left">비대면 가입 절차 안내</td>
+                        <td>이용안내</td>
+                        <td>2024-04-25</td>
+                        <td>노출중</td>
+                        <td>상세 · 수정 · 삭제</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td class="text-left">모바일 펀드 거래 가이드</td>
+                        <td>상품안내</td>
+                        <td>2024-04-18</td>
+                        <td>노출중</td>
+                        <td>상세 · 수정 · 삭제</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td class="text-left">펀드 가입 절차 안내</td>
+                        <td>이용안내</td>
+                        <td>2024-04-10</td>
+                        <td>노출중</td>
+                        <td>상세 · 수정 · 삭제</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <button class="page-btn" disabled>이전</button>
+                    <button class="page-number active">1</button>
+                    <button class="page-btn" disabled>다음</button>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div id="guideModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>가이드 등록</h3>
+        <form id="guideForm" class="modal-form">
+            <div class="form-field">
+                <label for="guideTitle">가이드명</label>
+                <input type="text" id="guideTitle" name="title" placeholder="가이드명을 입력하세요" required>
+            </div>
+            <div class="form-field">
+                <label for="guideCategory">카테고리</label>
+                <select id="guideCategory" name="category" required>
+                    <option value="">선택하세요</option>
+                    <option value="투자안내">투자안내</option>
+                    <option value="상품안내">상품안내</option>
+                    <option value="이용안내">이용안내</option>
+                    <option value="내부프로세스">내부프로세스</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="guideContent">내용</label>
+                <textarea id="guideContent" name="content" rows="6" placeholder="가이드 내용을 입력하세요" required></textarea>
+            </div>
+            <div class="form-field file-field">
+                <label for="guideFile">첨부파일</label>
+                <input type="file" id="guideFile" name="attachment">
+                <span class="field-hint">필요 시 참고 자료를 첨부해 주세요.</span>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">확인</button>
+                <button type="button" id="guideModalClose" class="btn btn-secondary">닫기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('guideForm');
+        const modal = document.getElementById('guideModal');
+        const closeBtn = document.getElementById('guideModalClose');
+        const openBtn = document.getElementById('openGuideModal');
+
+        function showModal() {
+            modal?.classList.add('show');
+        }
+
+        function closeModal() {
+            modal?.classList.remove('show');
+        }
+
+        openBtn?.addEventListener('click', showModal);
+        closeBtn?.addEventListener('click', closeModal);
+
+        form?.addEventListener('submit', function (event) {
+            event.preventDefault();
+            closeModal();
+        });
+
+        modal?.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    });
+</script>
+</body>
+</html>
+

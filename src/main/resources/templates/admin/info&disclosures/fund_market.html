@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>펀드시황 관리</title>
+    <link rel="stylesheet" href="info_disclosure.css">
+    <script src="sidebar-script.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="header-content">
+            <a href="adminMain.html">
+                <img src="logo.png" alt="BNK 부산은행" class="sidebar-logo">
+            </a>
+            <span class="admin-label">관리자</span>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <ul>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">상품관리</a>
+                <ul class="submenu">
+                    <li><a href="adminMain.html">상품 목록</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu open">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">정보/공시</a>
+                <ul class="submenu">
+                    <li><a href="disclosure_documents.html">공시자료</a></li>
+                    <li><a href="ad-hoc_disclosure.html">수시공시</a></li>
+                    <li><a href="fund_infomation.html">펀드정보</a></li>
+                    <li><a href="guide.html">가이드</a></li>
+                    <li><a href="fund_market.html" class="active">펀드시황 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">고객지원</a>
+                <ul class="submenu">
+                    <li><a href="#">FAQ 관리</a></li>
+                    <li><a href="#">백문백답 관리</a></li>
+                    <li><a href="#">Q&amp;A 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">환경설정</a>
+                <ul class="submenu">
+                    <li><a href="search_keyword.html">검색어 관리</a></li>
+                    <li><a href="category_management.html">상품 카테고리 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="approval_management.html">결재(승인) 관리</a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<div class="main-content">
+    <header class="main-header">
+        <div class="header-right">
+            <span class="user-name">관리자님</span>
+            <span class="header-divider">|</span>
+            <a href="#" class="logout-link">로그아웃</a>
+        </div>
+    </header>
+
+    <div class="main-content-body">
+        <div class="container">
+            <header class="page-header">
+                <h1>펀드시황 관리</h1>
+                <div class="header-actions">
+                    <button type="button" id="openMarketModal" class="btn btn-primary">등록</button>
+                </div>
+            </header>
+
+            <section class="section-block">
+                <div class="table-info">
+                    <span>총 <strong>3</strong>건</span>
+                    <span class="pagination-info">1 / 1 page</span>
+                </div>
+                <table class="fund-table">
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>제목</th>
+                        <th>유형</th>
+                        <th>게시일</th>
+                        <th>채널</th>
+                        <th>상태</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>3</td>
+                        <td class="text-left">5월 시장전망 라이브 방송 안내</td>
+                        <td>영상</td>
+                        <td>2024-05-02 19:00</td>
+                        <td>웹</td>
+                        <td>예약</td>
+                        <td>상세 · 수정 · 삭제</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td class="text-left">4월 4주차 글로벌 시장 리포트</td>
+                        <td>주간리포트</td>
+                        <td>2024-04-22 09:00</td>
+                        <td>웹/모바일</td>
+                        <td>게시중</td>
+                        <td>상세 · 수정 · 삭제</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td class="text-left">긴급 시장속보: 미국 금리 인상</td>
+                        <td>시장속보</td>
+                        <td>2024-04-18 14:30</td>
+                        <td>웹/모바일</td>
+                        <td>게시중</td>
+                        <td>상세 · 수정 · 삭제</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <button class="page-btn" disabled>이전</button>
+                    <button class="page-number active">1</button>
+                    <button class="page-btn" disabled>다음</button>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div id="marketModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>시황 등록</h3>
+        <form id="marketForm" class="modal-form">
+            <div class="form-field">
+                <label for="marketTitle">제목</label>
+                <input type="text" id="marketTitle" name="title" placeholder="시황 제목을 입력하세요" required>
+            </div>
+            <div class="form-field">
+                <label for="marketType">유형</label>
+                <select id="marketType" name="type" required>
+                    <option value="">선택하세요</option>
+                    <option value="주간리포트">주간리포트</option>
+                    <option value="월간전망">월간전망</option>
+                    <option value="시장속보">시장속보</option>
+                    <option value="영상">영상</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="marketPublishAt">게시일</label>
+                <input type="datetime-local" id="marketPublishAt" name="publish_at" required>
+            </div>
+            <div class="form-field">
+                <label for="marketSummary">요약</label>
+                <textarea id="marketSummary" name="summary" rows="6" placeholder="요약 내용을 입력하세요" required></textarea>
+            </div>
+            <div class="form-field file-field">
+                <label for="marketFile">첨부파일</label>
+                <input type="file" id="marketFile" name="attachment">
+                <span class="field-hint">영상 또는 자료 파일을 첨부할 수 있습니다.</span>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">확인</button>
+                <button type="button" id="marketModalClose" class="btn btn-secondary">닫기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('marketForm');
+        const modal = document.getElementById('marketModal');
+        const closeBtn = document.getElementById('marketModalClose');
+        const openBtn = document.getElementById('openMarketModal');
+
+        function showModal() {
+            modal?.classList.add('show');
+        }
+
+        function closeModal() {
+            modal?.classList.remove('show');
+        }
+
+        openBtn?.addEventListener('click', showModal);
+        closeBtn?.addEventListener('click', closeModal);
+
+        form?.addEventListener('submit', function (event) {
+            event.preventDefault();
+            closeModal();
+        });
+
+        modal?.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    });
+</script>
+</body>
+</html>
+

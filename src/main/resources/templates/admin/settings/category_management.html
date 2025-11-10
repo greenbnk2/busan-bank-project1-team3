@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 카테고리 관리</title>
+    <link rel="stylesheet" href="settings_styles.css">
+    <link rel="stylesheet" href="category_management.css">
+    <script src="sidebar-script.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="header-content">
+            <a href="adminMain.html">
+                <img src="logo.png" alt="BNK 부산은행" class="sidebar-logo">
+            </a>
+            <span class="admin-label">관리자</span>
+        </div>
+    </div>
+    <nav class="sidebar-menu">
+        <ul>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">상품관리</a>
+                <ul class="submenu">
+                    <li><a href="adminMain.html">상품 목록</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">정보/공시</a>
+                <ul class="submenu">
+                    <li><a href="disclosure_documents.html">공시자료</a></li>
+                    <li><a href="ad-hoc_disclosure.html">수시공시</a></li>
+                    <li><a href="fund_infomation.html">펀드정보</a></li>
+                    <li><a href="guide.html">가이드</a></li>
+                    <li><a href="fund_market.html">펀드시황 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">고객지원</a>
+                <ul class="submenu">
+                    <li><a href="#">FAQ 관리</a></li>
+                    <li><a href="#">백문백답 관리</a></li>
+                    <li><a href="#">Q&amp;A 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item has-submenu open">
+                <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">환경설정</a>
+                <ul class="submenu">
+                    <li><a href="search_keyword.html">검색어 관리</a></li>
+                    <li><a href="category_management.html" class="active">상품 카테고리 관리</a></li>
+                </ul>
+            </li>
+            <li class="menu-item">
+                <a href="approval_management.html">결재(승인) 관리</a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<div class="main-content">
+    <header class="main-header">
+        <div class="header-right">
+            <span class="user-name">관리자님</span>
+            <span class="header-divider">|</span>
+            <a href="#" class="logout-link">로그아웃</a>
+        </div>
+    </header>
+
+    <div class="main-content-body">
+        <div class="container category-page">
+            <div class="category-header">
+                <div>
+                    <h1>상품 카테고리 관리</h1>
+                    <p>은행 표준 분류를 자체 운영합니다. 사용 수가 0일 때만 삭제할 수 있습니다.</p>
+                </div>
+                <button id="openModalBtn" class="btn btn-primary">신규 등록</button>
+            </div>
+
+            <section class="summary-cards">
+                <article class="summary-card">
+                    <span>총 카테고리</span>
+                    <strong id="summaryTotal">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span>노출(ON)</span>
+                    <strong id="summaryActive">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span>숨김(OFF)</span>
+                    <strong id="summaryInactive">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span>펀드 매핑 수</span>
+                    <strong id="summaryUsage">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span>최근 갱신</span>
+                    <strong id="summaryUpdated">-</strong>
+                </article>
+            </section>
+
+            <section class="filter-panel">
+                <div>
+                    <label for="filterKeyword">검색 (이름/코드/slug)</label>
+                    <input id="filterKeyword" type="text" placeholder="예: 주식형 / CAT-010 / equity">
+                </div>
+                <div>
+                    <label for="filterType">유형</label>
+                    <select id="filterType">
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="check-row">
+                    <label>
+                        <input type="checkbox" id="filterActiveOnly">
+                        노출만 보기
+                    </label>
+                    <label>
+                        <input type="checkbox" id="filterUsageZero">
+                        사용 수 0만 보기
+                    </label>
+                </div>
+            </section>
+
+            <section class="category-table-wrap">
+                <header>
+                    <div>카테고리 목록 (<strong id="rowCount">0</strong>건)</div>
+                    <div class="note">삭제는 사용 수 0일 때만 가능 · 숨김은 프론트 및 검색에서 제외됩니다.</div>
+                </header>
+                <table class="category-table">
+                    <thead>
+                    <tr>
+                        <th class="code-col">코드</th>
+                        <th>이름</th>
+                        <th>유형</th>
+                        <th>상위</th>
+                        <th>Slug</th>
+                        <th class="num-col">사용수</th>
+                        <th class="status-col">노출</th>
+                        <th class="action-col">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="categoryRows">
+                    <tr><td colspan="8" class="empty-row">조건에 맞는 항목이 없습니다.</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+<div id="categoryModal" class="modal-overlay">
+    <div class="modal-card category-modal">
+        <h3 id="modalTitle">카테고리 등록</h3>
+        <form id="modalForm" class="modal-form">
+            <div class="form-grid">
+                <label>
+                    상위
+                    <select id="modalParent">
+                        <option value="">(없음)</option>
+                    </select>
+                </label>
+                <label>
+                    유형(Type)
+                    <select id="modalType" required></select>
+                </label>
+                <label class="full">
+                    이름(한글)
+                    <input id="modalName" type="text" minlength="2" required>
+                </label>
+                <label class="full">
+                    Slug
+                    <div class="slug-field">
+                        <input id="modalSlug" type="text" pattern="^[a-z0-9-]+$" required>
+                        <button type="button" id="slugAutoBtn" class="btn btn-secondary">자동</button>
+                    </div>
+                    <small>소문자/숫자/하이픈만 사용 · 다른 카테고리와 중복 불가</small>
+                </label>
+                <label>
+                    정렬값
+                    <input id="modalSort" type="number" min="0" step="10" value="10">
+                </label>
+                <label>
+                    노출
+                    <button type="button" id="modalActive" class="toggle-pill on" data-value="true">ON</button>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="modalCancel" class="btn btn-secondary">취소</button>
+                <button type="submit" class="btn btn-primary">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="category_management.js"></script>
+</body>
+</html>
