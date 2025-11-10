@@ -8,9 +8,9 @@
 body {
     font-family: 'Noto Sans KR', '돋움', Dotum, Helvetica, AppleGothic, Sans-serif !important;
     text-decoration: none;
-    cursor: pointer;
     color: #333;
     line-height: 1.6;
+    min-width: 1200px; /* PC 버전만 구현 */
 }
 
 a {
@@ -28,10 +28,19 @@ img {
     display: block;
 }
 
+/* ==================== CONTAINER STYLES ==================== */
+/* 메인 페이지용 컨테이너 */
 .container {
     max-width: 1080px;
     margin: 0 auto;
     padding: 0 20px;
+}
+
+/* 사이드바 레이아웃용 컨테이너 */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
 }
 
 /* ==================== HEADER STYLES ==================== */
@@ -346,6 +355,99 @@ img {
     background-color: #e5e5e5;
 }
 
+/* ==================== SIDEBAR LAYOUT STYLES ==================== */
+/* 사이드바가 포함된 페이지 레이아웃 */
+
+.content-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 40px;
+}
+
+/* ========== 사이드바 ========== */
+.sidebar {
+    flex: 0 0 220px;
+    width: 220px;
+    background-color: #fff;
+    border-right: 1px solid #e5e5e5;
+    padding-bottom: 30px;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    padding: 12px 16px;
+    border-top: 1px solid #28282b;
+    border-bottom: 1px solid #e0e0e1;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.menu-item {
+    border-bottom: 1px solid #eee;
+}
+
+.menu-btn {
+    width: 100%;
+    background: #fff;
+    border: none;
+    text-align: left;
+    padding: 10px 15px;
+    font-size: 13px;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.menu-btn:hover {
+    background-color: #f8f8fa;
+    color: #b22222;
+}
+
+.submenu {
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+.submenu li a {
+    display: block;
+    padding: 6px 0;
+    font-size: 12px;
+    color: #444;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.submenu li a:hover {
+    color: #b22222;
+}
+
+/* ========== 사이드바 옆 본문 영역 ========== */
+.content-wrapper .main-content {
+    flex: 1;
+    padding-left: 40px;
+    background: #fff;
+}
+
+.content-header {
+    margin-bottom: 20px;
+}
+
+.content-header h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
 /* ==================== FOOTER STYLES ==================== */
 .footer {
     background: #fff;
@@ -442,7 +544,18 @@ img {
 }
 
 /* ==================== RESPONSIVE ADJUSTMENTS ==================== */
-/* PC 버전만 구현하므로 최소 너비 설정 */
-body {
-    min-width: 1200px;
+@media (max-width: 1024px) {
+    .content-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .content-wrapper .main-content {
+        padding: 20px 10px;
+    }
 }

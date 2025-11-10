@@ -1,10 +1,7 @@
-body {
-    font-family: '맑은 고딕', sans-serif;
-    background-color: #fff;
-    margin: 0;
-    padding: 0;
-}
+/* ======================= MEMBER 페이지 공통 스타일 ======================= */
+/* member 폴더의 모든 HTML 파일에서 공통으로 사용하는 스타일 */
 
+/* ======================= 로그인 컨테이너 ======================= */
 .login-container {
     width: 95%;
     max-width: 700px;
@@ -25,14 +22,16 @@ body {
     flex: 1;
     padding: 14px 0;
     border: none;
-    background: #f9f9f9;
-    font-size: 15px;
-    white-space: nowrap;
-    transition: all 0.2s;
+    border-top: 2px solid #c6281f;
+    border-radius: 3px;
+    background: #ffffff;
+    font-size: 17px;
     text-align: center;
+    font-weight: bold;
+    color: #c6281f;
 }
 
-/* ======================= 공통 레이아웃 ======================= */
+/* ======================= 탭 콘텐츠 ======================= */
 .tab-content {
     padding: 35px;
 }
@@ -41,6 +40,7 @@ body {
     display: block;
 }
 
+/* ======================= 중앙 정렬 콘텐츠 ======================= */
 .center-content {
     text-align: center;
 }
@@ -56,7 +56,8 @@ body {
     margin-bottom: 20px;
 }
 
-/* 공통 빨간 버튼 */
+/* ======================= 공통 버튼 ======================= */
+/* 빨간색 기본 버튼 */
 .btn-red {
     display: block;
     width: 90%;
@@ -77,7 +78,7 @@ body {
     background: #a51f16;
 }
 
-/* 링크 그룹 */
+/* ======================= 링크 그룹 ======================= */
 .link-group {
     text-align: center;
     margin-top: 10px;
@@ -94,7 +95,7 @@ body {
     text-decoration: underline;
 }
 
-/* 안내문 */
+/* ======================= 안내 텍스트 ======================= */
 .info {
     font-size: 12px;
     color: #666;
@@ -103,7 +104,7 @@ body {
     line-height: 1.6;
 }
 
-/* 홈페이지 로그인 폼 */
+/* ======================= 로그인 폼 ======================= */
 .login-form input[type="text"],
 .login-form input[type="password"] {
     width: 67%;
@@ -120,5 +121,5 @@ body {
     align-items: center;
     gap: 6px;
     margin-bottom: 25px;
-    justify-content: center;
+    margin-left: 17.5%;
 }

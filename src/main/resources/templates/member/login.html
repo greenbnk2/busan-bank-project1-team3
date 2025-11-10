@@ -1,12 +1,9 @@
 <div th:replace="~{member/_head.html}"></div>
 <div class="login-container">
-
     <!-- 탭 메뉴 -->
     <div class="tab-menu">
         <p>홈페이지 회원</p>
     </div>
-
-
     <!-- 홈페이지 회원 -->
     <div id="homepage" class="tab-content center-content">
         <form class="login-form" th:action="@{/login}" method="post">
@@ -21,12 +18,9 @@
                 <a th:href="@{/join/type}">회원가입</a>
             </div>
         </form>
-
         <div class="info">
             홈페이지회원 로그인은 일부 서비스에 한하여 이용하실 수 있습니다.
         </div>
     </div>
-
-
 </div>
 <div th:replace="~{member/_tail.html}"></div>
