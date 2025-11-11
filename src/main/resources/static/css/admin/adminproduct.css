@@ -337,6 +337,7 @@
     color: #333;
     text-decoration: none;
     font-weight: 500;
+    display: inline-block;
 }
 
 .product-table .product-name-link:hover {
@@ -348,10 +349,10 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #cd1317;
+    color: #ddd;
     font-size: 1.1rem;
     padding: 5px;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, color 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -359,7 +360,7 @@
 
 .view-detail-btn:hover {
     transform: scale(1.2);
-    color: #cd1317;
+    color: #333;
 }
 
 .view-detail-btn i {
@@ -661,10 +662,22 @@
 .form-input-wrapper {
     display: flex;
     align-items: center;
-    gap: 10px;
     flex: 1;
     padding: 8px 20px;
     background: white;
+    flex-wrap: wrap;
+}
+
+.form-input-wrapper > .file-upload {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.form-input-wrapper > .file-list {
+    width: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .form-input-wrapper .form-input {
@@ -799,12 +812,16 @@
     align-items: center;
 }
 
-.file-list {
-    margin-top: 10px;
-}
 
 .existing-files {
-    margin-bottom: 15px;
+    width: 100%;
+}
+
+.form-input-wrapper > .existing-files {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .file-item {
@@ -814,7 +831,6 @@
     padding: 6px;
     background: #f8f9fa;
     border-radius: 6px;
-    margin-top: 15px;
     gap: 10px;
 }
 
@@ -830,23 +846,48 @@
 }
 
 .file-download {
-    color: #0066cc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
     text-decoration: none;
-    font-size: 0.95rem;
+    transition: color 0.2s ease;
+    padding: 4px;
+    border-radius: 4px;
 }
 
 .file-download:hover {
-    text-decoration: underline;
+    color: #cd1317;
+    background-color: #f0f0f0;
+}
+
+.download-icon {
+    width: 20px;
+    height: 20px;
 }
 
 .file-item-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    color: #cd1317;
+    color: #333;
     cursor: pointer;
-    font-size: 0.95rem;
-    padding: 0;
+    padding: 4px;
     margin: 0;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.file-item-remove:hover {
+    color: #cd1317;
+    background-color: #f0f0f0;
+}
+
+.delete-icon {
+    width: 20px;
+    height: 20px;
 }
 
 .file-name {
@@ -898,6 +939,11 @@
     max-height: 90vh;
     overflow-y: auto;
     animation: slideDown 0.3s ease;
+}
+
+.fund-detail-modal {
+    max-width: 1200px;
+    width: 95%;
 }
 
 @keyframes slideDown {
@@ -1004,5 +1050,442 @@
     .action-buttons {
         flex-direction: column;
     }
+}
+
+/* 펀드 상세 정보 모달 스타일 */
+.fund-detail-title {
+    flex: 1;
+}
+
+.fund-detail-title h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 10px 0;
+}
+
+.fund-name-section {
+    margin-top: 10px;
+}
+
+.fund-full-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.fund-code {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.fund-info-section {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.fund-price-section {
+    flex: 1;
+}
+
+.standard-price {
+    margin-bottom: 20px;
+}
+
+.price-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.price-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.price-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comparison-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.comparison-label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.comparison-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.comparison-value.positive {
+    color: #cd1317;
+}
+
+.comparison-value.negative {
+    color: #0066cc;
+}
+
+.reference-date {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 10px;
+}
+
+.fund-details-table {
+    flex: 1;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.detail-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.detail-table td:first-child {
+    width: 40%;
+    background: #f8f9fa;
+    font-weight: 500;
+    color: #333;
+}
+
+.detail-table td:last-child {
+    color: #666;
+}
+
+.fund-tabs {
+    margin-top: 20px;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 5px;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.95rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    color: #cd1317;
+    background: #fff5f5;
+}
+
+.tab-btn.active {
+    color: #cd1317;
+    border-bottom-color: #cd1317;
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.table-note {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+.company-link {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.company-link:hover {
+    text-decoration: underline;
+}
+
+.fund-detail-sections {
+    margin-top: 20px;
+}
+
+.detail-section {
+    margin-bottom: 30px;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #eee;
+}
+
+.fund-tabs-nav {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.fund-tab-btn {
+    padding: 12px 20px;
+    background: white;
+    border: none;
+    border-right: 1px solid #ddd;
+    font-size: 0.95rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex: 1;
+    text-align: center;
+}
+
+.fund-tab-btn:last-child {
+    border-right: none;
+}
+
+.fund-tab-btn:hover {
+    color: #cd1317;
+    background: #fff5f5;
+}
+
+.fund-tab-btn.active {
+    background: #cd1317;
+    color: white;
+    font-weight: 600;
+}
+
+.fund-basic-info {
+    display: block !important;
+}
+
+/* 수익률 추이차트 스타일 */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.unit-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.chart-query-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.query-row {
+    display: flex;
+    gap: 30px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.query-row:last-child {
+    margin-bottom: 0;
+}
+
+.query-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.query-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.date-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-input {
+    width: 150px;
+}
+
+.date-separator {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.query-actions {
+    margin-left: auto;
+}
+
+.chart-container {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    min-height: 400px;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.legend-icon {
+    border-radius: 2px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.detail-grid-item {
+    display: flex;
+    flex-direction: row;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+.detail-grid-item:nth-child(3n) {
+    border-right: none;
+}
+
+/* 마지막 행의 border-bottom 제거 */
+.detail-grid-item:nth-last-child(-n+3) {
+    border-bottom: none;
+}
+
+.detail-label {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+    width: 40%;
+    border-right: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.detail-value {
+    padding: 10px 15px;
+    color: #666;
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+/* 자산구성 테이블 */
+.asset-composition-wrapper {
+    margin-bottom: 30px;
+}
+
+.asset-composition-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.asset-composition-table th,
+.asset-composition-table td {
+    padding: 0px;
+    border: 1px solid #ddd;
+    text-align: center;
+    height: 30px;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.asset-composition-table th {
+    background: #f5f5f5;
+}
+
+.asset-composition-table td {
+    font-weight: 500;
+}
+
+/* 자산구성내역 하위 테이블 */
+.asset-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.asset-detail-table th,
+.asset-detail-table td {
+    padding: 0px;
+    border: 1px solid #ddd;
+    font-size: 13px;
+    height: 30px;
+    vertical-align: middle;
+}
+
+.asset-detail-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    text-align: center;
+}
+
+.asset-detail-table td {
+    text-align: center;
+}
+
+.asset-detail-tables-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-items: center;
 }
 

@@ -31,10 +31,32 @@
                     <div class="classification-label">펀드 검색</div>
                     <div class="classification-inputs">
                         <div class="search-input-wrapper-inline">
-                            <input type="text" class="form-input search-input-large" id="searchFund" placeholder="입력하세요">
+                            <input type="text" class="form-input search-input-large" id="searchFund" placeholder="입력하세요" onkeypress="if(event.key === 'Enter') searchFunds()">
                             <button class="btn btn-search-inline" onclick="searchFunds()">검색</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- 검색 결과 목록 -->
+                <div class="table-section" id="searchResultSection" style="display: none;">
+                    <div class="table-info">
+                        <span>총 <strong id="totalCount">0</strong>개</span>
+                    </div>
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>상품코드</th>
+                                <th>유형</th>
+                                <th>상품명</th>
+                                <th>회사명</th>
+                                <th>등록일자</th>
+                                <th>선택</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultBody">
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- 문서관리 -->
@@ -49,16 +71,23 @@
                                     <div class="file-item">
                                         <span class="file-item-name">약관_2024_01.pdf</span>
                                         <div class="file-actions">
-                                            <a href="#" class="file-download">다운로드</a>
-                                            <button type="button" class="file-item-remove" onclick="deleteExistingFile(this, 'terms')">삭제</button>
+                                            <a href="#" class="file-download" title="다운로드">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                </svg>
+                                            </a>
+                                            <button type="button" class="file-item-remove" onclick="deleteExistingFile(this, 'terms')" title="삭제">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="delete-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- 새 파일 업로드 -->
-                                <div class="file-upload">
+                                <div class="file-upload" id="termsDocUpload">
                                     <input type="file" id="termsDoc" accept=".pdf,.doc,.docx" style="display: none;">
-                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('termsDoc').click()">파일 선택</button>
-                                    <span id="termsDocFileName" class="file-name"></span>
+                                    <button type="button" class="btn btn-secondary" id="termsDocButton" onclick="document.getElementById('termsDoc').click()">파일 선택</button>
                                 </div>
                                 <div id="termsDocList" class="file-list"></div>
                                 <small class="file-help">PDF, DOC, DOCX 파일만 업로드 가능합니다.</small>
@@ -72,16 +101,23 @@
                                     <div class="file-item">
                                         <span class="file-item-name">투자설명서_2024_01.pdf</span>
                                         <div class="file-actions">
-                                            <a href="#" class="file-download">다운로드</a>
-                                            <button type="button" class="file-item-remove" onclick="deleteExistingFile(this, 'investment')">삭제</button>
+                                            <a href="#" class="file-download" title="다운로드">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                </svg>
+                                            </a>
+                                            <button type="button" class="file-item-remove" onclick="deleteExistingFile(this, 'investment')" title="삭제">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="delete-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- 새 파일 업로드 -->
-                                <div class="file-upload">
+                                <div class="file-upload" id="investmentDocUpload">
                                     <input type="file" id="investmentDoc" accept=".pdf,.doc,.docx" style="display: none;">
-                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('investmentDoc').click()">파일 선택</button>
-                                    <span id="investmentDocFileName" class="file-name"></span>
+                                    <button type="button" class="btn btn-secondary" id="investmentDocButton" onclick="document.getElementById('investmentDoc').click()">파일 선택</button>
                                 </div>
                                 <div id="investmentDocList" class="file-list"></div>
                                 <small class="file-help">PDF, DOC, DOCX 파일만 업로드 가능합니다.</small>
@@ -95,16 +131,23 @@
                                     <div class="file-item">
                                         <span class="file-item-name">간이투자설명서_2024_01.pdf</span>
                                         <div class="file-actions">
-                                            <a href="#" class="file-download">다운로드</a>
-                                            <button type="button" class="file-item-remove" onclick="deleteExistingFile(this, 'simple')">삭제</button>
+                                            <a href="#" class="file-download" title="다운로드">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                </svg>
+                                            </a>
+                                            <button type="button" class="file-item-remove" onclick="deleteExistingFile(this, 'simple')" title="삭제">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="delete-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- 새 파일 업로드 -->
-                                <div class="file-upload">
+                                <div class="file-upload" id="simpleInvestmentDocUpload">
                                     <input type="file" id="simpleInvestmentDoc" accept=".pdf,.doc,.docx" style="display: none;">
-                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('simpleInvestmentDoc').click()">파일 선택</button>
-                                    <span id="simpleInvestmentDocFileName" class="file-name"></span>
+                                    <button type="button" class="btn btn-secondary" id="simpleInvestmentDocButton" onclick="document.getElementById('simpleInvestmentDoc').click()">파일 선택</button>
                                 </div>
                                 <div id="simpleInvestmentDocList" class="file-list"></div>
                                 <small class="file-help">PDF, DOC, DOCX 파일만 업로드 가능합니다.</small>
@@ -133,8 +176,9 @@
         document.getElementById('termsDoc').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                document.getElementById('termsDocFileName').textContent = file.name;
-                addFileToList('termsDocList', file);
+                addFileToList('termsDocList', file, 'termsDoc');
+                // 파일 선택 버튼 숨기기
+                document.getElementById('termsDocUpload').style.display = 'none';
             }
         });
 
@@ -142,8 +186,9 @@
         document.getElementById('investmentDoc').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                document.getElementById('investmentDocFileName').textContent = file.name;
-                addFileToList('investmentDocList', file);
+                addFileToList('investmentDocList', file, 'investmentDoc');
+                // 파일 선택 버튼 숨기기
+                document.getElementById('investmentDocUpload').style.display = 'none';
             }
         });
 
@@ -151,47 +196,122 @@
         document.getElementById('simpleInvestmentDoc').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                document.getElementById('simpleInvestmentDocFileName').textContent = file.name;
-                addFileToList('simpleInvestmentDocList', file);
+                addFileToList('simpleInvestmentDocList', file, 'simpleInvestmentDoc');
+                // 파일 선택 버튼 숨기기
+                document.getElementById('simpleInvestmentDocUpload').style.display = 'none';
             }
         });
 
         // 파일 목록에 추가
-        function addFileToList(listId, file) {
+        function addFileToList(listId, file, inputId) {
             const fileList = document.getElementById(listId);
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
             fileItem.innerHTML = `
                 <span class="file-item-name">${file.name}</span>
-                <button type="button" class="file-item-remove" onclick="removeFile(this, '${listId}')">×</button>
+                <div class="file-actions">
+                    <a href="#" class="file-download" title="다운로드">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                    </a>
+                    <button type="button" class="file-item-remove" onclick="removeFile(this, '${listId}', '${inputId}')" title="삭제">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="delete-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             `;
             fileList.innerHTML = '';
             fileList.appendChild(fileItem);
         }
 
         // 파일 삭제
-        function removeFile(button, listId) {
+        function removeFile(button, listId, inputId) {
             const fileList = document.getElementById(listId);
             fileList.innerHTML = '';
             
-            // 파일명 표시 초기화
-            if (listId === 'termsDocList') {
-                document.getElementById('termsDoc').value = '';
-                document.getElementById('termsDocFileName').textContent = '';
-            } else if (listId === 'investmentDocList') {
-                document.getElementById('investmentDoc').value = '';
-                document.getElementById('investmentDocFileName').textContent = '';
-            } else if (listId === 'simpleInvestmentDocList') {
-                document.getElementById('simpleInvestmentDoc').value = '';
-                document.getElementById('simpleInvestmentDocFileName').textContent = '';
+            // 파일 input 초기화
+            document.getElementById(inputId).value = '';
+            
+            // 파일 선택 버튼 다시 표시
+            if (inputId === 'termsDoc') {
+                document.getElementById('termsDocUpload').style.display = 'flex';
+            } else if (inputId === 'investmentDoc') {
+                document.getElementById('investmentDocUpload').style.display = 'flex';
+            } else if (inputId === 'simpleInvestmentDoc') {
+                document.getElementById('simpleInvestmentDocUpload').style.display = 'flex';
             }
         }
 
         // 펀드 검색 함수
         function searchFunds() {
             const searchTerm = document.getElementById('searchFund').value;
-            // 검색 로직 구현
-            console.log('검색어:', searchTerm);
+            const searchResultSection = document.getElementById('searchResultSection');
+            const searchResultBody = document.getElementById('searchResultBody');
+            const totalCount = document.getElementById('totalCount');
+            
+            // 검색어가 없으면 목록 숨기기
+            if (!searchTerm.trim()) {
+                searchResultSection.style.display = 'none';
+                return;
+            }
+            
+            // 샘플 데이터 (실제로는 서버에서 데이터를 가져와야 함)
+            const sampleData = [
+                { id: 1, code: '0015400182', type: '적금', name: '더음ㄴㅇㄹㄴㄹㄴㄹㄴㅇㄹㄴㄹㄴㅇㄹㅇㄹㄴㄹㅇㄴㄹㄴㄹㄴㄹㄴㅇㄹㄴㅇㄹㄴㅇㄹㄴㄹㄴㄹ', company: '신한은행', date: '2022-03-15' },
+                { id: 2, code: '0014500678', type: '대출', name: '키드', company: '신한은행', date: '2022-03-10' },
+                { id: 3, code: '0012300456', type: '펀드', name: '성장형 펀드', company: '신한은행', date: '2022-02-20' }
+            ];
+            
+            // 검색어로 필터링 (실제로는 서버에서 처리)
+            const filteredData = sampleData.filter(item => 
+                item.name.includes(searchTerm) || 
+                item.code.includes(searchTerm) ||
+                item.type.includes(searchTerm)
+            );
+            
+            // 검색 결과 표시
+            if (filteredData.length > 0) {
+                searchResultBody.innerHTML = '';
+                filteredData.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${item.code}</td>
+                        <td>${item.type}</td>
+                        <td>
+                            <a href="#" class="product-name-link" onclick="selectFund(${item.id}, '${item.name}'); return false;" title="${item.name}">
+                                ${item.name.length > 35 ? item.name.substring(0, 35) + '...' : item.name}
+                            </a>
+                        </td>
+                        <td>${item.company}</td>
+                        <td>${item.date}</td>
+                        <td>
+                            <button class="action-btn edit" onclick="selectFund(${item.id}, '${item.name}')">선택</button>
+                        </td>
+                    `;
+                    searchResultBody.appendChild(row);
+                });
+                totalCount.textContent = filteredData.length;
+                searchResultSection.style.display = 'block';
+            } else {
+                searchResultBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">검색 결과가 없습니다.</td></tr>';
+                totalCount.textContent = '0';
+                searchResultSection.style.display = 'block';
+            }
+        }
+        
+        // 펀드 선택 함수
+        function selectFund(fundId, fundName) {
+            // 선택한 펀드의 문서를 로드하거나 표시
+            console.log('선택한 펀드:', fundId, fundName);
+            // 검색 결과 섹션 숨기기
+            document.getElementById('searchResultSection').style.display = 'none';
+            // 검색어 초기화
+            document.getElementById('searchFund').value = '';
+            // 실제로는 서버에서 해당 펀드의 문서 정보를 가져와서 표시해야 함
+            alert(fundName + ' 펀드의 문서를 불러옵니다.');
         }
 
         // 기존 파일 삭제
@@ -201,12 +321,44 @@
                 const existingFiles = fileItem.closest('.existing-files');
                 fileItem.remove();
                 
-                // 기존 파일이 없으면 영역 숨기기 (선택사항)
+                // 기존 파일이 없으면 영역 숨기기 및 파일 선택 버튼 표시
                 if (existingFiles && existingFiles.querySelectorAll('.file-item').length === 0) {
                     existingFiles.style.display = 'none';
+                    // 파일 선택 버튼 다시 표시
+                    if (fileType === 'terms') {
+                        document.getElementById('termsDocUpload').style.display = 'flex';
+                    } else if (fileType === 'investment') {
+                        document.getElementById('investmentDocUpload').style.display = 'flex';
+                    } else if (fileType === 'simple') {
+                        document.getElementById('simpleInvestmentDocUpload').style.display = 'flex';
+                    }
                 }
             }
         }
+
+        // 페이지 로드 시 기존 파일이 있으면 파일 선택 버튼 숨기기
+        document.addEventListener('DOMContentLoaded', function() {
+            // 약관
+            const termsExistingFiles = document.querySelector('#termsDocUpload')?.previousElementSibling;
+            if (termsExistingFiles && termsExistingFiles.classList.contains('existing-files') && 
+                termsExistingFiles.querySelectorAll('.file-item').length > 0) {
+                document.getElementById('termsDocUpload').style.display = 'none';
+            }
+            
+            // 투자설명서
+            const investmentExistingFiles = document.querySelector('#investmentDocUpload')?.previousElementSibling;
+            if (investmentExistingFiles && investmentExistingFiles.classList.contains('existing-files') && 
+                investmentExistingFiles.querySelectorAll('.file-item').length > 0) {
+                document.getElementById('investmentDocUpload').style.display = 'none';
+            }
+            
+            // 간이 투자 설명서
+            const simpleExistingFiles = document.querySelector('#simpleInvestmentDocUpload')?.previousElementSibling;
+            if (simpleExistingFiles && simpleExistingFiles.classList.contains('existing-files') && 
+                simpleExistingFiles.querySelectorAll('.file-item').length > 0) {
+                document.getElementById('simpleInvestmentDocUpload').style.display = 'none';
+            }
+        });
 
         // 문서 저장 함수
         function saveDocuments() {
