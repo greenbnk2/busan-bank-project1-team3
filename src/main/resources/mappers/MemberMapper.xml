@@ -4,6 +4,20 @@
 
 <mapper namespace="kr.co.bnk.bnk_project.mapper.MemberMapper">
 
+    <select id="findByCustId" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
+        SELECT
+            cust_id     AS userId,  -- BnkUserDTO의 'userId' 필드와 매칭
+            password,               -- BnkUserDTO의 'password' 필드와 매칭
+            cust_name   AS name,    -- BnkUserDTO의 'name' 필드와 매칭
+            cust_hp     AS phone,   -- BnkUserDTO의 'phone' 필드와 매칭
+            cust_email,             -- BnkUserDTO의 'custEmail' (이 필드가 DTO에 있다면)
+            status_code             -- BnkUserDTO의 'statusCode' (이 필드가 DTO에 있다면)
+        FROM
+            bnk_user
+        WHERE
+            cust_id = #{custId}
+    </select>
+
     <!-- 회원 정보 저장 -->
     <insert id="insertUser" parameterType="map">
         <!-- 시퀀스로 고객번호 생성 후 custNo에 저장 -->

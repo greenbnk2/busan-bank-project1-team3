@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
         <!-- 메인 헤더 Fragment -->
         <header class="main-header" th:fragment="header">
@@ -10,9 +10,9 @@
                     <span class="note-num">3</span>
                 </div>
                 <span class="header-divider">|</span>
-                <span class="user-name">누구닉네임 님</span>
+                <span sec:authorize="isAuthenticated()" sec:authentication="name" class="user-name">관리자ID</span>
                 <span class="header-divider">|</span>
-                <a href="#" class="logout-link">로그아웃</a>
+                <a th:href="@{/admin/logout}" class="logout-link">로그아웃</a>
             </div>
         </header>
 </body>

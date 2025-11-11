@@ -1,0 +1,28 @@
+<div th:replace="~{member/_head.html}"></div>
+
+<div class="login-container">
+    <div class="tab-menu">
+        <p>BNK 펀드 관리자</p>
+    </div>
+    <div id="homepage" class="tab-content center-content">
+        <form class="login-form" th:action="@{/admin/login}" method="post">
+            <input type="text" name="adminId" placeholder="관리자 아이디를 입력해주세요" required>
+            <input type="password" name="password" placeholder="비밀번호를 입력해주세요" required>
+
+            <div th:if="${param.error}" style="color: red; font-size: 0.9em; margin-top: 10px;">
+                아이디 또는 비밀번호가 올바르지 않습니다.
+            </div>
+            <div th:if="${param.logout}" style="color: blue; font-size: 0.9em; margin-top: 10px;">
+                로그아웃되었습니다.
+            </div>
+
+            <button type="submit" class="btn-red" style="margin-top: 15px;">로그인</button>
+
+        </form>
+        <div class="info">
+            관리자 전용 로그인 페이지입니다.
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{member/_tail.html}"></div>

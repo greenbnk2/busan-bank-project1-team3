@@ -17,5 +17,10 @@ public class AdminController {
     public String permissionManagement() {
         return "admin/permission/permission";
     }
+  
+    @GetMapping("/login")
+    public String adminLoginPage() {
+      return "admin/login";
+    }
 }
 
