@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.MemberMapper">
+
+    <!-- 회원 정보 저장 -->
+    <insert id="insertUser" parameterType="map">
+        <!-- 시퀀스로 고객번호 생성 후 custNo에 저장 -->
+        <selectKey keyProperty="custNo" resultType="long" order="BEFORE">
+            SELECT bnk_user_seq.NEXTVAL FROM DUAL
+        </selectKey>
+
+        INSERT INTO bnk_user (
+        cust_no,
+        cust_id,
+        password,
+        cust_name,
+        cust_hp,
+        cust_email,
+        status_code,
+        join_date,
+        acct_pass
+        ) VALUES (
+        #{custNo},
+        #{custId},
+        #{password},
+        #{custName},
+        #{custHp},
+        #{custEmail},
+        #{statusCode},
+        SYSDATE,
+        #{acctPass}
+        )
+    </insert>
+
+    <!-- 계좌 정보 저장 -->
+    <insert id="insertAccount" parameterType="map">
+        INSERT INTO bnk_account (
+            account_id,
+            cust_no,
+            acct_no,
+            acct_type,
+            balance,
+            reg_date
+        ) VALUES (
+                     bnk_account_seq.NEXTVAL,
+                     #{custNo},
+                     #{acctNo},
+                     #{acctType},
+                     #{balance},
+                     SYSDATE
+                 )
+    </insert>
+
+    <!-- 약관 동의 저장 -->
+    <insert id="insertAgreement">
+        INSERT INTO user_agreement (
+            user_agree_seq,
+            cust_no,
+            term_id,
+            is_agreed,
+            agree_date
+        ) VALUES (
+                     user_agreement_seq.NEXTVAL,
+                     #{custNo},
+                     #{termId},
+                     #{isAgreed},
+                     SYSDATE
+                 )
+    </insert>
+
+</mapper>

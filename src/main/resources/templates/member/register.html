@@ -51,7 +51,7 @@
                     </div>
 
                     <!-- 폼 시작 -->
-                    <form id="registerForm" class="register-form">
+                    <form id="registerForm" class="register-form" th:action="@{/member/register}" method="post">
 
                         <!-- 개인정보 섹션 -->
                         <div class="form-section">
@@ -62,7 +62,7 @@
                                 <tr>
                                     <th><label>성명(실명) <span class="required">*</span></label></th>
                                     <td>
-                                        <input type="text" name="name" class="input-text" placeholder="최상규" required>
+                                        <input type="text" name="name" class="input-text" placeholder="" required>
                                     </td>
                                 </tr>
 
@@ -118,11 +118,11 @@
                                     <th><label>주소 <span class="required">*</span></label></th>
                                     <td>
                                         <div class="address-group">
-                                            <input type="text" name="zipcode" class="input-text input-short" placeholder="-" readonly>
-                                            <button type="button" class="btn-secondary">우편번호찾기</button>
+                                            <input type="text" name="zipcode" id="mem_zip" class="input-text input-short"  readonly>
+                                            <button type="button" class="btn-secondary" onclick="postCode()">우편번호찾기</button>
                                         </div>
-                                        <input type="text" name="address1" class="input-text input-full" style="margin-top: 5px;">
-                                        <input type="text" name="address2" class="input-text input-full" style="margin-top: 5px;">
+                                        <input type="text" name="address1" id="mem_addr1" class="input-text input-full" style="margin-top: 5px;" readonly>
+                                        <input type="text" name="address2" id="mem_addr2" class="input-text input-full" style="margin-top: 5px;">
                                     </td>
                                 </tr>
 
@@ -255,11 +255,11 @@
                                         <th><label>주소</label></th>
                                         <td colspan="3">
                                             <div class="address-group">
-                                                <input type="text" name="jobZipcode" class="input-text input-short" placeholder="-" readonly>
-                                                <button type="button" class="btn-secondary">우편번호찾기</button>
+                                                <input type="text" name="jobZipcode" id="job_zip" class="input-text input-short"  readonly>
+                                                <button type="button" class="btn-secondary" onclick="postCodeJob()">우편번호찾기</button>
                                             </div>
-                                            <input type="text" name="jobAddress1" class="input-text input-full" style="margin-top: 5px;">
-                                            <input type="text" name="jobAddress2" class="input-text input-full" style="margin-top: 5px;">
+                                            <input type="text" name="jobAddress1" id="job_addr1" class="input-text input-full" style="margin-top: 5px;" readonly>
+                                            <input type="text" name="jobAddress2" id="job_addr2" class="input-text input-full" style="margin-top: 5px;">
                                         </td>
                                     </tr>
                                 </table>
