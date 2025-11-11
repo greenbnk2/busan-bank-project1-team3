@@ -1,0 +1,362 @@
+<div th:replace="~{member/_head.html}"></div>
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+            <!--  사이드바 시작 -->
+            <aside class="sidebar">
+                <h2 class="sidebar-title">회원가입</h2>
+                <nav class="sidebar-nav">
+                    <a href="/bnk/member/guide" class="sidebar-link active">
+                        안내
+                        <span class="arrow">▶</span>
+                    </a>
+                    <a href="/bnk/member/findId" class="sidebar-link">
+                        아이디조회
+                        <span class="arrow">▶</span>
+                    </a>
+                    <a href="/bnk/member/findPassword" class="sidebar-link">
+                        비밀번호찾기
+                        <span class="arrow">▶</span>
+                    </a>
+                </nav>
+                <div class="sidebar-icons">
+                    <div class="sidebar-icon-item">
+                        <div class="icon-bubble">💬</div>
+                        <span>Talk상담</span>
+                    </div>
+                    <div class="sidebar-icon-item">
+                        <div class="icon-envelope">✉</div>
+                        <span>메일상담</span>
+                    </div>
+                    <div class="sidebar-icon-item">
+                        <div class="icon-question">?</div>
+                        <span>FAQ</span>
+                    </div>
+                </div>
+            </aside>
+            <!--  사이드바 끝 -->
+
+            <!-- 메인 컨텐츠 시작 -->
+            <div class="main-content">
+                <div class="register-container">
+                    <!-- 상단 헤더 -->
+                    <div class="register-header">
+                        <h1 class="register-title">회원가입</h1>
+                        <div class="step-indicator">
+                            <span class="step">1</span>
+                            <span class="step">2</span>
+                            <span class="step active">3 정보입력</span>
+                            <span class="step">4</span>
+                        </div>
+                    </div>
+
+                    <!-- 폼 시작 -->
+                    <form id="registerForm" class="register-form">
+
+                        <!-- 개인정보 섹션 -->
+                        <div class="form-section">
+                            <h2 class="section-title">개인정보<span class="required-notice">* 필수입력항목</span></h2>
+
+                            <table class="form-table">
+                                <!-- 성명 -->
+                                <tr>
+                                    <th><label>성명(실명) <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="text" name="name" class="input-text" placeholder="최상규" required>
+                                    </td>
+                                </tr>
+
+                                <!-- 회원아이디 -->
+                                <tr>
+                                    <th><label>회원아이디 <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="text" name="userId" class="input-text" required>
+                                    </td>
+                                </tr>
+
+                                <!-- 비밀번호 -->
+                                <tr>
+                                    <th><label>비밀번호 <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="password" name="password" class="input-text" required>
+                                    </td>
+                                </tr>
+
+                                <!-- 비밀번호 확인 -->
+                                <tr>
+                                    <th><label>비밀번호 확인 <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="password" name="passwordConfirm" class="input-text" required>
+                                    </td>
+                                </tr>
+
+                                <!-- 핸드폰 번호 -->
+                                <tr>
+                                    <th><label>핸드폰 번호 <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="text" name="phone" class="input-text input-medium" placeholder="010-1234-5678" required>
+                                    </td>
+                                </tr>
+
+                                <!-- 전화수신거부 -->
+                                <tr>
+                                    <th><label>전화수신거부 <span class="required">*</span></label></th>
+                                    <td>
+                                        <div class="radio-group">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="phoneSms" value="receive"> 수신
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="phoneSms" value="refuse" checked> 수신거부
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- 주소 -->
+                                <tr>
+                                    <th><label>주소 <span class="required">*</span></label></th>
+                                    <td>
+                                        <div class="address-group">
+                                            <input type="text" name="zipcode" class="input-text input-short" placeholder="-" readonly>
+                                            <button type="button" class="btn-secondary">우편번호찾기</button>
+                                        </div>
+                                        <input type="text" name="address1" class="input-text input-full" style="margin-top: 5px;">
+                                        <input type="text" name="address2" class="input-text input-full" style="margin-top: 5px;">
+                                    </td>
+                                </tr>
+
+                                <!-- E-mail -->
+                                <tr>
+                                    <th><label>E-mail</label></th>
+                                    <td>
+                                        <div class="email-group">
+                                            <input type="text" name="emailId" class="input-text input-medium">
+                                            <span>@</span>
+                                            <input type="text" name="emailDomain" class="input-text input-medium" value="naver.com">
+                                            <select name="emailDomainSelect" class="input-select">
+                                                <option value="naver.com">naver.com</option>
+                                                <option value="gmail.com">gmail.com</option>
+                                                <option value="daum.net">daum.net</option>
+                                                <option value="direct">직접입력</option>
+                                            </select>
+                                            <button type="button" class="btn-secondary" onclick="sendEmailVerification()">이메일 인증</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- 인증번호 입력 (초기 숨김) -->
+                                <tr id="verificationRow" style="display: none;">
+                                    <th><label>인증번호 입력</label></th>
+                                    <td>
+                                        <div class="verification-group">
+                                            <input type="text" name="verificationCode" class="input-text input-medium" placeholder="인증번호 입력">
+                                            <button type="button" class="btn-secondary" onclick="verifyEmailCode()">확인</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- E-mail수신거부 -->
+                                <tr>
+                                    <th><label>E-mail수신거부 <span class="required">*</span></label></th>
+                                    <td>
+                                        <div class="radio-group">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="emailSms" value="receive"> 수신
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="emailSms" value="refuse" checked> 수신거부
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 계좌정보 섹션 -->
+                        <div class="form-section">
+                            <h2 class="section-title">계좌정보</h2>
+
+                            <table class="form-table">
+                                <!-- 계좌번호 -->
+                                <tr>
+                                    <th><label>계좌번호 <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="text" name="accountNumber" class="input-text" value="123-456-789012" readonly>
+                                    </td>
+                                </tr>
+
+                                <!-- 계좌비밀번호 -->
+                                <tr>
+                                    <th><label>계좌비밀번호 <span class="required">*</span></label></th>
+                                    <td>
+                                        <input type="password" name="accountPassword" class="input-text input-short" maxlength="4" required>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 직장정보 섹션 -->
+                        <div class="form-section">
+                            <h2 class="section-title">직장정보</h2>
+
+                            <table class="form-table">
+                                <!-- 직장정보입력구분 -->
+                                <tr>
+                                    <th><label>직장정보입력구분 <span class="required">*</span></label></th>
+                                    <td colspan="3">
+                                        <div class="radio-group">
+                                            <label class="radio-inline">
+                                                <input type="radio" name="hasJob" value="yes" onclick="toggleJobInfo(true)"> 직장정보입력
+                                            </label>
+                                            <label class="radio-inline">
+                                                <input type="radio" name="hasJob" value="no" onclick="toggleJobInfo(false)" checked> 직장없음
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- 직장정보 상세 (초기 숨김) -->
+                            <div id="jobInfoDetail" style="display: none;">
+                                <table class="form-table form-table-double">
+                                    <!-- 직장명 | 직업구분 -->
+                                    <tr>
+                                        <th style="width: 15%;"><label>직장명</label></th>
+                                        <td style="width: 35%;">
+                                            <input type="text" name="companyName" class="input-text">
+                                        </td>
+                                        <th style="width: 15%;"><label>직업구분</label></th>
+                                        <td style="width: 35%;">
+                                            <select name="jobType" class="input-select">
+                                                <option value="">선택</option>
+                                                <option value="office">사무직</option>
+                                                <option value="sales">영업직</option>
+                                                <option value="technical">기술직</option>
+                                                <option value="service">서비스직</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+
+                                    <!-- 부서명 | 직위 -->
+                                    <tr>
+                                        <th style="width: 15%;"><label>부서명</label></th>
+                                        <td style="width: 35%;">
+                                            <input type="text" name="department" class="input-text">
+                                        </td>
+                                        <th style="width: 15%;"><label>직위</label></th>
+                                        <td style="width: 35%;">
+                                            <input type="text" name="position" class="input-text">
+                                        </td>
+                                    </tr>
+
+                                    <!-- 주소 -->
+                                    <tr>
+                                        <th><label>주소</label></th>
+                                        <td colspan="3">
+                                            <div class="address-group">
+                                                <input type="text" name="jobZipcode" class="input-text input-short" placeholder="-" readonly>
+                                                <button type="button" class="btn-secondary">우편번호찾기</button>
+                                            </div>
+                                            <input type="text" name="jobAddress1" class="input-text input-full" style="margin-top: 5px;">
+                                            <input type="text" name="jobAddress2" class="input-text input-full" style="margin-top: 5px;">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 부가정보 섹션 -->
+                        <div class="form-section">
+                            <h2 class="section-title">부가정보</h2>
+
+                            <table class="form-table">
+                                <!-- 생년월일 -->
+                                <tr>
+                                    <th><label>생년월일 <span class="required">*</span></label></th>
+                                    <td>
+                                        <div class="inline-group">
+                                            <input type="date" name="birthdate" class="input-text input-medium">
+                                            <div class="radio-group" style="display: inline-flex; margin-left: 20px;">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="calendarType" value="solar" checked> 양력
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="calendarType" value="lunar"> 음력
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- 자녀수 -->
+                                <tr>
+                                    <th><label>자녀수</label></th>
+                                    <td>
+                                        <select name="childCount" class="input-select">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5+">5명 이상</option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <!-- 주택소유 -->
+                                <tr>
+                                    <th><label>주택소유</label></th>
+                                    <td>
+                                        <select name="houseOwnership" class="input-select">
+                                            <option value="">선택</option>
+                                            <option value="own">자가</option>
+                                            <option value="rent">전세</option>
+                                            <option value="monthly">월세</option>
+                                        </select>
+                                        <label style="margin-left: 50px; font-size: 13px;">주택종류</label>
+                                        <select name="houseType" class="input-select" style="margin-left: 10px;">
+                                            <option value="">선택</option>
+                                            <option value="apartment">아파트</option>
+                                            <option value="villa">빌라</option>
+                                            <option value="house">단독주택</option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <!-- 자동차소유 -->
+                                <tr>
+                                    <th><label>자동차소유 <span class="required">*</span></label></th>
+                                    <td>
+                                        <div class="inline-group">
+                                            <div class="radio-group" style="display: inline-flex;">
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="hasCar" value="yes" onclick="toggleCarNumber(true)"> 소유
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="hasCar" value="no" onclick="toggleCarNumber(false)" checked> 미소유
+                                                </label>
+                                            </div>
+                                            <div id="carNumberGroup" style="display: none; margin-left: 50px;">
+                                                <label style="margin-right: 10px;">차량번호</label>
+                                                <input type="text" id="carNumber" name="carNumber" class="input-text input-medium">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- 버튼 그룹 -->
+                        <div class="register-button-group">
+                            <button type="submit" class="btn-next">다음</button>
+                            <button type="button" class="btn-cancel" onclick="cancelRegister()">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!--  메인 컨텐츠 끝 -->
+        </div>
+    </div>
+</main>
+<div th:replace="~{member/_tail.html}"></div>
