@@ -26,4 +26,14 @@ public class MemberController {
     public String terms(){
         return "member/terms";
     }
+
+    @GetMapping("/register")
+    public String register(){
+        return "member/register";
+    }
+
+    @GetMapping("/complete")
+    public String complete(){
+        return "member/complete";
+    }
 }
