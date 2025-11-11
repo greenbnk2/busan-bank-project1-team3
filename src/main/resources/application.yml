@@ -19,7 +19,7 @@ spring:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     password: 1234
     url: jdbc:oracle:thin:@localhost:1521:XE
-    username: system
+    username: bnk
   devtools:
     livereload:
       enabled: true
