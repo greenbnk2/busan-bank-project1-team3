@@ -23,17 +23,21 @@ spring:
     password: Tnsrnjs231123!
     driver-class-name: oracle.jdbc.OracleDriver
     hikari:
+      pool-name: BNK_HikariPool
       maximum-pool-size: 5
       minimum-idle: 2
       connection-timeout: 20000
       idle-timeout: 300000
       max-lifetime: 600000
+      leak-detection-threshold: 15000
+      auto-commit: true
 
   devtools:
     livereload:
       enabled: true
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
       naming:
@@ -43,3 +47,5 @@ spring:
         dialect: org.hibernate.dialect.OracleDialect
         format_sql: true
         show_sql: true
+        connection:
+          handling_mode: DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT
