@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<aside class="my-sidebar" th:fragment="sidebar(activeMenu)">
+    <h2 class="my-sidebar__title">마이페이지</h2>
+    <ul class="my-sidebar__menu">
+
+        <li class="my-sidebar__item">
+            <a th:href="@{/my/dashboard}"
+               class="my-sidebar__button"
+               th:classappend="${activeMenu == 'dashboard'} ? 'is-active' : ''">
+                마이 대시보드
+            </a>
+        </li>
+
+        <li class="my-sidebar__item" th:classappend="((${activeMenu == 'account'} or ${activeMenu == 'price'})) ? 'is-open' : ''">
+
+            <button type="button"
+                    class="my-sidebar__button"
+                    th:classappend="((${activeMenu == 'account'} or ${activeMenu == 'price'})) ? 'is-active' : ''">
+                <span>조회</span>
+                <span class="my-sidebar__arrow">▶</span>
+            </button>
+
+            <ul class="my-sidebar__submenu">
+                <li>
+                    <a th:href="@{/my/account}" th:classappend="${activeMenu == 'account'} ? 'is-active' : ''">
+                        펀드계좌조회
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/my/price}" th:classappend="${activeMenu == 'price'} ? 'is-active' : ''">
+                        기준가격조회
+                    </a>
+                </li>
+                <li><a href="#">수익률조회</a></li>
+            </ul>
+        </li>
+
+    </ul>
+</aside>
+
+</body>
+</html>

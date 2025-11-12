@@ -24,9 +24,9 @@
                 </div>
                 <div class="header-utils">
                     <span sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 5px;">
-                        <span class="util-link" style="font-weight: bold; color: #000;"
-                              th:text="${#authentication.principal.displayName} + '님'">홍길동님
-                        </span>
+                        <a th:href="@{/my/dashboard}" class="util-link" style="font-weight: bold; color: #000; text-decoration: none;">
+                            <span th:text="${#authentication.principal.displayName} + '님'">홍길동님</span>
+                        </a>
                         <span class="util-link" style="color: #ddd;">|</span>
                         <span id="sessionTimer" class="util-link" style="color: #cb2b11; font-weight: bold;">20:00</span>
                         <button type="button" id="sessionExtendBtn" class="util-link" style="background: none; border: 1px solid #ccc; padding: 2px 6px; font-size: 11px; border-radius: 4px; cursor: pointer; line-height: 1.4;">

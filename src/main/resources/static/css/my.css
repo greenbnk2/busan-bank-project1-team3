@@ -1,0 +1,104 @@
+/* 사이드바 전체 컨테이너 */
+.my-sidebar {
+    width: 220px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e1;
+    flex-shrink: 0;
+}
+
+/* 사이드바 제목 */
+.my-sidebar__title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    padding: 12px 16px;
+    margin: 0;
+    border-top: 2px solid #28282b;
+    border-bottom: 1px solid #e0e0e1;
+}
+
+.my-sidebar__menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.my-sidebar__item {
+    border-bottom: 1px solid #f0f0f0; /* 메뉴 아이템간 구분선 */
+}
+
+/* 버튼과 링크 (공통 스타일) */
+.my-sidebar__button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 14px 16px;
+
+    font-family: inherit; /* 버튼 폰트 상속 */
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    text-decoration: none;
+
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.my-sidebar__button:hover {
+    background-color: #f9f9f9;
+}
+
+/* ★ 활성화된 버튼/링크 (현재 페이지) */
+.my-sidebar__button.is-active {
+    color: #cb2b11; /* 포인트 컬러 */
+    font-weight: bold;
+}
+
+.my-sidebar__arrow {
+    transition: transform 0.2s ease-in-out;
+    display: inline-block;
+    font-size: 10px;
+}
+
+/* === 서브메뉴 로직 === */
+
+/* 1. 서브메뉴 기본 숨김 */
+.my-sidebar__submenu {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background-color: #fdfdfd;
+}
+
+/* 2. 'is-open' 클래스가 붙으면 서브메뉴 보이기 (JS가 제어) */
+.my-sidebar__item.is-open .my-sidebar__submenu {
+    display: block;
+}
+
+/* 3. 'is-open' 클래스가 붙으면 화살표 회전 */
+.my-sidebar__item.is-open .my-sidebar__arrow {
+    transform: rotate(90deg);
+}
+
+/* 서브메뉴 링크 스타일 */
+.my-sidebar__submenu a {
+    display: block;
+    padding: 12px 16px 12px 30px; /* 들여쓰기 */
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+}
+
+.my-sidebar__submenu a:hover {
+    background-color: #f5f5f5;
+}
+
+/* ★ 활성화된 서브메뉴 링크 (현재 페이지) */
+.my-sidebar__submenu a.is-active {
+    color: #cb2b11;
+    font-weight: bold;
+}

@@ -1,0 +1,46 @@
+<div th:replace="~{my/_head.html}"></div>
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('account')}"></div>
+
+            <div class="main-content">
+                <div class="content-header">
+                    <h1>펀드계좌조회</h1>
+                </div>
+
+                <div style="font-size: 13px; color: #666; line-height: 1.7; padding: 15px; border: 1px solid #eee; margin-bottom: 20px;">
+                    <p>대출가능금액은 해당 계좌의 순수 대출가능금액으로 인터넷 대출 신청시 대출가능금액이 달라질 수 있습니다.</p>
+                    <p>펀드의 경우 현재잔액란의 표기된 금액은 기준일 현재 고시기준가격을 적용한 평가금액으로 실제지급시 차감금액과 상이할 수 있습니다.</p>
+                    <p>펀드계좌의 대출가능금액 조회는 토요일, 일요일(공휴일포함) 조회 불가하며 평일 09:30 ~ 23:00 가능합니다.</p>
+                    <p>조회기준선택대상의 조구구분은 로보어드바이저(포트폴리오) 펀드를 제외한 일반 펀드만을 대상으로 합니다.</p>
+                    <p>로보어드바이저(포트폴리오) 펀드의 상세 정보를 원하시면 포트폴리오 조회 화면을 이용바랍니다.</p>
+                </div>
+
+                <div style="border-top: 2px solid #cb2b11; border-bottom: 1px solid #ccc;">
+                    <form th:action="@{/my/account}" method="post" style="display: flex; align-items: center; padding: 20px;">
+                        <label style="font-weight: bold; margin-right: 30px;">조회구분</label>
+                        <div style="display: flex; gap: 20px; font-size: 14px;">
+                            <label><input type="radio" name="queryType" value="net" checked> 불안액기준(순수익)</label>
+                            <label><input type="radio" name="queryType" value="total"> 전액기준(세금지분포함)</label>
+                            <label><input type="radio" name="queryType" value="method"> 불안액기준(금액방식)</label>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <button type="button" class="btn-red" style="padding: 8px 30px; font-size: 15px;">조회</button>
+                </div>
+
+                <div style="text-align: center; padding: 50px 0; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;">
+                    <img th:src="@{/images/main/ico_gnb_search.png}" alt="경고" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.5;"> <p style="font-size: 16px; font-weight: bold; color: #333;">조회하실 내역이 없습니다.</p>
+                    <p style="font-size: 13px; color: #888;">조회기준일시: 2025-11-06 11:02:59</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</main>
+<div th:replace="~{my/_tail.html}"></div>

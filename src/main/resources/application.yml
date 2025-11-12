@@ -19,8 +19,8 @@ spring:
     version: ${version}
   datasource:
     url: jdbc:oracle:thin:@oracledb1_high?TNS_ADMIN=src/main/resources/wallet
-    username: <DB_USERNAME>
-    password: <DB_PASSWORD>
+    username: ADMIN
+    password: Tnsrnjs231123!
     driver-class-name: oracle.jdbc.OracleDriver
     hikari:
       pool-name: BNK_HikariPool

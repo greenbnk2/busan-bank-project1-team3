@@ -1,0 +1,23 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('dashboard')}"></div>
+
+            <div class="main-content">
+                <div class="content-header">
+                    <h1>마이 대시보드</h1>
+                </div>
+
+                <div style="padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+                    <h3><span th:text="${#authentication.principal.displayName}">사용자</span>님, 환영합니다.</h3>
+                    <p>이곳에 보유 펀드 요약, 수익률 현황 등을 표시할 수 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>
