@@ -543,6 +543,85 @@ img {
     border-color: #999;
 }
 
+/* ==================== 세션 만료 모달 스타일 ==================== */
+.session-modal-overlay {
+    display: none; /* 평상시 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.session-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width: 400px;
+    max-width: 90%;
+    border-top: 5px solid #cb2b11;
+    overflow: hidden;
+}
+
+.session-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.session-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #111;
+}
+
+.session-modal-body {
+    padding: 25px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.session-modal-timer {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #cb2b11;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.session-modal-footer {
+    padding: 20px 25px;
+    background: #f9f9f9;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.session-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.session-btn-extend {
+    background-color: #cb2b11;
+    color: white;
+}
+
+.session-btn-logout {
+    background-color: #888;
+    color: white;
+}
+
 /* ==================== RESPONSIVE ADJUSTMENTS ==================== */
 @media (max-width: 1024px) {
     .content-wrapper {
@@ -559,3 +638,4 @@ img {
         padding: 20px 10px;
     }
 }
+

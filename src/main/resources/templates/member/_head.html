@@ -2,6 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BNK부산은행 - 펀드</title>
     <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
@@ -21,12 +23,24 @@
                     </a>
                 </div>
                 <div class="header-utils">
-                    <span sec:authorize="isAuthenticated()">
-                        <a th:href="@{/logout}" class="util-link">로그아웃</a>
+                    <span sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 5px;">
+                        <span class="util-link" style="font-weight: bold; color: #000;"
+                              th:text="${#authentication.principal.displayName} + '님'">홍길동님
+                        </span>
+                        <span class="util-link" style="color: #ddd;">|</span>
+                        <span id="sessionTimer" class="util-link" style="color: #cb2b11; font-weight: bold;">20:00</span>
+                        <button type="button" id="sessionExtendBtn" class="util-link" style="background: none; border: 1px solid #ccc; padding: 2px 6px; font-size: 11px; border-radius: 4px; cursor: pointer; line-height: 1.4;">
+                            연장
+                        </button>
+                        <span class="util-link" style="color: #ddd;">|</span>
+                        <form th:action="@{/logout}" method="post" style="display: inline; margin: 0; padding: 0;">
+                            <button type="submit" class="util-link" style="background: none; border: none; padding: 0; font-size: 14px; cursor: pointer;">로그아웃</button>
+                        </form>
                     </span>
                     <span sec:authorize="isAnonymous()">
-                        <a th:href="@{/member/login}" class="util-link">로그인</a>
+                            <a th:href="@{/member/login}" class="util-link">로그인</a>
                     </span>
+
                     <button type="button" class="btn-search" title="검색하기">검색하기</button>
                     <button type="button" class="btn-allmenu" title="전체메뉴">전체메뉴</button>
                 </div>

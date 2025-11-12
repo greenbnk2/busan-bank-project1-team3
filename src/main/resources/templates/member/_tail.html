@@ -55,5 +55,34 @@
 
 <script th:src="@{/js/index.js}"></script>
 <script th:src="@{/js/member.js}"></script>
+
+<div id="sessionModal" class="session-modal-overlay" sec:authorize="isAuthenticated()">
+    <div class="session-modal-content">
+        <div class="session-modal-header">
+            <h3>세션 만료 안내</h3>
+        </div>
+        <div class="session-modal-body">
+            <p>
+                안전한 금융거래를 위해, 로그인 후 장시간 이용이 없어<br>
+                자동 로그아웃까지 남은 시간입니다.
+            </p>
+            <p>
+                계속 이용하시려면 [세션 연장] 버튼을 눌러주세요.
+            </p>
+            <strong id="sessionModalTimer" class="session-modal-timer">02:00</strong>
+        </div>
+        <div class="session-modal-footer">
+            <button id="sessionModalLogoutBtn" type="button" class="session-btn session-btn-logout">로그아웃</button>
+            <button id="sessionModalExtendBtn" type="button" class="session-btn session-btn-extend">세션 연장</button>
+        </div>
+    </div>
+</div>
+
+<script sec:authorize="isAuthenticated()" th:inline="javascript">
+    const serverTimeoutInSeconds = /*[[${sessionTimeout}]]*/ 1200;
+    initSessionTimer(serverTimeoutInSeconds);
+</script>
+
+
 </body>
 </html>

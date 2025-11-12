@@ -9,6 +9,8 @@ server:
   port: 8080
   servlet:
     context-path: /bnk
+    session:
+      timeout: 20m
   tomcat:
     uri-encoding: UTF-8
 spring:

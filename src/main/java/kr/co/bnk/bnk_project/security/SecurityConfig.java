@@ -67,8 +67,8 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
                         .logoutSuccessUrl("/admin/login?logout=true")
-                )
-                .csrf(AbstractHttpConfigurer::disable); // 개발 편의를 위해 CSRF 비활성화 (배포 시 활성화 고려)
+                );
+                //.csrf(AbstractHttpConfigurer::disable); // 개발 편의를 위해 CSRF 비활성화 (배포 시 활성화 고려)
 
         return http.build();
     }
@@ -92,10 +92,9 @@ public class SecurityConfig {
 
                         // 2순위: 인증이 필요한 사용자 전용 페이지 (예: 마이페이지, 펀드 가입 신청 등)
                         // ⭐️ 여기에 "로그인이 필요한" URL 패턴을 추가.
-                        .requestMatchers("/my/**", "/fund/**", "/user/profile/**").hasRole("USER") // "ROLE_USER"만 접근 가능
+                        .requestMatchers("/my/**", "/fund/**", "/user/profile/**","/api/session/extend").hasRole("USER") // "ROLE_USER"만 접근 가능
 
-                        // 3순위: 위 2개 외의 "모든" 요청은 허용.
-                        // 공개 페이지가 자동으로 허용됩니다.
+                        // 3순위: 위 2개 외의 "모든" 요청은 허용 -> 공개 페이지가 자동으로 허용.
                         .anyRequest().permitAll()
                 )
 
@@ -115,9 +114,11 @@ public class SecurityConfig {
                 // 5. 일반 사용자 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/?logout=true")
-                )
-                .csrf(AbstractHttpConfigurer::disable); // 개발 편의를 위해 CSRF 비활성화 (배포 시 활성화 고려)
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true) //서버 세션 파기
+                        .deleteCookies("JSESSIONID") //브라우저 JSESSIONID 쿠키 삭제
+                );
+                //.csrf(AbstractHttpConfigurer::disable); // 개발 편의를 위해 CSRF 비활성화 (배포 시 활성화 고려)
 
         return http.build();
     }
