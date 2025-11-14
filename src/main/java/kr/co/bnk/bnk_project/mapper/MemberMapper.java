@@ -16,10 +16,16 @@ public interface MemberMapper {
     int checkDuplicateId(@Param("custId") String custId);
 
     // 회원 정보 저장
-    void insertUser(Map<String, Object> params);
+    void insertUser(BnkUserDTO dto);
 
     // 계좌 정보 저장
-    void insertAccount(Map<String, Object> params);
+    void insertAccount(BnkUserDTO dto);
+
+    // 직장 정보 저장
+    void insertJobInfo(BnkUserDTO dto);
+
+    // 부가 정보 저장
+    void insertAdditionalInfo(BnkUserDTO dto);
 
     // 약관 동의 저장
     void insertAgreement(@Param("custNo") Long custNo,

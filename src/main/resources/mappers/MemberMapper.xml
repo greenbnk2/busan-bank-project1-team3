@@ -19,52 +19,99 @@
     </select>
 
     <!-- 회원 정보 저장 -->
-    <insert id="insertUser" parameterType="map">
-        <!-- 시퀀스로 고객번호 생성 후 custNo에 저장 -->
+    <insert id="insertUser" parameterType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
         <selectKey keyProperty="custNo" resultType="long" order="BEFORE">
             SELECT bnk_user_seq.NEXTVAL FROM DUAL
         </selectKey>
 
         INSERT INTO bnk_user (
-        cust_no,
-        cust_id,
-        password,
-        cust_name,
-        cust_hp,
-        cust_email,
-        status_code,
-        join_date,
-        acct_pass
+            cust_no,
+            cust_id,
+            password,
+            cust_name,
+            cust_hp,
+            cust_email,
+            ZIP_CODE,
+            ADDR1,
+            ADDR2,
+            join_date
         ) VALUES (
-        #{custNo},
-        #{custId},
-        #{password},
-        #{custName},
-        #{custHp},
-        #{custEmail},
-        #{statusCode},
-        SYSDATE,
-        #{acctPass}
+            #{custNo},
+            #{userId},
+            #{password},
+            #{name},
+            #{phone},
+            #{emailId} || '@' || #{emailDomain},
+            #{zipcode},
+            #{address1},
+            #{address2},
+            SYSDATE
         )
     </insert>
 
     <!-- 계좌 정보 저장 -->
-    <insert id="insertAccount" parameterType="map">
+    <insert id="insertAccount" parameterType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
         INSERT INTO bnk_account (
             account_id,
             cust_no,
             acct_no,
-            acct_type,
-            balance,
+            acct_pass,
             reg_date
         ) VALUES (
-                     bnk_account_seq.NEXTVAL,
-                     #{custNo},
-                     #{acctNo},
-                     #{acctType},
-                     #{balance},
-                     SYSDATE
-                 )
+            bnk_account_seq.NEXTVAL,
+            #{custNo},
+            #{accountNumber},
+            #{accountPassword},
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 직장 정보 저장 -->
+    <insert id="insertJobInfo" parameterType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
+        INSERT INTO BNK_USER_JOBINFO (
+            CUST_NO,
+            HAS_JOB,
+            COMPANY_NAME,
+            JOB_TYPE,
+            DEPARTMENT,
+            POSITION,
+            JOB_ZIP_CODE,
+            JOB_ADDR1,
+            JOB_ADDR2
+        ) VALUES (
+            #{custNo},
+            #{hasJob},
+            #{companyName},
+            #{jobType},
+            #{department},
+            #{position},
+            #{jobZipcode},
+            #{jobAddress1},
+            #{jobAddress2}
+        )
+    </insert>
+
+    <!-- 부가 정보 저장 -->
+    <insert id="insertAdditionalInfo" parameterType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
+        INSERT INTO BNK_USER_INFO (
+            CUST_NO,
+            BIRTH,
+            CALENDER_TYPE,
+            CHILD_COUNT,
+            HAS_HOUSE,
+            HOUSE_TYPE,
+            HAS_CAR,
+            CAR_NUMBER
+        ) VALUES (
+            #{custNo},
+            TO_DATE(#{birthdate}, 'YYYY-MM-DD'),
+            #{calendarType},
+            #{childCount},
+            #{houseOwnership},
+            #{houseType},
+            #{hasCar},
+            #{carNumber}
+        )
     </insert>
 
     <!-- 약관 동의 저장 -->

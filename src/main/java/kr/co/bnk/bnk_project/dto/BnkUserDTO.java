@@ -10,6 +10,11 @@ import lombok.*;
 @Builder
 public class BnkUserDTO {
 
+    // ===== DB 테이블에서 직접 사용되는 필드 =====
+    private Long custNo;        // bnk_user (PK - <selectKey>로 채워짐)
+
+    // ===== register.html 폼 필드 =====
+
     // 개인정보
     private String name;              // 성명
     private String userId;            // 회원아이디
@@ -51,12 +56,12 @@ public class BnkUserDTO {
     private String hasCar;            // 자동차소유
     private String carNumber;         // 차량번호
 
-    // 이메일 조합 메서드
+    // 이메일 조합 메서드 - 조회시 사용
     public String getFullEmail() {
         return emailId + "@" + emailDomain;
     }
 
-    // 전체 주소 조합 메서드
+    // 전체 주소 조합 메서드 - 조회시 사용
     public String getFullAddress() {
         return String.format("(%s) %s %s", zipcode, address1, address2);
     }
