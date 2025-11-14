@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="kr.co.bnk.bnk_project.mapper.InfoPostMapper">
+<mapper namespace="kr.co.bnk.bnk_project.mapper.admin.InfoPostMapper">
 
     <!-- 등록 -->
     <insert id="insertInfoPost" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">

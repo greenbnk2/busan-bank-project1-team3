@@ -49,3 +49,6 @@ spring:
         show_sql: true
         connection:
           handling_mode: DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT
+file:
+  upload:
+    path: upload
