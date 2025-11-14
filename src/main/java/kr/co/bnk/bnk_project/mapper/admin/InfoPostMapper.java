@@ -1,6 +1,5 @@
-package kr.co.bnk.bnk_project.mapper;
+package kr.co.bnk.bnk_project.mapper.admin;
 
-import kr.co.bnk.bnk_project.dto.admin.InfoAttachmentDTO;
 import kr.co.bnk.bnk_project.dto.admin.InfoPostDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,9 +9,6 @@ import java.util.List;
 public interface InfoPostMapper {
 
     public void insertInfoPost(InfoPostDTO infoPostDTO);
-
-    // 파일 첨부
-    public void insertInfoAttachment(InfoAttachmentDTO infoAttachmentDTO);
 
     public InfoPostDTO selectInfoPostById(int postId);
 
