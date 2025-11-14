@@ -6,10 +6,13 @@ import kr.co.bnk.bnk_project.dto.admin.AdminListDTO;
 import kr.co.bnk.bnk_project.dto.admin.UserSearchDTO;
 import kr.co.bnk.bnk_project.service.admin.PermissionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -36,18 +39,6 @@ public class AdminController {
 
     /*-------------------------권한 변경-------------------------*/
 
- /*   @GetMapping("/permission")
-    public String permissionList(PageRequestDTO pageRequestDTO, Model model) {
-
-        PageResponseDTO<UserSearchDTO> pageResponse =
-                permissionService.getUserSearchPage(pageRequestDTO);
-
-        model.addAttribute("pageRequestDTO", pageRequestDTO);
-        model.addAttribute("pageResponse", pageResponse);
-
-        return "admin/permission/permission";
-    }
-*/
 
     @GetMapping("/permission")
     public String permissionList(PageRequestDTO pageRequestDTO, Model model) {
@@ -71,5 +62,41 @@ public class AdminController {
         return "admin/permission/permission";
     }
 
+
+    @PostMapping("/permission/add")
+    public String addAdmin(@RequestParam("custNo") Long custNo,
+                           @RequestParam("role") String role,
+                           PageRequestDTO pageRequestDTO,
+                           RedirectAttributes redirectAttributes) {
+
+        permissionService.addAdmin(custNo, role);
+
+        // 메시지 (필요하면)
+        redirectAttributes.addFlashAttribute("msg", "관리자가 추가되었습니다.");
+
+        // 검색 조건 유지해서 다시 목록으로
+        redirectAttributes.addAttribute("searchType", pageRequestDTO.getSearchType());
+        redirectAttributes.addAttribute("keyword", pageRequestDTO.getKeyword());
+        redirectAttributes.addAttribute("pg", pageRequestDTO.getPg());
+        redirectAttributes.addAttribute("size", pageRequestDTO.getSize());
+
+        return "redirect:/admin/permission";
+    }
+
+
+    // 관리자 권한 수정 (AJAX)
+    @PostMapping("/permission/role")
+    @ResponseBody
+    public ResponseEntity<?> updateAdminRole(
+            @RequestParam("adminNo") Long adminNo,
+            @RequestParam("role") String role
+    ) {
+        permissionService.updateAdminRole(adminNo, role);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "adminNo", adminNo,
+                "role", role
+        ));
+    }
 }
 

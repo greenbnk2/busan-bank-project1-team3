@@ -24,4 +24,13 @@ public interface PermissionMapper {
 
     /** 관리자 총 인원 수 */
     int selectAdminTotal(@Param("pageRequestDTO") PageRequestDTO pageRequestDTO);
+
+    /*관리자 추가*/
+    int insertAdminFromUser(@Param("custNo") Long custNo,
+                            @Param("role") String role);
+
+
+    /*관리자 권한 수정*/
+    void updateAdminRole(@Param("adminNo") Long adminNo,
+                         @Param("role") String role);
 }

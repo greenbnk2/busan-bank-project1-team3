@@ -95,35 +95,92 @@
         <result property="joinDate"   column="JOIN_DATE"/>
     </resultMap>
 
-    <!-- 관리자 목록 -->
+
+    <!-- 관리자 검색 where 절 -->
+    <sql id="adminSearchWhere">
+        <where>
+            <if test="pageRequestDTO.keyword != null and pageRequestDTO.keyword != ''">
+                <choose>
+
+                    <!-- 관리자 아이디로 검색 -->
+                    <when test="pageRequestDTO.searchType == 'adminId'">
+                        AND ba.ADMIN_ID LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                    </when>
+
+                    <!-- 관리자 이름으로 검색 -->
+                    <when test="pageRequestDTO.searchType == 'adminName'">
+                        AND ba.ADMIN_NAME LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                    </when>
+
+                    <!-- 기본: 아이디 + 이름 통합검색 -->
+                    <otherwise>
+                        AND (
+                        ba.ADMIN_ID   LIKE '%' || #{pageRequestDTO.keyword} || '%' OR
+                        ba.ADMIN_NAME LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                        )
+                    </otherwise>
+
+                </choose>
+            </if>
+        </where>
+    </sql>
+
     <select id="selectAdminList"
             parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
             resultMap="AdminListResultMap">
 
         SELECT
-            a.ADMIN_NO,
-            a.ADMIN_ID,
-            a.ADMIN_NAME,
-            a.ROLE,
-            u.CUST_HP,
-            u.CUST_EMAIL,
-            u.JOIN_DATE
-        FROM ADMIN.BNK_ADMIN a
-                 LEFT JOIN ADMIN.BNK_USER u
-                           ON a.ADMIN_ID = u.CUST_ID
-        ORDER BY a.ADMIN_NO ASC
+        ba.ADMIN_NO,
+        ba.ADMIN_ID,
+        ba.ADMIN_NAME,
+        ba.ROLE,
+        bu.CUST_HP,
+        bu.CUST_EMAIL,
+        bu.JOIN_DATE
+        FROM ADMIN.BNK_ADMIN ba
+        LEFT JOIN ADMIN.BNK_USER bu
+        ON ba.ADMIN_ID = bu.CUST_ID
+
+        <include refid="adminSearchWhere"/>
+
         OFFSET #{pageRequestDTO.startRow} ROWS
-            FETCH NEXT #{pageRequestDTO.size} ROWS ONLY
+        FETCH NEXT #{pageRequestDTO.size} ROWS ONLY
     </select>
 
-    <!-- 관리자 총 인원 -->
     <select id="selectAdminTotal"
             parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
             resultType="int">
+
         SELECT COUNT(*)
-        FROM ADMIN.BNK_ADMIN
+        FROM ADMIN.BNK_ADMIN ba
+        LEFT JOIN ADMIN.BNK_USER bu
+        ON ba.ADMIN_ID = bu.CUST_ID
+
+        <include refid="adminSearchWhere"/>
+
     </select>
 
+    <!-- 회원을 관리자 테이블에 추가 -->
+    <insert id="insertAdminFromUser" parameterType="map">
+        INSERT INTO ADMIN.BNK_ADMIN
+            (ADMIN_NO, ADMIN_ID, PASSWORD, ADMIN_NAME, ROLE)
+        SELECT
+            SEQ_BNK_ADMIN.NEXTVAL,     -- 관리자 번호 (시퀀스 가정)
+            bu.CUST_ID,                -- 회원 ID → 관리자 ID
+            bu.PASSWORD,               -- 회원 비밀번호 그대로 사용 (이미 암호화 되어있다고 가정)
+            bu.CUST_NAME,              -- 회원 이름
+            #{role}                    -- 선택한 권한(SAD/ADM/CS)
+        FROM ADMIN.BNK_USER bu
+        WHERE bu.CUST_NO = #{custNo}
+    </insert>
 
+
+
+    <!-- 관리자 권한 수정 -->
+    <update id="updateAdminRole">
+        UPDATE ADMIN.BNK_ADMIN
+        SET ROLE = #{role}
+        WHERE ADMIN_NO = #{adminNo}
+    </update>
 
 </mapper>

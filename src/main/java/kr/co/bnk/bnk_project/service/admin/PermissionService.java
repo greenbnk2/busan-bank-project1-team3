@@ -7,6 +7,7 @@ import kr.co.bnk.bnk_project.dto.admin.UserSearchDTO;
 import kr.co.bnk.bnk_project.mapper.admin.PermissionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -43,5 +44,18 @@ public class PermissionService {
         int total = permissionMapper.selectAdminTotal(pageRequestDTO);
 
         return PageResponseDTO.of(pageRequestDTO, list, total);
+    }
+
+    /*추가*/
+    @Transactional
+    public void addAdmin(Long custNo, String role) {
+
+        permissionMapper.insertAdminFromUser(custNo, role);
+    }
+
+    /*수정*/
+    @Transactional
+    public void updateAdminRole(Long adminNo, String role) {
+        permissionMapper.updateAdminRole(adminNo, role);
     }
 }
