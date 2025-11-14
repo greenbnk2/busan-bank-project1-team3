@@ -56,13 +56,15 @@
                     </ul>
                 </li>
                 <li class="menu-item has-submenu"
-                    th:classappend="${activeMenu != null && (activeMenu == 'settings-search-keyword' || activeMenu == 'settings-category') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'settings-search-keyword' || activeMenu == 'settings-category' || activeMenu == 'settings-terms') ? 'open' : ''}">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">환경설정</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/settings/search-keyword}"
                                th:classappend="${activeMenu == 'settings-search-keyword' ? 'active' : ''}">검색어관리</a></li>
                         <li><a th:href="@{/admin/settings/category}"
                                th:classappend="${activeMenu == 'settings-category' ? 'active' : ''}">카테고리 관리</a></li>
+                        <li><a th:href="@{/admin/settings/terms}"
+                               th:classappend="${activeMenu == 'settings-terms' ? 'active' : ''}">약관 관리</a></li>
                     </ul>
                 </li>
                 <li class="menu-item has-submenu"
