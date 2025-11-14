@@ -92,7 +92,7 @@ public class SecurityConfig {
 
                         // 2순위: 인증이 필요한 사용자 전용 페이지 (예: 마이페이지, 펀드 가입 신청 등)
                         // ⭐️ 여기에 "로그인이 필요한" URL 패턴을 추가.
-                        .requestMatchers("/my/**", "/fund/**", "/user/profile/**","/api/session/extend").hasRole("USER") // "ROLE_USER"만 접근 가능
+                        .requestMatchers("/my/**", "/fund/**", "/user/profile/**","/api/session/extend").authenticated() // USER ROLE이 따로 없어서 로그인 하면 허용
 
                         // 3순위: 위 2개 외의 "모든" 요청은 허용 -> 공개 페이지가 자동으로 허용.
                         .anyRequest().permitAll()
