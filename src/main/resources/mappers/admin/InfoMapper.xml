@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.co.bnk.bnk_project.mapper.admin.InfoPostMapper">
 
-    <!-- 등록 -->
+    <!-- 공시자료 등록 -->
     <insert id="insertInfoPost" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
     <selectKey keyProperty="postId" resultType="int" order="BEFORE">
         SELECT info_post_seq.NEXTVAL FROM dual
@@ -48,23 +48,301 @@
         ORDER BY post_id DESC
     </select>
 
-<!--    <select id="selectInfoPostById" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">-->
+    <!-- 수정 -->
+    <update id="updateInfoPost" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        UPDATE info_post
+        SET
+            title = #{title},
+            disclosure_type = #{disclosureType},
+            content = #{content}
+        WHERE post_id = #{postId}
+    </update>
+
+    <!-- 삭제 -->
+    <delete id="deleteInfoPost" parameterType="int">
+        DELETE FROM info_post
+        WHERE post_id = #{postId}
+    </delete>
+
+
+
+    
+    <!-- 펀드정보 등록 -->
+    <insert id="insertFundInfo" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
+            SELECT info_post_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO info_post(
+            post_id,
+            post_type,
+            title,
+            fundinfo_type,
+            summary,
+            content,
+            publish_start_at,
+            status,
+            created_by,
+            created_at
+        ) VALUES (
+            #{postId},
+            'FUND_INFO',
+            #{title},
+            #{fundInfoType},
+            #{summary},
+            #{content},
+            #{publishStartAt},
+            NVL(#{status}, 'PUBLISHED'),
+            NVL(#{createdBy}, 'admin'),
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 펀드정보 목록 -->
+    <select id="selectAllFundInfo" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id         AS postId,
+            title,
+            fundinfo_type AS fundInfoType,
+            summary,
+            publish_start_at AS publishStartAt,
+            content,
+            status,
+            created_by      AS createdBy,
+            created_at      AS createdAt
+        FROM
+            info_post
+        WHERE
+            post_type = 'FUND_INFO'
+        ORDER BY post_id DESC
+    </select>
+
+    <!-- 펀드정보 상세 -->
+<!--    <select id="selectFundInfoById" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">-->
 <!--        SELECT-->
 <!--            post_id         AS postId,-->
 <!--            title,-->
-<!--            disclosure_type AS disclosureType,-->
+<!--            fundinfo_type AS fundInfoType,-->
+<!--            summary,-->
+<!--            publish_start_at AS publishStartAt,-->
+<!--            content,-->
+<!--            status,-->
 <!--            created_by      AS createdBy,-->
 <!--            created_at      AS createdAt,-->
-<!--            content,-->
-<!--            status-->
+<!--            updated_by      AS updatedBy,-->
+<!--            updated_at      AS updatedAt-->
 <!--        FROM-->
 <!--            info_post-->
 <!--        WHERE-->
 <!--            post_id = #{postId}-->
+<!--            AND post_type = 'FUND_INFO'-->
 <!--    </select>-->
 
+    <!-- 펀드정보 수정 -->
+    <update id="updateFundInfo" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        UPDATE info_post
+        SET
+            title = #{title},
+            fundinfo_type = #{fundInfoType},
+            summary = #{summary},
+            content = #{content},
+            publish_start_at = #{publishStartAt},
+            updated_by = #{updatedBy},
+            updated_at = SYSDATE
+        WHERE
+            post_id = #{postId}
+            AND post_type = 'FUND_INFO'
+    </update>
+
+    <!-- 펀드정보 삭제 -->
+    <delete id="deleteFundInfo" parameterType="int">
+        DELETE FROM info_post
+        WHERE post_id = #{postId}
+            AND post_type = 'FUND_INFO'
+    </delete>
 
 
+    
+    <!-- 펀드 가이드 등록 -->
+    <insert id="insertFundGuide" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
+            SELECT info_post_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO info_post(
+            post_id,
+            post_type,
+            title,
+            guide_type,
+            content,
+            status,
+            created_by,
+            created_at
+        ) VALUES (
+            #{postId},
+            'FUND_GUIDE',
+            #{title},
+            #{guideType},
+            #{content},
+            NVL(#{status}, 'PUBLISHED'),
+            NVL(#{createdBy}, 'admin'),
+            SYSDATE
+        )
+    </insert>
 
+    <!-- 펀드 가이드 목록 -->
+    <select id="selectAllFundGuide" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id         AS postId,
+            title,
+            guide_type AS guideType,
+            content,
+            status,
+            created_by      AS createdBy,
+            created_at      AS createdAt
+        FROM
+            info_post
+        WHERE
+            post_type = 'FUND_GUIDE'
+        ORDER BY post_id DESC
+    </select>
+
+    <!-- 펀드 가이드 상세 -->
+<!--    <select id="selectFundGuideById" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">-->
+<!--        SELECT-->
+<!--            post_id         AS postId,-->
+<!--            title,-->
+<!--            guide_type AS guideType,-->
+<!--            content,-->
+<!--            status,-->
+<!--            created_by      AS createdBy,-->
+<!--            created_at      AS createdAt,-->
+<!--            updated_by      AS updatedBy,-->
+<!--            updated_at      AS updatedAt-->
+<!--        FROM-->
+<!--            info_post-->
+<!--        WHERE-->
+<!--            post_id = #{postId}-->
+<!--            AND post_type = 'FUND_GUIDE'-->
+<!--    </select>-->
+
+    <!-- 펀드 가이드 수정 -->
+    <update id="updateFundGuide" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        UPDATE info_post
+        SET
+            title = #{title},
+            guide_type = #{guideType},
+            content = #{content},
+            updated_by = #{updatedBy},
+            updated_at = SYSDATE
+        WHERE
+            post_id = #{postId}
+            AND post_type = 'FUND_GUIDE'
+    </update>
+
+    <!-- 펀드 가이드 삭제 -->
+    <delete id="deleteFundGuide" parameterType="int">
+        DELETE FROM info_post
+        WHERE post_id = #{postId}
+            AND post_type = 'FUND_GUIDE'
+    </delete>
+
+
+    
+    <!-- 펀드시황관리 등록 -->
+    <insert id="insertFundMarket" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
+            SELECT info_post_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO info_post(
+            post_id,
+            post_type,
+            title,
+            fundMarket_type,
+            summary,
+            channels,
+            publish_start_at,
+            content,
+            status,
+            created_by,
+            created_at
+        ) VALUES (
+            #{postId},
+            'FUND_MARKET',
+            #{title},
+            #{fundMarketType},
+            #{summary},
+            #{channels},
+            #{publishStartAt},
+            #{content},
+            NVL(#{status}, 'PUBLISHED'),
+            NVL(#{createdBy}, 'admin'),
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 펀드시황관리 목록 -->
+    <select id="selectAllFundMarket" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id         AS postId,
+            title,
+            fundMarket_type AS fundMarketType,
+            summary,
+            channels,
+            publish_start_at AS publishStartAt,
+            content,
+            status,
+            created_by      AS createdBy,
+            created_at      AS createdAt
+        FROM
+            info_post
+        WHERE
+            post_type = 'FUND_MARKET'
+        ORDER BY post_id DESC
+    </select>
+
+    <!-- 펀드시황관리 상세 -->
+<!--    <select id="selectFundMarketById" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">-->
+<!--        SELECT-->
+<!--            post_id         AS postId,-->
+<!--            title,-->
+<!--            fundMarket_type AS fundMarketType,-->
+<!--            summary,-->
+<!--            channels,-->
+<!--            publish_start_at AS publishStartAt,-->
+<!--            content,-->
+<!--            status,-->
+<!--            created_by      AS createdBy,-->
+<!--            created_at      AS createdAt,-->
+<!--            updated_by      AS updatedBy,-->
+<!--            updated_at      AS updatedAt-->
+<!--        FROM-->
+<!--            info_post-->
+<!--        WHERE-->
+<!--            post_id = #{postId}-->
+<!--            AND post_type = 'FUND_MARKET'-->
+<!--    </select>-->
+
+    <!-- 펀드시황관리 수정 -->
+    <update id="updateFundMarket" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        UPDATE info_post
+        SET
+            title = #{title},
+            fundMarket_type = #{fundMarketType},
+            summary = #{summary},
+            channels = #{channels},
+            publish_start_at = #{publishStartAt},
+            content = #{content},
+            updated_by = #{updatedBy},
+            updated_at = SYSDATE
+        WHERE
+            post_id = #{postId}
+            AND post_type = 'FUND_MARKET'
+    </update>
+
+    <!-- 펀드시황관리 삭제 -->
+    <delete id="deleteFundMarket" parameterType="int">
+        DELETE FROM info_post
+        WHERE post_id = #{postId}
+            AND post_type = 'FUND_MARKET'
+    </delete>
 
 </mapper>

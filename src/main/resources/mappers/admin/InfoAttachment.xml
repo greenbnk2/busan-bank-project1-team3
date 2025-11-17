@@ -26,4 +26,17 @@
         )
     </insert>
 
+    <!-- 첨부파일 조회 -->
+    <select id="selectByPostId" resultType="kr.co.bnk.bnk_project.dto.admin.InfoAttachmentDTO">
+        SELECT *
+        FROM info_attachment
+        WHERE post_id = #{postId}
+    </select>
+
+    <!-- 첨부파일 삭제 -->
+    <delete id="deleteByPostId">
+        DELETE FROM info_attachment
+        WHERE post_id = #{postId}
+    </delete>
+
 </mapper>

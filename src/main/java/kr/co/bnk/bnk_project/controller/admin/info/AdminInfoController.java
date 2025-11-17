@@ -52,6 +52,37 @@ public class AdminInfoController {
 
     }
 
+    // 공시자료 수정
+    @PostMapping("/disclosures/update")
+    public String updateDisclosure(
+            @RequestParam("id") int postId,
+            @RequestParam("title") String title,
+            @RequestParam("category") String category,
+            @RequestParam("content") String content,
+            @RequestParam(value = "attachment", required = false) MultipartFile attachment
+    ) {
+        // DTO  생성
+        InfoPostDTO dto = new InfoPostDTO();
+        dto.setPostId(postId);
+        dto.setTitle(title);
+        dto.setDisclosureType(category);
+        dto.setContent(content);
+
+        // 서비스 호출
+        infoPostService.updateDisclosure(dto,attachment);
+
+        return "redirect:/admin/info/disclosures";
+    }
+
+    // 공시자료 삭제
+    @PostMapping("/disclosures/delete")
+    public String deleteDisclosure(@RequestParam("id") int postId){
+
+        infoPostService.deleteDisclosure(postId);
+
+        return "redirect:/admin/info/disclosures";
+    }
+
 
     @GetMapping("/ad-hoc")
     public String adHocDisclosure() {

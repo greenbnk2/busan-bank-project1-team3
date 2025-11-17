@@ -32,4 +32,9 @@ public class InfoPostDTO {
     // 추가 컬럼
     private String disclosureType; // 공시자료 내부 분류 : 운용보고서, 안내사항 등.
 
+
+    //private String fundInfoType; // 펀드정보 내부 분류 : 주식형, 채권형 등.
+    //private String guideType; // 펀드 가이드 내부 분류 : 투자안내, 상품안내 등.
+    //private String fundMarketType; // 펀드시황 내부 분류 : 주간 리포트, 월간전망, 시장속보 등.
+
 }

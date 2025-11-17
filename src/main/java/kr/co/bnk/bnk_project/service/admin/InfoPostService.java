@@ -92,13 +92,108 @@ public class InfoPostService {
         infoAttachmentMapper.insertInfoAttachment(fileDTO);
     }
 
-    // 상세 확인
+    // 공시자료 상세 확인
     public InfoPostDTO findInfoPostById(int postId) {
         return infoPostMapper.selectInfoPostById(postId);
     }
 
-    // 목록 전체
+    // 공시자료 목록 전체
     public List<InfoPostDTO> findAllInfoPost(){
         return infoPostMapper.selectAllInfoPost();
     }
+
+    // 공시자료 수정 (글 + 파일)
+    public void updateDisclosure(InfoPostDTO dto, MultipartFile attachment) {
+
+        // 글 수정
+        infoPostMapper.updateInfoPost(dto);
+
+        // 첨부파일 없으면 기존 파일 그대로 사용
+        if (attachment == null || attachment.isEmpty()) {
+            return;
+        }
+
+        // 기존 첨부파일 조회 (여러 개일 수도 있음)
+        List<InfoAttachmentDTO> oldFiles = infoAttachmentMapper.selectByPostId(dto.getPostId());
+
+        String projectRoot = System.getProperty("user.dir");
+        File uploadDir = new File(projectRoot, uploadPath);
+
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+        // 기존 파일 삭제
+        if (oldFiles != null && !oldFiles.isEmpty()) {
+
+            for (InfoAttachmentDTO old : oldFiles) {
+
+                if (old == null) continue;
+                if (old.getFilePath() == null || old.getFilePath().isBlank()) continue;
+
+                File delFile = new File(uploadDir, old.getFilePath());
+                if (delFile.exists()) delFile.delete();
+            }
+
+            // DB 삭제
+            infoAttachmentMapper.deleteByPostId(dto.getPostId());
+        }
+
+        // 새 파일 저장
+        String oriName = attachment.getOriginalFilename();
+        String ext = "";
+
+        if (oriName != null && oriName.lastIndexOf(".") != -1) {
+            ext = oriName.substring(oriName.lastIndexOf("."));
+        }
+
+        String savedName = UUID.randomUUID().toString() + ext;
+
+        File saveFile = new File(uploadDir, savedName);
+
+        try {
+            attachment.transferTo(saveFile);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 업로드 실패", e);
+        }
+
+        // 새 파일 DB 등록
+        InfoAttachmentDTO newFile = new InfoAttachmentDTO();
+        newFile.setPostId(dto.getPostId());
+        newFile.setFileName(oriName);
+        newFile.setFilePath(savedName);
+        newFile.setSortOrder(1);
+
+        infoAttachmentMapper.insertInfoAttachment(newFile);
+    }
+
+
+    // 공시자료 삭제
+    public void deleteDisclosure(int postId) {
+
+        String projectRoot = System.getProperty("user.dir");
+        File uploadDir = new File(projectRoot, uploadPath);
+
+        // 첨부파일 여러 개 조회
+        List<InfoAttachmentDTO> oldFiles = infoAttachmentMapper.selectByPostId(postId);
+
+        if (oldFiles != null && !oldFiles.isEmpty()) {
+            for (InfoAttachmentDTO old : oldFiles) {
+
+                // old 자체가 null 일 경우 skip
+                if (old == null) continue;
+
+                // filePath 가 null 이면 skip
+                if (old.getFilePath() == null || old.getFilePath().isBlank()) continue;
+
+                File delFile = new File(uploadDir, old.getFilePath());
+                if (delFile.exists()) delFile.delete();
+            }
+
+            // DB 삭제
+            infoAttachmentMapper.deleteByPostId(postId);
+        }
+
+        // 게시글 삭제
+        infoPostMapper.deleteInfoPost(postId);
+    }
+
 }

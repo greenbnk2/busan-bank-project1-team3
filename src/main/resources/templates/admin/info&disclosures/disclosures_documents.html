@@ -169,7 +169,10 @@
 <div id="announcementEditModal" class="modal-overlay">
     <div class="modal-card">
         <h3>공시자료 수정</h3>
-        <form id="announcementEditForm" class="modal-form">
+        <form id="announcementEditForm" class="modal-form"
+              th:action="@{/admin/info/disclosures/update}"
+              method="post"
+              enctype="multipart/form-data">
             <input type="hidden" id="editAnnouncementId" name="id">
             <div class="form-field">
                 <label for="editAnnouncementTitle">제목</label>
@@ -188,6 +191,7 @@
                 <label for="editAnnouncementContent">내용</label>
                 <textarea id="editAnnouncementContent" name="content" rows="6" placeholder="공시 내용을 입력하세요" required></textarea>
             </div>
+            <div id="editExistingFileName" style="margin-bottom: 8px; color: #666;"></div>
             <div class="form-field file-field">
                 <label for="editAnnouncementFile">첨부파일</label>
                 <input type="file" id="editAnnouncementFile" name="attachment">
@@ -205,6 +209,11 @@
 <div id="announcementDeleteModal" class="modal-overlay">
     <div class="modal-card">
         <h3>공시자료 삭제</h3>
+        <form id="announcementDeleteForm" method="post"
+        th:action="@{/admin/info/disclosures/delete}">
+
+        <input type="hidden" id="deleteAnnouncementId" name="id">
+
         <div class="modal-form">
             <div class="form-field">
                 <p style="margin: 0; color: #495057; font-size: 1rem;">
@@ -219,6 +228,7 @@
                 <button type="button" id="announcementDeleteModalClose" class="btn btn-secondary">취소</button>
             </div>
         </div>
+        </form>
     </div>
 </div>
 
@@ -287,9 +297,11 @@
         });
 
         editForm?.addEventListener('submit', function (event) {
-            event.preventDefault();
+            //event.preventDefault();
             // TODO: 수정 API 호출
-            closeModal(editModal);
+
+            //closeModal(editModal);
+            console.log('공시자료 수정!');
         });
 
         // 삭제 모달
@@ -298,6 +310,8 @@
             // TODO: 삭제 API 호출
             const id = deleteConfirmBtn.getAttribute('data-id');
             console.log('삭제할 ID:', id);
+            document.getElementById('deleteAnnouncementId').value = id;
+            document.getElementById('announcementDeleteForm').submit();
             closeModal(deleteModal);
             // 삭제 후 테이블 새로고침 또는 행 제거
         });
@@ -339,6 +353,7 @@
                         document.getElementById('editAnnouncementTitle').value = title || '';
                         document.getElementById('editAnnouncementCategory').value = category || '';
                         document.getElementById('editAnnouncementContent').value = content || '';
+                        document.getElementById('editExistingFileName').textContent = "(기존 파일 있음)";
                         showModal(editModal);
                     } else if (action === 'delete') {
                         // 삭제 모달에 데이터 채우기
