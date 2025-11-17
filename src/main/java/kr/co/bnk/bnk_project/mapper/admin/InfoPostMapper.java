@@ -15,6 +15,13 @@ public interface InfoPostMapper {
     public void updateInfoPost(InfoPostDTO infoPostDTO);
     public void deleteInfoPost(int postId);
 
+    // 수시공시
+    //public void insertInfoPost(InfoPostDTO infoPostDTO);
+    //public InfoPostDTO selectInfoPostById(int postId);
+    //public List<InfoPostDTO> selectAllInfoPost();
+    //public void updateInfoPost(InfoPostDTO infoPostDTO);
+    //public void deleteInfoPost(int postId);
+
     // 펀드정보
     public void insertFundInfo(InfoPostDTO infoPostDTO);
     public InfoPostDTO selectFundInfoById(int postId);

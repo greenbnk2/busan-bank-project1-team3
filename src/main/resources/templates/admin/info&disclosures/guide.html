@@ -42,60 +42,26 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr
-                            data-id="3"
-                            data-title="비대면 가입 절차 안내"
-                            data-category="이용안내"
-                            data-date="2024-04-25"
-                            data-content="비대면 가입 절차 안내 내용입니다."
-                            data-status="노출중">
-                        <td>3</td>
-                        <td class="text-left">비대면 가입 절차 안내</td>
-                        <td>이용안내</td>
-                        <td>2024-04-25</td>
-                        <td>노출중</td>
+                    <tr th:each="post : ${dtoList}"
+                        th:attr="
+                            data-id=${post.postId},
+                            data-title=${post.title},
+                            data-category=${post.guideType},
+                            data-date=${post.createdAt},
+                            data-content=${post.content},
+                            data-status=${post.status}">
+                        <td th:text="${post.postId}"></td>
+                        <td th:text="${post.title}" class="text-left"></td>
+                        <td th:text="${post.guideType}"></td>
+                        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2024-04-25</td>
+                        <td th:text="${post.status}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
                             <button type="button" class="btn-action" data-action="delete">삭제</button>
                         </td>
                     </tr>
-                    <tr
-                            data-id="2"
-                            data-title="모바일 펀드 거래 가이드"
-                            data-category="상품안내"
-                            data-date="2024-04-18"
-                            data-content="모바일 펀드 거래 가이드 내용입니다."
-                            data-status="노출중">
-                        <td>2</td>
-                        <td class="text-left">모바일 펀드 거래 가이드</td>
-                        <td>상품안내</td>
-                        <td>2024-04-18</td>
-                        <td>노출중</td>
-                        <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="detail">상세</button>
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
-                        </td>
-                    </tr>
-                    <tr
-                            data-id="1"
-                            data-title="펀드 가입 절차 안내"
-                            data-category="이용안내"
-                            data-date="2024-04-10"
-                            data-content="펀드 가입 절차 안내 내용입니다."
-                            data-status="노출중">
-                        <td>1</td>
-                        <td class="text-left">펀드 가입 절차 안내</td>
-                        <td>이용안내</td>
-                        <td>2024-04-10</td>
-                        <td>노출중</td>
-                        <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="detail">상세</button>
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
-                        </td>
-                    </tr>
+
                     </tbody>
                 </table>
                 <div class="pagination">
@@ -116,14 +82,18 @@
 <div id="guideModal" class="modal-overlay">
     <div class="modal-card">
         <h3>가이드 등록</h3>
-        <form id="guideForm" class="modal-form">
+        <form id="guideForm" class="modal-form"
+        th:action="@{/admin/info/guide}"
+        th:object="${postForm}"
+        method="post"
+        enctype="multipart/form-data">
             <div class="form-field">
                 <label for="guideTitle">가이드명</label>
                 <input type="text" id="guideTitle" name="title" placeholder="가이드명을 입력하세요" required>
             </div>
             <div class="form-field">
                 <label for="guideCategory">카테고리</label>
-                <select id="guideCategory" name="category" required>
+                <select id="guideCategory" name="guideType" required>
                     <option value="">선택하세요</option>
                     <option value="투자안내">투자안내</option>
                     <option value="상품안내">상품안내</option>
@@ -188,7 +158,10 @@
 <div id="guideEditModal" class="modal-overlay">
     <div class="modal-card">
         <h3>가이드 수정</h3>
-        <form id="guideEditForm" class="modal-form">
+        <form id="guideEditForm" class="modal-form"
+        th:action="@{/admin/info/guide/update}"
+        method="post"
+        enctype="multipart/form-data">
             <input type="hidden" id="editGuideId" name="id">
             <div class="form-field">
                 <label for="editGuideTitle">가이드명</label>
@@ -196,7 +169,7 @@
             </div>
             <div class="form-field">
                 <label for="editGuideCategory">카테고리</label>
-                <select id="editGuideCategory" name="category" required>
+                <select id="editGuideCategory" name="guideType" required>
                     <option value="">선택하세요</option>
                     <option value="투자안내">투자안내</option>
                     <option value="상품안내">상품안내</option>
@@ -225,6 +198,11 @@
 <div id="guideDeleteModal" class="modal-overlay">
     <div class="modal-card">
         <h3>가이드 삭제</h3>
+        <form id="guideDeleteFrom" method="post"
+        th:action="@{/admin/info/guide/delete}">
+
+            <input type="hidden" id="deleteGuideId" name="id">
+
         <div class="modal-form">
             <div class="form-field">
                 <p style="margin: 0; color: #495057; font-size: 1rem;">
@@ -239,6 +217,7 @@
                 <button type="button" id="guideDeleteModalClose" class="btn btn-secondary">취소</button>
             </div>
         </div>
+        </form>
     </div>
 </div>
 
@@ -278,9 +257,10 @@
         closeBtn?.addEventListener('click', () => closeModal(modal));
 
         form?.addEventListener('submit', function (event) {
-            event.preventDefault();
+            //event.preventDefault();
             // TODO: 등록 API 호출
-            closeModal(modal);
+            //closeModal(modal);
+            console.log('펀드가이드 등록!');
         });
 
         modal?.addEventListener('click', function (event) {
@@ -306,9 +286,10 @@
         });
 
         editForm?.addEventListener('submit', function (event) {
-            event.preventDefault();
+            //event.preventDefault();
             // TODO: 수정 API 호출
-            closeModal(editModal);
+            //closeModal(editModal);
+            console.log('펀드가이드 수정!');
         });
 
         // 삭제 모달
@@ -317,6 +298,8 @@
             // TODO: 삭제 API 호출
             const id = deleteConfirmBtn.getAttribute('data-id');
             console.log('삭제할 ID:', id);
+            document.getElementById('deleteGuideId').value = id;
+            document.getElementById('guideDeleteFrom').submit();
             closeModal(deleteModal);
             // 삭제 후 테이블 새로고침 또는 행 제거
         });

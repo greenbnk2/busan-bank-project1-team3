@@ -231,7 +231,9 @@
             title = #{title},
             guide_type = #{guideType},
             content = #{content},
-            updated_by = #{updatedBy},
+            <if test="updatedBy != null">
+                updated_by = #{updatedBy},
+            </if>
             updated_at = SYSDATE
         WHERE
             post_id = #{postId}
@@ -256,7 +258,7 @@
             post_id,
             post_type,
             title,
-            fundMarket_type,
+            market_type,
             summary,
             channels,
             publish_start_at,
@@ -284,7 +286,7 @@
         SELECT
             post_id         AS postId,
             title,
-            fundMarket_type AS fundMarketType,
+            market_type AS  marketType,
             summary,
             channels,
             publish_start_at AS publishStartAt,
@@ -326,7 +328,7 @@
         UPDATE info_post
         SET
             title = #{title},
-            fundMarket_type = #{fundMarketType},
+            market_type = #{marketType},
             summary = #{summary},
             channels = #{channels},
             publish_start_at = #{publishStartAt},
