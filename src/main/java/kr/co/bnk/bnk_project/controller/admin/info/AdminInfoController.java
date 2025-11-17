@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -125,11 +126,11 @@ public class AdminInfoController {
 
         infoPostService.createMarket(infoPostDTO,attachment);
 
-        return "redirect:/admin/info/market";
+        return "redirect:/admin/info/fund-market";
     }
 
     // 펀드 시황 상세
-    @GetMapping("market/detail")
+    @GetMapping("/market/detail")
     public String MarketDetail(@RequestParam("postId") int postId, Model model){
 
         InfoPostDTO dto = infoPostService.findFundMarketById(postId);
@@ -144,19 +145,23 @@ public class AdminInfoController {
             @RequestParam("id") int postId,
             @RequestParam("title") String title,
             @RequestParam("marketType") String marketType,
-            @RequestParam("content") String content,
+            @RequestParam("publishStartAt") String publishStartAt,
+            @RequestParam("channels") String channels,
+            @RequestParam("summary") String summary,
             @RequestParam(value = "attachment" , required = false) MultipartFile attachment
     ) {
         // DTO 생성
         InfoPostDTO dto = new InfoPostDTO();
         dto.setPostId(postId);
         dto.setTitle(title);
-        dto.setFundMarketType(marketType);
-        dto.setContent(content);
+        dto.setMarketType(marketType);
+        dto.setPublishStartAt(LocalDateTime.parse(publishStartAt));
+        dto.setChannels(channels);
+        dto.setSummary(summary);
 
-        infoPostService.updateGuide(dto,attachment);
+        infoPostService.updateMarket(dto,attachment);
 
-        return "redirect:/admin/info/market";
+        return "redirect:/admin/info/fund-market";
     }
 
     // 펀드 시황 삭제
@@ -165,7 +170,7 @@ public class AdminInfoController {
 
         infoPostService.deleteMarket(postId);
 
-        return  "redirect:/admin/info/market";
+        return  "redirect:/admin/info/fund-market";
     }
 
 
@@ -202,7 +207,7 @@ public class AdminInfoController {
     }
 
     // 펀드 가이드 상세
-    @GetMapping("guide/detail")
+    @GetMapping("/guide/detail")
     public String guideDetail(@RequestParam("postId") int postId, Model model){
 
         InfoPostDTO dto = infoPostService.findFundGuideById(postId);

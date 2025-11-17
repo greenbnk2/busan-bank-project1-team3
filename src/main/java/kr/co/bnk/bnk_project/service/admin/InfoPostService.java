@@ -448,12 +448,12 @@ public class InfoPostService {
         return infoPostMapper.selectAllFundMarket();
     }
 
-    // 펀드 가이드 상세
+    // 펀드 시황 상세
     public InfoPostDTO findFundMarketById(int postId) {
         return infoPostMapper.selectFundMarketById(postId);
     }
 
-    // 펀드 가이드 수정 (글 + 파일)
+    // 펀드 시황 수정 (글 + 파일)
     public void updateMarket(InfoPostDTO dto, MultipartFile attachment) {
 
         // 글 수정
@@ -516,7 +516,7 @@ public class InfoPostService {
         infoAttachmentMapper.insertInfoAttachment(newFile);
     }
 
-    // 펀드 가이드 삭제
+    // 펀드 시황 삭제
     public void deleteMarket(int postId) {
 
         String projectRoot = System.getProperty("user.dir");

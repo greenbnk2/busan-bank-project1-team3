@@ -43,66 +43,28 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr
-                            data-id="3"
-                            data-title="5월 시장전망 라이브 방송 안내"
-                            data-type="영상"
-                            data-publish="2024-05-02T19:00"
-                            data-channel="웹"
-                            data-summary="5월 시장전망 라이브 방송 안내 내용입니다."
-                            data-status="예약">
-                        <td>3</td>
-                        <td class="text-left">5월 시장전망 라이브 방송 안내</td>
-                        <td>영상</td>
-                        <td>2024-05-02 19:00</td>
-                        <td>웹</td>
-                        <td>예약</td>
+                    <tr th:each="post : ${dtoList}"
+                        th:attr="
+                            data-id=${post.postId},
+                            data-title=${post.title},
+                            data-type=${post.marketType},
+                            data-publish=${post.publishStartAt},
+                            data-channel=${post.channels},
+                            data-summary=${post.summary},
+                            data-status=${post.status}">
+                        <td th:text="${post.postId}"></td>
+                        <td th:text="${post.title}"></td>
+                        <td th:text="${post.marketType}"></td>
+                        <td th:text="${#temporals.format(post.publishStartAt,'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${post.channels}"></td>
+                        <td th:text="${post.status}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
                             <button type="button" class="btn-action" data-action="delete">삭제</button>
                         </td>
                     </tr>
-                    <tr
-                            data-id="2"
-                            data-title="4월 4주차 글로벌 시장 리포트"
-                            data-type="주간리포트"
-                            data-publish="2024-04-22T09:00"
-                            data-channel="웹/모바일"
-                            data-summary="4월 4주차 글로벌 시장 리포트 내용입니다."
-                            data-status="게시중">
-                        <td>2</td>
-                        <td class="text-left">4월 4주차 글로벌 시장 리포트</td>
-                        <td>주간리포트</td>
-                        <td>2024-04-22 09:00</td>
-                        <td>웹/모바일</td>
-                        <td>게시중</td>
-                        <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="detail">상세</button>
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
-                        </td>
-                    </tr>
-                    <tr
-                            data-id="1"
-                            data-title="긴급 시장속보: 미국 금리 인상"
-                            data-type="시장속보"
-                            data-publish="2024-04-18T14:30"
-                            data-channel="웹/모바일"
-                            data-summary="긴급 시장속보: 미국 금리 인상 내용입니다."
-                            data-status="게시중">
-                        <td>1</td>
-                        <td class="text-left">긴급 시장속보: 미국 금리 인상</td>
-                        <td>시장속보</td>
-                        <td>2024-04-18 14:30</td>
-                        <td>웹/모바일</td>
-                        <td>게시중</td>
-                        <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="detail">상세</button>
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
-                        </td>
-                    </tr>
+
                     </tbody>
                 </table>
                 <div class="pagination">
@@ -123,14 +85,18 @@
 <div id="marketModal" class="modal-overlay">
     <div class="modal-card">
         <h3>시황 등록</h3>
-        <form id="marketForm" class="modal-form">
+        <form id="marketForm" class="modal-form"
+            th:action="@{/admin/info/market}"
+            th:object="${postForm}"
+              method="post"
+              enctype="multipart/form-data">
             <div class="form-field">
                 <label for="marketTitle">제목</label>
                 <input type="text" id="marketTitle" name="title" placeholder="시황 제목을 입력하세요" required>
             </div>
             <div class="form-field">
                 <label for="marketType">유형</label>
-                <select id="marketType" name="type" required>
+                <select id="marketType" name="marketType" required>
                     <option value="">선택하세요</option>
                     <option value="주간리포트">주간리포트</option>
                     <option value="월간전망">월간전망</option>
@@ -140,11 +106,11 @@
             </div>
             <div class="form-field">
                 <label for="marketPublishAt">게시일</label>
-                <input type="datetime-local" id="marketPublishAt" name="publish_at" required>
+                <input type="datetime-local" id="marketPublishAt" name="publishStartAt" required>
             </div>
             <div class="form-field">
                 <label for="marketChannel">채널</label>
-                <select id="marketChannel" name="channel" required>
+                <select id="marketChannel" name="channels" required>
                     <option value="">선택하세요</option>
                     <option value="웹">웹</option>
                     <option value="모바일">모바일</option>
@@ -212,7 +178,10 @@
 <div id="marketEditModal" class="modal-overlay">
     <div class="modal-card">
         <h3>시황 수정</h3>
-        <form id="marketEditForm" class="modal-form">
+        <form id="marketEditForm" class="modal-form"
+              th:action="@{/admin/info/market/update}"
+              method="post"
+              enctype="multipart/form-data">
             <input type="hidden" id="editMarketId" name="id">
             <div class="form-field">
                 <label for="editMarketTitle">제목</label>
@@ -220,7 +189,7 @@
             </div>
             <div class="form-field">
                 <label for="editMarketType">유형</label>
-                <select id="editMarketType" name="type" required>
+                <select id="editMarketType" name="marketType" required>
                     <option value="">선택하세요</option>
                     <option value="주간리포트">주간리포트</option>
                     <option value="월간전망">월간전망</option>
@@ -230,11 +199,11 @@
             </div>
             <div class="form-field">
                 <label for="editMarketPublishAt">게시일</label>
-                <input type="datetime-local" id="editMarketPublishAt" name="publish_at" required>
+                <input type="datetime-local" id="editMarketPublishAt" name="publishStartAt" required>
             </div>
             <div class="form-field">
                 <label for="editMarketChannel">채널</label>
-                <select id="editMarketChannel" name="channel" required>
+                <select id="editMarketChannel" name="channels" required>
                     <option value="">선택하세요</option>
                     <option value="웹">웹</option>
                     <option value="모바일">모바일</option>
@@ -262,6 +231,11 @@
 <div id="marketDeleteModal" class="modal-overlay">
     <div class="modal-card">
         <h3>시황 삭제</h3>
+        <form id="marketDeleteForm" method="post"
+              th:action="@{/admin/info/market/delete}">
+
+            <input type="hidden" id="deleteMarketId" name="id">
+
         <div class="modal-form">
             <div class="form-field">
                 <p style="margin: 0; color: #495057; font-size: 1rem;">
@@ -276,6 +250,7 @@
                 <button type="button" id="marketDeleteModalClose" class="btn btn-secondary">취소</button>
             </div>
         </div>
+        </form>
     </div>
 </div>
 
@@ -315,9 +290,10 @@
         closeBtn?.addEventListener('click', () => closeModal(modal));
 
         form?.addEventListener('submit', function (event) {
-            event.preventDefault();
+            //event.preventDefault();
             // TODO: 등록 API 호출
-            closeModal(modal);
+            //closeModal(modal);
+            console.log('펀드시황 등록!');
         });
 
         modal?.addEventListener('click', function (event) {
@@ -343,9 +319,10 @@
         });
 
         editForm?.addEventListener('submit', function (event) {
-            event.preventDefault();
-            // TODO: 수정 API 호출
-            closeModal(editModal);
+            //event.preventDefault();
+            // TODO: 등록 API 호출
+            //closeModal(modal);
+            console.log('펀드시황 수정!');
         });
 
         // 삭제 모달
@@ -354,6 +331,8 @@
             // TODO: 삭제 API 호출
             const id = deleteConfirmBtn.getAttribute('data-id');
             console.log('삭제할 ID:', id);
+            document.getElementById('deleteMarketId').value = id;
+            document.getElementById('marketDeleteForm').submit();
             closeModal(deleteModal);
             // 삭제 후 테이블 새로고침 또는 행 제거
         });
@@ -394,14 +373,19 @@
                         document.getElementById('editMarketId').value = id || '';
                         document.getElementById('editMarketTitle').value = title || '';
                         document.getElementById('editMarketType').value = type || '';
-                        document.getElementById('editMarketPublishAt').value = publish || '';
+                        const raw = publish || '';
+                        const converted = raw
+                            .replace(' ', 'T')      // 공백 → T 로 변경
+                            .substring(0, 16);      // 초 제거하여 yyyy-MM-ddTHH:mm 형태로 맞춤
+
+                        document.getElementById('editMarketPublishAt').value = converted;
                         document.getElementById('editMarketChannel').value = channel || '';
                         document.getElementById('editMarketSummary').value = summary || '';
                         showModal(editModal);
                     } else if (action === 'delete') {
                         // 삭제 모달에 데이터 채우기
                         document.getElementById('deleteMarketTitle').textContent = title || '';
-                        deleteConfirmBtn.setAttribute('data-id', id || '');
+                        document.getElementById('deleteMarketId').value = id;
                         showModal(deleteModal);
                     }
                 });

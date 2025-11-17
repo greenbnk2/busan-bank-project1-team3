@@ -270,11 +270,11 @@
             #{postId},
             'FUND_MARKET',
             #{title},
-            #{fundMarketType},
+            #{marketType},
             #{summary},
             #{channels},
-            #{publishStartAt},
-            #{content},
+            #{publishStartAt, jdbcType=TIMESTAMP},
+            #{content, jdbcType=CLOB},
             NVL(#{status}, 'PUBLISHED'),
             NVL(#{createdBy}, 'admin'),
             SYSDATE
@@ -332,8 +332,7 @@
             summary = #{summary},
             channels = #{channels},
             publish_start_at = #{publishStartAt},
-            content = #{content},
-            updated_by = #{updatedBy},
+            updated_by = NVL(#{updatedBy,jdbcType=VARCHAR}, 'admin'),
             updated_at = SYSDATE
         WHERE
             post_id = #{postId}
@@ -344,7 +343,7 @@
     <delete id="deleteFundMarket" parameterType="int">
         DELETE FROM info_post
         WHERE post_id = #{postId}
-            AND post_type = 'FUND_MARKET'
+            AND post_type = 'MARKET'
     </delete>
 
 </mapper>
