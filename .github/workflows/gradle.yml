@@ -49,7 +49,7 @@ jobs:
       - name: Setup SSH Key
         run: |
           echo "${{ secrets.GCP_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
+          chmod 400 private_key.pem
 
       - name: Copy JAR to EC2
         run: |
