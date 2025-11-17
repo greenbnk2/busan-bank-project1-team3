@@ -18,7 +18,7 @@ spring:
     name: BNK_PROJECT
     version: ${version}
   datasource:
-    url: jdbc:oracle:thin:@//3.37.166.16:1522/XEPDB1
+    url: jdbc:oracle:thin:@//3.37.166.16:1522/XEPDB1 
     username: BNK
     password: abc1234!
     driver-class-name: oracle.jdbc.OracleDriver
