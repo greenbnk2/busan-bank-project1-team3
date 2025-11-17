@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.UserTermsMapper">
+
+    <!-- USER_TERMS 결과 매핑 -->
+    <resultMap id="UserTermsResultMap" type="kr.co.bnk.bnk_project.dto.UserTermsDTO">
+        <id     property="termId"  column="TERM_ID"/>
+        <result property="title"   column="TITLE"/>
+        <result property="content" column="CONTENT"/>
+        <result property="regDate" column="REG_DATE"/>
+    </resultMap>
+
+    <!-- 전체 약관 리스트 조회 -->
+    <select id="selectAllTerms" resultMap="UserTermsResultMap">
+        SELECT
+            TERM_ID,
+            TITLE,
+            CONTENT,
+            REG_DATE
+        FROM USER_TERMS
+        ORDER BY TERM_ID
+    </select>
+
+    <!-- termId 기준 단일 약관 조회 -->
+    <select id="selectTermById" parameterType="string" resultMap="UserTermsResultMap">
+        SELECT
+            TERM_ID,
+            TITLE,
+            CONTENT,
+            REG_DATE
+        FROM USER_TERMS
+        WHERE TERM_ID = #{termId}
+    </select>
+
+    <!-- 약관 수정 (제목, 내용만 수정 / REG_DATE는 최초 등록일 유지) -->
+    <update id="updateTerm" parameterType="kr.co.bnk.bnk_project.dto.UserTermsDTO">
+        UPDATE USER_TERMS
+        SET
+            TITLE   = #{title},
+            CONTENT = #{content}
+        WHERE TERM_ID = #{termId}
+    </update>
+
+    <!-- INSERT -->
+    <!--
+    <insert id="insertTerm" parameterType="kr.co.bnk.bnk_project.dto.UserTermsDTO">
+        INSERT INTO USER_TERMS (TERM_ID, TITLE, CONTENT, REG_DATE)
+        VALUES (#{termId}, #{title}, #{content}, SYSDATE)
+    </insert>
+    -->
+
+</mapper>

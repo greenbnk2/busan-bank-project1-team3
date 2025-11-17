@@ -27,7 +27,7 @@
             <div class="form-section">
                 <form th:action="@{/admin/member/update}" method="post" id="memberEditForm">
 
-                    <input type="hidden" name="custNo" th:value="${member.custNo}">
+                    <input type="hidden" name="custNo" th:value="${pageResponse.custNo}">
 
                     <div class="form-table">
 
@@ -36,7 +36,7 @@
                             <div class="form-label">아이디</div>
                             <div class="form-input-wrapper">
                                 <input type="text" class="form-input"
-                                       th:value="${member.custId}"
+                                       th:value="${pageResponse.custId}"
                                        readonly
                                        style="background-color: #f5f5f5;">
                             </div>
@@ -48,7 +48,7 @@
                             <div class="form-input-wrapper">
                                 <input type="text" class="form-input"
                                        name="custName"
-                                       th:value="${member.custName}"
+                                       th:value="${pageResponse.custName}"
                                        placeholder="이름을 입력하세요" required>
                             </div>
                         </div>
@@ -59,7 +59,7 @@
                             <div class="form-input-wrapper">
                                 <input type="text" class="form-input"
                                        name="custHp"
-                                       th:value="${member.custHp}"
+                                       th:value="${pageResponse.custHp}"
                                        placeholder="010-0000-0000" required>
                             </div>
                         </div>
@@ -70,28 +70,60 @@
                             <div class="form-input-wrapper">
                                 <input type="email" class="form-input"
                                        name="custEmail"
-                                       th:value="${member.custEmail}"
+                                       th:value="${pageResponse.custEmail}"
                                        placeholder="이메일을 입력하세요" required>
                             </div>
                         </div>
 
                         <!-- 주소 -->
+                        <!-- 주소 -->
                         <div class="form-row">
                             <div class="form-label">주소</div>
                             <div class="form-input-wrapper">
-                                <input type="text" class="form-input"
-                                       name="address"
-                                       th:value="${member.address}"
-                                       placeholder="주소를 입력하세요">
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <!-- 우편번호 -->
+                                    <input type="text"
+                                           class="form-input"
+                                           name="zipCode"
+                                           id="zip"
+                                           style="max-width: 150px;"
+                                           placeholder="우편번호"
+                                           readonly
+                                           th:value="${pageResponse != null ? pageResponse.zipCode : ''}">
+
+                                    <!-- 우편번호 찾기 버튼 -->
+                                    <button type="button" class="btn btn-secondary" onclick="execDaumPostcode()">
+                                        우편번호 찾기
+                                    </button>
+                                </div>
+
+                                <!-- 기본주소 -->
+                                <input type="text"
+                                       class="form-input"
+                                       name="addr1"
+                                       id="addr1"
+                                       placeholder="기본 주소"
+                                       readonly
+                                       style="margin-bottom: 8px;"
+                                       th:value="${pageResponse != null ? pageResponse.addr1 : ''}">
+
+                                <!-- 상세주소 -->
+                                <input type="text"
+                                       class="form-input"
+                                       name="addr2"
+                                       id="addr2"
+                                       placeholder="상세 주소"
+                                       th:value="${pageResponse != null ? pageResponse.addr2 : ''}">
                             </div>
                         </div>
+
 
                         <!-- 가입일 -->
                         <div class="form-row">
                             <div class="form-label">가입일</div>
                             <div class="form-input-wrapper">
                                 <input type="text" class="form-input"
-                                       th:value="${#temporals.format(member.joinDate, 'yyyy-MM-dd')}"
+                                       th:value="${#temporals.format(pageResponse.joinDate, 'yyyy-MM-dd')}"
                                        readonly style="background-color: #f5f5f5;">
                             </div>
                         </div>
@@ -100,7 +132,7 @@
 
                     <!-- 버튼 영역 -->
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">저장</button>
+                        <button type="submit" class="btn btn-primary" style="background: #cd1317; border-color: #cd1317; color: #fff;">저장</button>
                         <a th:href="@{/admin/member/list}" class="btn btn-secondary">취소</a>
                     </div>
 
@@ -113,12 +145,54 @@
         </div>
     </div>
 </div>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <!-- 사이드바 스크립트 -->
 <div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+    // 우편번호 찾기 함수
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
+
+                // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 도로명 주소
+                    addr = data.roadAddress;
+                } else { // 지번 주소
+                    addr = data.jibunAddress;
+                }
+
+                // 도로명 주소일 때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 주소에 참고항목 추가
+                    addr += extraAddr;
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('zip').value = data.zonecode;
+                document.getElementById('addr1').value = addr;
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById('addr2').focus();
+            }
+        }).open();
+    }
+
     // 폼 유효성 검사
     document.getElementById('memberEditForm').addEventListener('submit', function(e) {
 
@@ -143,7 +217,7 @@
         }
 
         // 이메일 형식
-        const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email)) {
             alert("올바른 이메일 형식을 입력해주세요.");
             e.preventDefault();

@@ -397,6 +397,49 @@ button:hover {
     margin-top: 15px;
 }
 
+.terms-form {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.terms-form-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.terms-form-field input,
+.terms-form-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.terms-form-field textarea {
+    resize: vertical;
+    min-height: 220px;
+}
+
+.terms-form-field input:focus,
+.terms-form-field textarea:focus {
+    outline: none;
+    border-color: #cd1317;
+    box-shadow: 0 0 0 3px rgba(205, 19, 23, 0.15);
+}
+
 .terms-box-title {
     font-size: 15px;
     font-weight: bold;

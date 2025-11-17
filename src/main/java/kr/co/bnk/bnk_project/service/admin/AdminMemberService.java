@@ -37,4 +37,9 @@ public class AdminMemberService {
     public void updateMember(MemberListDTO dto) {
         adminMemberMapper.updateMember(dto);
     }
+
+
+    public void updateMemberStatus(int custNo, String statusCode) {
+        adminMemberMapper.updateMemberStatus(custNo, statusCode);
+    }
 }

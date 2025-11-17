@@ -90,7 +90,7 @@
                         <th>주소</th>
                         <th>가입일</th>
                         <th>상태</th>
-                        <th>가입상품</th>
+                        <th>상세</th>
                         <th>관리</th>
                     </tr>
                     </thead>
@@ -133,12 +133,12 @@
                             </span>
                         </td>
 
-                        <!-- 가입상품 -->
+                        <!-- 상세 -->
                         <td>
                             <button type="button"
-                                    class="btn btn-secondary btn-small"
-                                    th:onclick="|location.href='@{/admin/product/status(searchType='id', keyword=${user.custId})}'|">
-                                가입상품보기
+                                    class="action-btn edit"
+                                    th:onclick="|location.href='@{/admin/member/list-detail(custNo=${user.custNo})}'|">
+                                상세
                             </button>
                         </td>
 
@@ -147,38 +147,23 @@
                              - 휴면(S), 정지(J): 수정 / 재개
                              - 탈퇴(D): 수정만(또는 비활성) -->
                         <td>
-                            <div class="member-action-buttons" style="display:flex; gap:4px; justify-content:center;">
-                                <!-- 수정: 공통 -->
-                                <button type="button"
-                                        class="btn btn-secondary btn-small"
-                                        th:onclick="|location.href='@{/admin/member/detail(custNo=${user.custNo})}'|">
-                                    수정
-                                </button>
+                            <a th:href="@{|/admin/member/detail?custNo=${user.custNo}|}" class="action-btn edit">
+                                수정
+                            </a>
 
-                                <!-- 정상(A) → 정지 -->
-                                <button type="button"
-                                        class="btn btn-secondary btn-small"
-                                        th:if="${user.statusCode == 'A'}"
-                                        th:onclick="|changeStatus(${user.custNo}, 'J')|">
-                                    정지
-                                </button>
+                            <!-- 정상 → 중단 버튼 -->
+                            <button class="action-btn stop"
+                                    th:if="${user.statusCode == 'A'}"
+                                    th:onclick="|updateStatus(${user.custNo}, 'J')|">
+                                중단
+                            </button>
 
-                                <!-- 휴면(S) / 정지(J) → 재개(정상) -->
-                                <button type="button"
-                                        class="btn btn-secondary btn-small"
-                                        th:if="${user.statusCode == 'S' or user.statusCode == 'J'}"
-                                        th:onclick="|changeStatus(${user.custNo}, 'A')|">
-                                    재개
-                                </button>
-
-                                <!-- 탈퇴(D): 필요하면 별도 버튼 -->
-                                <button type="button"
-                                        class="btn btn-secondary btn-small"
-                                        th:if="${user.statusCode == 'D'}"
-                                        disabled>
-                                    탈퇴회원
-                                </button>
-                            </div>
+                            <!-- 휴면/정지 → 재개 버튼 -->
+                            <button class="action-btn resume"
+                                    th:if="${user.statusCode == 'S' or user.statusCode == 'J'}"
+                                    th:onclick="|updateStatus(${user.custNo}, 'A')|">
+                                재개
+                            </button>
                         </td>
                     </tr>
                     </tbody>
@@ -235,6 +220,7 @@
 <!-- 사이드바 스크립트 -->
 <div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
 
+<!-- list.html - JavaScript 부분 수정 -->
 <script th:inline="javascript">
     /*<![CDATA[*/
     // Enter 키로 검색
@@ -248,14 +234,35 @@
         });
     }
 
-    // 상태 변경 (정지 / 재개)
-    function changeStatus(custNo, targetStatus) {
-        if (!confirm('해당 회원의 상태를 변경하시겠습니까?')) {
-            return;
-        }
-        // TODO: 실제 상태 변경 요청 (AJAX 또는 form submit)
-        // 예시: location.href = '/admin/member/status?custNo=' + custNo + '&status=' + targetStatus;
-        console.log('changeStatus:', custNo, targetStatus);
+    // Spring Security CSRF 정보
+    const csrfHeaderName = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
+    const csrfToken = /*[[${_csrf.token}]]*/ '';
+
+    // 상태 변경 함수
+    function updateStatus(custNo, statusCode) {
+        if(!confirm("상태를 변경하시겠습니까?")) return;
+
+        fetch(/*[[@{/admin/member/status}]]*/ '/admin/member/status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                [csrfHeaderName]: csrfToken
+            },
+            body: `custNo=${custNo}&statusCode=${statusCode}`
+        })
+            .then(res => res.text())
+            .then(data => {
+                if (data === 'success') {
+                    alert('상태가 변경되었습니다.');
+                    location.reload();
+                } else {
+                    alert('변경 실패: ' + data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('상태 변경 중 오류가 발생했습니다.');
+            });
     }
     /*]]>*/
 </script>

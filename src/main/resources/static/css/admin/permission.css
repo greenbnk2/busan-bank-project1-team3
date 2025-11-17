@@ -304,6 +304,41 @@
     color: #cd1317;
 }
 
+.action-btn.stop {
+    background: #333;
+    color: white;
+    border-color: #333;
+}
+
+.action-btn.stop:hover {
+    background: #222;
+    color: white;
+}
+
+.action-btn.resume {
+    background: #cd1317;
+    color: white;
+    border-color: #cd1317;
+}
+
+.action-btn.resume:hover {
+    background: #b01013;
+    color: white;
+}
+
+.action-btn.edit {
+    background: #f0f0f0;
+    color: #333;
+    border-color: #f0f0f0;
+    text-decoration: none;
+}
+
+.action-btn.edit:hover {
+    background: #e0e0e0;
+    color: #333;
+    text-decoration: none;
+}
+
 /* 페이지네이션 */
 .pagination {
     display: flex;

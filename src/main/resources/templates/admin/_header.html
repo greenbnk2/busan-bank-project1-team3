@@ -10,8 +10,6 @@
                     <span class="note-num">3</span>
                 </div>
                 <span class="header-divider">|</span>
-                <a th:href="@{/}" class="main-link">MAIN</a>
-                <span class="header-divider">|</span>
                 <span sec:authorize="isAuthenticated()" sec:authentication="name" class="user-name">관리자ID</span>
                 <span class="header-divider">|</span>
                 <form th:action="@{/admin/logout}" method="post" style="display: inline; margin: 0; padding: 0;">

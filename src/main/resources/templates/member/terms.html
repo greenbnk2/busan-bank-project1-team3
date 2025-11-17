@@ -58,8 +58,16 @@
                         <div class="terms-box-wrapper">
                             <h3 class="terms-box-title">■ 회원약관</h3>
                             <div class="terms-box">
-                                <div class="terms-box-header">홈페이지 회원약관</div>
-                                <div class="terms-text">
+                                <div class="terms-box-header"
+                                     th:text="${memberTerms != null ? memberTerms.title : '홈페이지 회원약관'}">
+                                    홈페이지 회원약관
+                                </div>
+                                <div class="terms-text"
+                                     th:if="${memberTerms != null}"
+                                     th:utext="${memberTerms.content}">
+                                </div>
+                                <div class="terms-text"
+                                     th:unless="${memberTerms != null}">
                                     <p><strong>제1장 총칙</strong></p>
                                     <p><strong>제1조(목적)</strong></p>
                                     <p>이 약관은 주식회사 부산은행(이하'은행'이라 한다)과 이용 고객(이하'회원'이라 한다)에 홈페이지 및 회원 개인홈페이지의 이용조건 및 절차에 관한 사항을 정함을 목적으로 합니다.</p>
@@ -95,9 +103,17 @@
                         <div class="terms-box-wrapper">
                             <h3 class="terms-box-title">■ 개인정보처리위탁방침</h3>
                             <div class="terms-box">
-                                <div class="terms-box-header">개인정보처리위탁방침</div>
-                                <div class="terms-text">
-                                    <p>㈜부산은행(이하 '당행')은 개인정보보호법 제30조에 따라 고객의 개인정보보 보호 및 권익을 보호하고 개인정보와 관련한 고객의 고충을 원활하게 처리할 수 있도록 다음과 같은 처리방침을 두고 있습니다.</p>
+                                <div class="terms-box-header"
+                                     th:text="${privacyTerms != null ? privacyTerms.title : '개인정보처리위탁방침'}">
+                                    개인정보처리위탁방침
+                                </div>
+                                <div class="terms-text"
+                                     th:if="${privacyTerms != null}"
+                                     th:utext="${privacyTerms.content}">
+                                </div>
+                                <div class="terms-text"
+                                     th:unless="${privacyTerms != null}">
+                                    <p>㈜부산은행(이하 '당행')은 개인정보보호법 제30조에 따라 고객의 개인정보 보호 및 권익을 보호하고 개인정보와 관련한 고객의 고충을 원활하게 처리할 수 있도록 다음과 같은 처리방침을 두고 있습니다.</p>
                                     <br>
                                     <p><strong>제1조(개인정보의 처리 목적)</strong></p>
                                     <p>당행은 개인정보를 다음 각 호의 목적을 위해 처리합니다. 처리한 개인정보는 다음의 목적 이외의 용도로는 사용되지 않으며 이용 목적이 변경될 시에는 사전동의를 구할 예정입니다.</p>

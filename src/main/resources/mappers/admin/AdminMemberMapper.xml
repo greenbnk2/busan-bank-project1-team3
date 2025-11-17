@@ -5,20 +5,24 @@
 
 <mapper namespace="kr.co.bnk.bnk_project.mapper.admin.AdminMemberMapper">
 
-    <!-- 회원 목록 ResultMap -->
-    <resultMap id="MemberListResultMap" type="kr.co.bnk.bnk_project.dto.admin.MemberListDTO">
+    <resultMap id="MemberListResultMap"
+               type="kr.co.bnk.bnk_project.dto.admin.MemberListDTO">
+
         <id     property="custNo"     column="CUST_NO"/>
         <result property="custId"     column="CUST_ID"/>
         <result property="custName"   column="CUST_NAME"/>
         <result property="custHp"     column="CUST_HP"/>
         <result property="custEmail"  column="CUST_EMAIL"/>
+
+        <result property="zipCode"    column="ZIP_CODE"/>
+        <result property="addr1"      column="ADDR1"/>
+        <result property="addr2"      column="ADDR2"/>
+        <result property="address"    column="ADDRESS"/>
+
         <result property="joinDate"   column="JOIN_DATE"/>
         <result property="statusCode" column="STATUS_CODE"/>
-        <result property="zipCode" column="ZIP_CODE"/>
-
-        <!-- 화면용 -->
-        <result property="address"    column="ADDRESS"/>
     </resultMap>
+
 
     <!-- 검색 where 절 -->
     <sql id="memberSearchWhere">
@@ -71,22 +75,21 @@
     </select>
 
     <select id="selectMemberByCustNo"
-            resultType="kr.co.bnk.bnk_project.dto.admin.MemberListDTO">
+            resultType="kr.co.bnk.bnk_project.dto.admin.MemberListDTO"
+            resultMap="MemberListResultMap">
 
         SELECT
-            CUST_NO,
-            CUST_ID,
-            CUST_NAME,
-            CUST_HP,
-            CUST_EMAIL,
-            ADDR1,
-            ADDR2,
-            ZIP_CODE,
-            (ADDR1 || ' ' || ADDR2) AS address,
-            JOIN_DATE,
-            STATUS_CODE
-        FROM ADMIN.BNK_USER
-        WHERE CUST_NO = #{custNo}
+            bu.CUST_NO,
+            bu.CUST_ID,
+            bu.CUST_NAME,
+            bu.CUST_HP,
+            bu.CUST_EMAIL,
+            bu.ZIP_CODE,
+            bu.ADDR1,
+            bu.ADDR2,
+            bu.JOIN_DATE
+        FROM ADMIN.BNK_USER bu
+        WHERE bu.CUST_NO = #{custNo}
     </select>
 
 
@@ -98,8 +101,7 @@
             CUST_EMAIL  = #{custEmail},
             ADDR1       = #{addr1},
             ADDR2       = #{addr2},
-            ZIP_CODE     = #{zipCode},
-            STATUS_CODE = #{statusCode}
+            ZIP_CODE     = #{zipCode}
         WHERE CUST_NO = #{custNo}
     </update>
 
@@ -113,5 +115,14 @@
         <include refid="memberSearchWhere"/>
 
     </select>
+
+
+    <!-- 회원 상태-->
+    <update id="updateMemberStatus">
+        UPDATE ADMIN.BNK_USER
+        SET STATUS_CODE = #{statusCode}
+        WHERE CUST_NO = #{custNo}
+    </update>
+
 
 </mapper>

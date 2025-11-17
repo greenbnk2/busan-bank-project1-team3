@@ -19,4 +19,7 @@ public interface AdminMemberMapper {
 
     // 회원 수정
     int updateMember(MemberListDTO dto);
+
+    // 회원 상태 변경 (정상/정지/휴면 등)
+    int updateMemberStatus(int custNo, String statusCode);
 }

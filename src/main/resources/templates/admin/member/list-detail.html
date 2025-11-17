@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 상세 - 은행 펀드 상품 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/admin/admin_styles.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/adminproduct.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/permission.css}">
+</head>
+<body>
+    <!-- 사이드바 Fragment -->
+    <div th:replace="~{admin/_sidebar :: sidebar('member')}"></div>
+
+    <div class="main-content">
+        <!-- 헤더 Fragment -->
+        <div th:replace="~{admin/_header :: header}"></div>
+        <div class="main-content-body">
+            <div class="container">
+                <!-- 페이지 헤더 -->
+                <header class="page-header">
+                    <h1>회원 상세</h1>
+                </header>
+
+                <!-- 개인정보 -->
+                <div class="form-section">
+                    <h2 class="section-title">개인정보</h2>
+                    <div class="form-table">
+                        <div class="form-row">
+                            <div class="form-label">아이디</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${member != null ? member.custId : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">이름</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${member != null ? member.custName : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">전화번호</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${member != null ? member.custHp : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">이메일</div>
+                            <div class="form-input-wrapper">
+                                <input type="email" class="form-input"
+                                       th:value="${member != null ? member.custEmail : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">주소</div>
+                            <div class="form-input-wrapper">
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text"
+                                           class="form-input"
+                                           style="max-width: 150px; background-color: #f5f5f5;"
+                                           th:value="${member != null ? member.zipCode : ''}"
+                                           readonly>
+                                </div>
+                                <input type="text"
+                                       class="form-input"
+                                       th:value="${member != null ? member.addr1 : ''}"
+                                       readonly
+                                       style="margin-bottom: 8px; background-color: #f5f5f5;">
+                                <input type="text"
+                                       class="form-input"
+                                       th:value="${member != null ? member.addr2 : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">가입일</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${member != null and member.joinDate != null ? #temporals.format(member.joinDate, 'yyyy-MM-dd') : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 계좌정보 -->
+                <div class="form-section">
+                    <h2 class="section-title">계좌정보</h2>
+                    <div class="form-table">
+                        <div class="form-row">
+                            <div class="form-label">계좌번호</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${account != null ? account.acctNo : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">계좌비밀번호</div>
+                            <div class="form-input-wrapper">
+                                <input type="password" class="form-input"
+                                       value="****"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 직장정보 -->
+                <div class="form-section">
+                    <h2 class="section-title">직장정보</h2>
+                    <div class="form-table">
+                        <div class="form-row">
+                            <div class="form-label">직장명</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${jobInfo != null ? jobInfo.companyName : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">직업구분</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${jobInfo != null ? jobInfo.jobType : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">부서명</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${jobInfo != null ? jobInfo.department : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">직위</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${jobInfo != null ? jobInfo.position : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">직장 주소</div>
+                            <div class="form-input-wrapper">
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text"
+                                           class="form-input"
+                                           style="max-width: 150px; background-color: #f5f5f5;"
+                                           th:value="${jobInfo != null ? jobInfo.jobZipcode : ''}"
+                                           readonly>
+                                </div>
+                                <input type="text"
+                                       class="form-input"
+                                       th:value="${jobInfo != null ? jobInfo.jobAddress1 : ''}"
+                                       readonly
+                                       style="margin-bottom: 8px; background-color: #f5f5f5;">
+                                <input type="text"
+                                       class="form-input"
+                                       th:value="${jobInfo != null ? jobInfo.jobAddress2 : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 부가정보 -->
+                <div class="form-section">
+                    <h2 class="section-title">부가정보</h2>
+                    <div class="form-table">
+                        <div class="form-row">
+                            <div class="form-label">생년월일</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.birth : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">양력/음력</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.calendarType : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">자녀수</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.childCount : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">주택소유</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.houseOwnership : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">주택종류</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.houseType : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">차량보유</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.hasCar : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">차량번호</div>
+                            <div class="form-input-wrapper">
+                                <input type="text" class="form-input"
+                                       th:value="${additionalInfo != null ? additionalInfo.carNumber : ''}"
+                                       readonly
+                                       style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 가입상품 -->
+                <div class="form-section">
+                    <h2 class="section-title">가입상품</h2>
+                    <div class="table-section">
+                        <div class="table-info">
+                            <span>총 <strong>3</strong>개</span>
+                        </div>
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>상품코드</th>
+                                    <th>유형</th>
+                                    <th>상품명</th>
+                                    <th>회사명</th>
+                                    <th>가입일자</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>3</td>
+                                    <td>0015400182</td>
+                                    <td>주식형</td>
+                                    <td>
+                                        <a href="#" class="product-name-link">미래에셋코어테크증권투자신탁(주식) 종류A-e</a>
+                                    </td>
+                                    <td>미래에셋자산운용</td>
+                                    <td>2024-01-15</td>
+                                    <td><span class="status-badge modifying">가입중</span></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>0015400183</td>
+                                    <td>혼합형</td>
+                                    <td>
+                                        <a href="#" class="product-name-link">KB배당인컴증권투자신탁(주식) 종류A</a>
+                                    </td>
+                                    <td>KB자산운용</td>
+                                    <td>2024-02-20</td>
+                                    <td><span class="status-badge modifying">가입중</span></td>
+                                </tr>
+                                <tr>
+                                    <td>1</td>
+                                    <td>0015400184</td>
+                                    <td>채권형</td>
+                                    <td>
+                                        <a href="#" class="product-name-link">신한위험중립형밸런스펀드</a>
+                                    </td>
+                                    <td>신한자산운용</td>
+                                    <td>2024-03-10</td>
+                                    <td><span class="status-badge modifying">가입중</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 버튼 영역 -->
+                <div class="form-actions">
+                    <a th:href="@{/admin/member/list}" class="btn btn-secondary">목록</a>
+                    <a th:href="@{/admin/member/detail(custNo=${member != null ? member.custNo : ''})}" class="btn btn-primary" style="background: #cd1317; color: white;">수정</a>
+                </div>
+
+                <!-- 푸터 -->
+                <footer class="admin-footer"></footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- 사이드바 스크립트 -->
+    <div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
+</body>
+</html>
+

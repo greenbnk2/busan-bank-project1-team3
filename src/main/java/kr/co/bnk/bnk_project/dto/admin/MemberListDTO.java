@@ -21,7 +21,7 @@ public class MemberListDTO {
 
     private String addr1;
     private String addr2;
-    private String zipcode;
+    private String zipCode;
 
     // 화면용 추가 필드
     private String address;
