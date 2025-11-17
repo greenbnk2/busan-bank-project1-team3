@@ -1,0 +1,62 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('additionalInvestmentHistory')}"></div>
+
+            <div class="main-content">
+
+                <div style="text-align: right; font-size: 12px; color: #888; margin-bottom: 10px;">
+                    펀드 &gt; 추가투자 &gt; <span style="color: #cb2b11; font-weight: bold;">추가투자예약내역조회/취소</span>
+                </div>
+
+                <div class="page-title-wrap">
+                    <h2>추가투자예약내역조회/취소</h2>
+                    <div class="step-indicator">
+                        <span class="step-item active">1 조회</span>
+                        <span class="step-item">2</span>
+                        <span class="step-item">3</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <ul>
+                        <li>펀드계좌로 추가투자 예약하신 내역을 조회하실 수 있습니다.</li>
+                        <li>추가투자 예약 등록내역 조회 후 취소 하시고자 하는 거래를 선택하시면 취소 가능합니다.</li>
+                        <li>조회된 내역은 이체예약 내역이므로 반드시 이체예정일 이후에 거래내역조회를 통해 신규결과를 확인 하시기 바랍니다.</li>
+                        <li>추가투자예약내역 취소는 당일 신청 건에 한해 가능합니다.(평일 09:00~17:00)<br>
+                            (단, 15:30 이전에 추가투자예약한 국내주식이 50% 이상 편입된 펀드는 15:30 까지, 레버리지 펀드는 14:00 까지 취소 가능합니다.)</li>
+                        <li>마감 후 추가투자예약 취소는 은행영업일 17시부터, 공휴일 포함, 다음 은행영업일 09:00까지 가능 합니다.</li>
+                    </ul>
+                </div>
+
+                <div class="search-section" style="margin-top: 40px;">
+                    <form action="#" method="post">
+                        <table class="search-table" style="border-top: 2px solid #cb2b11;">
+                            <colgroup>
+                                <col style="width: 200px;">
+                                <col>
+                            </colgroup>
+                            <tr>
+                                <th>펀드계좌번호</th>
+                                <td>
+                                    <select class="form-select" style="width: 300px;">
+                                        <option>계좌번호 목록이 없습니다.</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="btn-area-center">
+                            <button type="submit" class="btn-red">조회</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div> </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>

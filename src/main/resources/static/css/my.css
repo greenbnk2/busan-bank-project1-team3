@@ -102,3 +102,305 @@
     color: #cb2b11;
     font-weight: bold;
 }
+
+
+/* 컨텐츠 헤더 (브레드크럼, 타이틀) */
+.content-header {
+    margin-bottom: 30px;
+}
+.breadcrumb {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 10px;
+}
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #222;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #222;
+}
+
+/* 안내 박스 */
+.info-box {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 40px;
+}
+.info-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.info-box li {
+    font-size: 13px;
+    color: #666;
+    position: relative;
+    padding-left: 10px;
+    margin-bottom: 5px;
+}
+.info-box li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+/* 조회 테이블 섹션 */
+.search-section h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #cb2b11; /* 포인트 컬러 */
+}
+
+.search-table {
+    width: 100%;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    border-collapse: collapse;
+}
+.search-table th, .search-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+.search-table th {
+    background-color: #f9f9f9;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    width: 160px;
+}
+.search-table td {
+    color: #555;
+}
+
+/* 폼 요소 스타일 */
+.form-radio {
+    margin-right: 20px;
+    cursor: pointer;
+}
+.form-select {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    width: 300px;
+}
+.form-date {
+    padding: 5px;
+    border: 1px solid #ccc;
+    width: 120px;
+    text-align: center;
+}
+
+/* 날짜 선택 버튼 그룹 */
+.date-btn-group {
+    display: inline-block;
+    margin-bottom: 5px;
+}
+.btn-date {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    margin-right: -1px; /* 버튼 연결 */
+}
+.btn-date:hover {
+    background-color: #f5f5f5;
+}
+
+/* 하단 조회 버튼 */
+.btn-area-center {
+    text-align: center;
+    margin-top: 30px;
+}
+/*.btn-submit {
+    background-color: #cb2b11; !* 부산은행 포인트 컬러 *!
+    color: #fff;
+    border: none;
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-submit:hover {
+    background-color: #a61f0a;
+}*/
+
+.btn-search-submit {
+    display: inline-block;
+    background-color: #cb2b11; /* BNK 레드 */
+    color: #fff;
+    border: 1px solid #cb2b11;
+    padding: 12px 40px;       /* 버튼 크기 (내부 여백) */
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-radius: 0;         /* 사각형 모서리 (필요시 조정) */
+}
+
+.btn-search-submit:hover {
+    background-color: #a61f0a; /* 호버 시 더 짙은 색 */
+    border-color: #a61f0a;
+}
+
+/* 버튼 감싸는 영역 (가운데 정렬) */
+.btn-area-center {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* 보고서 변경 페이지 전용 박스 스타일 */
+.report-box {
+    display: flex;            /* 좌우 배치를 위해 Flexbox 사용 */
+    justify-content: space-between; /* 양쪽 끝으로 배치 */
+    align-items: center;      /* 수직 중앙 정렬 */
+    border: 1px solid #ccc;   /* 테두리 */
+    padding: 30px;            /* 내부 여백 */
+    background-color: #fff;
+    margin-top: 20px;
+}
+
+.report-text h4 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.report-text ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.report-text li {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    padding-left: 10px;
+    position: relative;
+}
+
+.report-text li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+    color: #888;
+}
+
+/* 우측 '정보변경' 버튼 스타일 */
+.btn-white-border {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    color: #555;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-white-border:hover {
+    background-color: #f9f9f9;
+    border-color: #bbb;
+}
+
+/* 기준가격조회 화면과 동일한 버튼 스타일 (.btn-red) */
+.btn-red {
+    padding: 8px 30px;        /* 내부 여백 */
+    font-size: 15px;          /* 글자 크기 */
+    background: #cb2b11;      /* 배경색 (부산은행 레드) */
+    color: white;             /* 글자색 */
+    border: none;             /* 테두리 없음 */
+    border-radius: 4px;       /* 모서리 둥글게 */
+    cursor: pointer;          /* 마우스 커서 손가락 모양 */
+    transition: background 0.2s; /* 색상 변경 부드럽게 */
+}
+
+.btn-red:hover {
+    background-color: #a61f0a; /* 마우스 올렸을 때 조금 더 진하게 */
+}
+
+/* 상단 타이틀 영역 (타이틀 + 스텝 표시) */
+.page-title-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* 바닥 라인 맞춤 */
+    border-bottom: 2px solid #222; /* 타이틀 밑줄 */
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.page-title-wrap h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #222;
+    margin: 0;
+}
+
+/* 단계 표시 (Step Indicator) */
+.step-indicator {
+    display: flex;
+    gap: 10px;
+}
+.step-item {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 20px; /* 둥근 캡슐 모양 */
+    padding: 4px 12px;
+    font-size: 13px;
+    color: #888;
+    background-color: #fff;
+}
+/* 활성화된 단계 (1 조회) */
+.step-item.active {
+    border-color: #cb2b11;
+    color: #cb2b11;
+    font-weight: bold;
+}
+
+/* 목록형 테이블 (List Table) - 기존 search-table과 다름 */
+.list-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid #cb2b11; /* 상단 붉은 선 */
+    margin-top: 10px;
+}
+
+.list-table th {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ccc;
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.list-table td {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+}
+
+/* 데이터 없음 메시지 */
+.no-data-msg {
+    padding: 50px 0;
+    text-align: center;
+    color: #333;
+    font-weight: bold;
+}

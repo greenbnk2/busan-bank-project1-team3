@@ -1,0 +1,62 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('additionalInvestment')}"></div>
+
+            <div class="main-content">
+
+                <div style="text-align: right; font-size: 12px; color: #888; margin-bottom: 10px;">
+                    펀드 &gt; 추가투자 &gt; <span style="color: #cb2b11; font-weight: bold;">추가투자예약</span>
+                </div>
+
+                <div class="page-title-wrap">
+                    <h2>추가투자예약</h2>
+                    <div class="step-indicator">
+                        <span class="step-item active">1 정보입력</span>
+                        <span class="step-item">2</span>
+                        <span class="step-item">3</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <ul>
+                        <li>펀드 자동이체 설정시 자동이체 설정일에 연결 계좌에서 출금되어 펀드별 매입기준가격 적용일에 펀드 계좌로 입금하여 매입 처리 됩니다.</li>
+                        <li>펀드 신규 및 추가투자(자동이체)의 경우 해당 예약금액을 별도의 신탁계정(특정금전신탁)에 예치한 후, 펀드별 매입기준가격 적용일에 펀드계좌로 입금하여 매입 처리할 때까지 특정금전신탁에 신탁 됩니다.</li>
+                        <li>추가투자예약은 은행영업시간(09:00 ~ 17:00) 이내에 가능 합니다.</li>
+                        <li>마감 후 추가투자예약은 은행영업일 17시부터, 공휴일 포함, 다음 은행영업일 09:00까지 가능 합니다.</li>
+                        <li>마감 후 추가투자예약은 다음 은행영업일 오전에 추가투자예약 처리됩니다.</li>
+                        <li>펀드 판매한도 소진시 거래가 취소될 수 있음을 유의하시기 바랍니다.</li>
+                    </ul>
+                </div>
+
+                <div class="search-section" style="margin-top: 40px;">
+                    <form action="#" method="post">
+                        <table class="search-table" style="border-top: 2px solid #cb2b11;">
+                            <colgroup>
+                                <col style="width: 200px;">
+                                <col>
+                            </colgroup>
+                            <tr>
+                                <th>펀드계좌번호 <span style="color: #cb2b11;">*</span></th>
+                                <td>
+                                    <select class="form-select" style="width: 300px;">
+                                        <option>계좌번호 목록이 없습니다.</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="btn-area-center">
+                            <button type="submit" class="btn-red">조회</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div> </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>

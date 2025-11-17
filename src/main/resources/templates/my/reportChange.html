@@ -1,0 +1,33 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('report')}"></div>
+
+            <div class="main-content">
+
+                <div style="text-align: right; font-size: 12px; color: #888; margin-bottom: 10px;">
+                    펀드 &gt; 조회 &gt; <span style="color: #cb2b11; font-weight: bold;">자산운용보고서통보방법변경</span>
+                </div>
+
+                <div class="report-box">
+                    <div class="report-text">
+                        <h4>자산운용보고서통보방법변경</h4>
+                        <ul>
+                            <li>고객님께서는 우편물통지 금지로 신청되어있으십니다.</li>
+                            <li>고객정보를 변경하셔야 자산운용보고서통보방법을 변경하실 수 있습니다.</li>
+                        </ul>
+                    </div>
+
+                    <div class="report-btn">
+                        <button type="button" class="btn-white-border">정보변경</button>
+                    </div>
+                </div>
+
+            </div> </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>

@@ -1,0 +1,67 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('newReservationCancel')}"></div>
+
+            <div class="main-content">
+
+                <div style="text-align: right; font-size: 12px; color: #888; margin-bottom: 10px;">
+                    펀드 &gt; 펀드 신규가입 &gt; <span style="color: #cb2b11; font-weight: bold;">신규예약조회/취소</span>
+                </div>
+
+                <div class="page-title-wrap">
+                    <h2>신규예약조회/취소</h2>
+                    <div class="step-indicator">
+                        <span class="step-item active">1 조회</span>
+                        <span class="step-item">2</span>
+                        <span class="step-item">3</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <ul>
+                        <li>펀드계좌로 신규 예약하신 내역을 조회하실 수 있습니다.</li>
+                        <li>조회된 내역은 신규예약 내역이므로 반드시 신규예정일 이후에 거래내역조회를 통해 신규결과를 확인 하시기 바랍니다.</li>
+                        <li>신규 예약 취소는 당일 신청 건에 한해 영업시간이내에 가능합니다.<br>
+                            단, 15:30 이전에 예약한 국내주식이 50% 이상 편입된 펀드는 15:30 까지만 가능합니다.</li>
+                        <li>이체 예약 등록내역 조회 후 취소 하시고자 하는 거래를 선택하시면 취소 가능합니다.</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 40px;">
+                    <h3 style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px;">펀드선택</h3>
+
+                    <table class="list-table">
+                        <colgroup>
+                            <col style="width: 60px;"> <col style="width: 60px;"> <col style="width: 140px;"> <col>                      <col style="width: 80px;"> <col style="width: 80px;"> <col style="width: 100px;"> <col style="width: 90px;"> <col style="width: 90px;"> </colgroup>
+                        <thead>
+                        <tr>
+                            <th>선택</th>
+                            <th>번호</th>
+                            <th>계좌번호</th>
+                            <th>펀드명</th>
+                            <th>과세구분</th>
+                            <th>납입방법</th>
+                            <th>장기주식형여부</th>
+                            <th>신규일</th>
+                            <th>만기일</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td colspan="9" class="no-data-msg">
+                                조회기준일시 기준 조회결과가 없습니다.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div> </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>

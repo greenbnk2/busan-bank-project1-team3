@@ -23,4 +23,34 @@ public class MyController {
     public String myPriceInquiry() {
         return "my/basicPriceInquiry";
     }
+
+    @GetMapping("/yield")
+    public String myYieldInquiry() {
+        return "my/yieldInquiry";
+    }
+
+    @GetMapping("/report")
+    public String myReportChange() {
+        return "my/reportChange";
+    }
+
+    @GetMapping("/newFundReservationCancel")
+    public String newReservationCancel() {
+        return "my/newFundReservationCancel";
+    }
+
+    @GetMapping("/lateNewFundReservationCancel")
+    public String lateNewReservationCancel() {
+        return "my/lateNewFundReservationCancel";
+    }
+
+    @GetMapping("/additionalInvestment")
+    public String additionalInvestment() {
+        return "my/additionalInvestmentReservation";
+    }
+
+    @GetMapping("/additionalInvestmentHistory")
+    public String additionalInvestmentHistory() {
+        return "my/additionalInvestmentHistory";
+    }
 }

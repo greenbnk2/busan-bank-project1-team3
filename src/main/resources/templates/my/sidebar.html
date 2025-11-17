@@ -14,11 +14,12 @@
             </a>
         </li>
 
-        <li class="my-sidebar__item" th:classappend="((${activeMenu == 'account'} or ${activeMenu == 'price'})) ? 'is-open' : ''">
+        <li class="my-sidebar__item"
+            th:classappend="((${activeMenu == 'account'} or ${activeMenu == 'price'} or ${activeMenu == 'yield'} or ${activeMenu == 'report'})) ? 'is-open' : ''">
 
             <button type="button"
                     class="my-sidebar__button"
-                    th:classappend="((${activeMenu == 'account'} or ${activeMenu == 'price'})) ? 'is-active' : ''">
+                    th:classappend="((${activeMenu == 'account'} or ${activeMenu == 'price'} or ${activeMenu == 'yield'} or ${activeMenu == 'report'})) ? 'is-active' : ''">
                 <span>조회</span>
                 <span class="my-sidebar__arrow">▶</span>
             </button>
@@ -34,7 +35,73 @@
                         기준가격조회
                     </a>
                 </li>
-                <li><a href="#">수익률조회</a></li>
+                <li>
+                    <a th:href="@{/my/yield}" th:classappend="${activeMenu == 'yield'} ? 'is-active' : ''">
+                        수익률조회
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/my/report}" th:classappend="${activeMenu == 'report'} ? 'is-active' : ''">
+                        자산운용보고서통보방법변경
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="my-sidebar__item"
+            th:classappend="${activeMenu == 'newReservationCancel'} ? 'is-open' : ''">
+
+            <button type="button"
+                    class="my-sidebar__button"
+                    th:classappend="${activeMenu == 'newReservationCancel'} ? 'is-active' : ''">
+                <span>펀드 신규가입</span>
+                <span class="my-sidebar__arrow">▶</span>
+            </button>
+
+            <ul class="my-sidebar__submenu">
+                <li>
+                    <a th:href="@{/fund/productList}">
+                        신규예약
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/my/newFundReservationCancel}"
+                       th:classappend="${activeMenu == 'newReservationCancel'} ? 'is-active' : ''">
+                        신규예약조회/취소
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/my/lateNewFundReservationCancel}"
+                       th:classappend="${activeMenu == 'lateNewReservationCancel'} ? 'is-active' : ''">
+                        마감후펀드신규예약내역조회/취소
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="my-sidebar__item"
+            th:classappend="${activeMenu == 'additionalInvestment'} ? 'is-open' : ''">
+
+            <button type="button"
+                    class="my-sidebar__button"
+                    th:classappend="${activeMenu == 'additionalInvestment'} ? 'is-active' : ''">
+                <span>추가투자</span>
+                <span class="my-sidebar__arrow">▶</span>
+            </button>
+
+            <ul class="my-sidebar__submenu">
+                <li>
+                    <a th:href="@{/my/additionalInvestment}"
+                       th:classappend="${activeMenu == 'additionalInvestment'} ? 'is-active' : ''">
+                        추가투자예약
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/my/additionalInvestmentHistory}"
+                       th:classappend="${activeMenu == 'additionalInvestmentHistory'} ? 'is-active' : ''">
+                        추가투자예약내역조회/취소
+                    </a>
+                </li>
             </ul>
         </li>
 
