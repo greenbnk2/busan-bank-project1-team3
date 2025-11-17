@@ -909,3 +909,12 @@
     margin-top: 6px;
     display: block;
 }
+
+/* 성공 메시지  */
+.success-message {
+    color: #28a745;       /* 성공 (초록색) */
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 6px;
+    display: block;
+}

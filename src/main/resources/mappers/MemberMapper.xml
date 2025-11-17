@@ -18,6 +18,20 @@
             cust_id = #{custId}
     </select>
 
+    <!-- ID중복 체크 -->
+    <select id="existsByCustId" parameterType="string" resultType="int">
+        SELECT COUNT(1)
+        FROM bnk_user
+        WHERE Cust_id = #{userId}
+    </select>
+
+    <!-- 이메일 체크 -->
+    <select id="existsByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM BNK_USER
+        WHERE CUST_EMAIL = #{email}
+    </select>
+
     <!-- 회원 정보 저장 -->
     <insert id="insertUser" parameterType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
         <selectKey keyProperty="custNo" resultType="long" order="BEFORE">

@@ -12,8 +12,11 @@ public interface MemberMapper {
     //Spring Security 인증을 위한 사용자 정보 조회
     BnkUserDTO findByCustId(@Param("custId") String custId);
 
-    // ID 중복 체크
-    int checkDuplicateId(@Param("custId") String custId);
+    // 아이디 중복 체크
+    int existsByCustId(String userId);
+
+    // 이메일 중복 체크
+    int existsByEmail(String email);
 
     // 회원 정보 저장
     void insertUser(BnkUserDTO dto);

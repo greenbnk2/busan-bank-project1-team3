@@ -49,6 +49,8 @@ dependencies {
     implementation 'com.oracle.database.security:osdt_cert:21.9.0.0'
     implementation 'com.oracle.database.security:osdt_core:21.9.0.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {

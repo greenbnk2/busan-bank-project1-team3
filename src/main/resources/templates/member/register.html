@@ -122,7 +122,7 @@
                                             <button type="button" class="btn-secondary" onclick="postCode()">우편번호찾기</button>
                                         </div>
                                         <input type="text" name="address1" id="mem_addr1" class="input-text input-full" style="margin-top: 5px;" readonly>
-                                        <input type="text" name="address2" id="mem_addr2" class="input-text input-full" style="margin-top: 5px;">
+                                        <input type="text" name="address2" id="mem_addr2" class="input-text input-full" style="margin-top: 5px;" required>
                                     </td>
                                 </tr>
 
@@ -131,9 +131,9 @@
                                     <th><label>E-mail <span class="required">*</span></label></th>
                                     <td>
                                         <div class="email-group">
-                                            <input type="text" name="emailId" class="input-text input-medium">
+                                            <input type="text" name="emailId" class="input-text input-medium" required>
                                             <span>@</span>
-                                            <input type="text" name="emailDomain" class="input-text input-medium" value="naver.com">
+                                            <input type="text" name="emailDomain" class="input-text input-medium" value="naver.com" required>
                                             <select name="emailDomainSelect" class="input-select">
                                                 <option value="naver.com">naver.com</option>
                                                 <option value="gmail.com">gmail.com</option>

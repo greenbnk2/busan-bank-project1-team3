@@ -18,7 +18,16 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     // 회원가입 처리
+    @Transactional
     public void registerUser(BnkUserDTO dto) {
+
+        // 비즈니스 검증
+        if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        if (memberMapper.existsByCustId(dto.getUserId()) > 0) {
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
 
         // 1. DTO에 비즈니스 로직 값 설정 (암호화)
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -48,4 +57,12 @@ public class MemberService {
         }*/
     }
 
+    @Transactional(readOnly = true)
+    public boolean isUserIdAvailable(String userId) {
+        // 1. DB에서 userId 개수 확인
+        int count = memberMapper.existsByCustId(userId);
+
+        // 2. count가 0이면 사용 가능 (true), 0보다 크면 중복 (false)
+        return count == 0;
+    }
 }

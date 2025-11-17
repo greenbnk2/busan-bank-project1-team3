@@ -27,6 +27,12 @@ function toggleInfoBox() {
 
 // ==================== 약관동의 페이지 기능 ====================
 function initTermsPage() {
+    // 약관 페이지 확인
+    const termsContainer = document.querySelector('.terms-container');
+    if (!termsContainer) {
+        return; // 약관 페이지가 아니면 이 함수를 종료 (회원가입 페이지 등에서 오작동 방지)
+    }
+
     // '다음' 버튼이 있는 페이지(terms.html)에서만 실행
     const btnNext = document.querySelector('.btn-next');
     const btnCancel = document.querySelector('.btn-cancel');
@@ -82,12 +88,21 @@ function initRegisterPage() {
     }
 
     // 폼 제출 시 전체 검증
-    form.addEventListener('submit', function (e) {
-        if (!validateMasterForm()) {
-            e.preventDefault(); // 유효성 검사 실패 시 폼 제출 중단
+    form.addEventListener('submit',  async function (e) {
+
+        // 유효성 검사 완료 전까지 항상 제출 방지
+        e.preventDefault();
+
+        // await로 마스터 유효성 검사 실행
+        const isFormValid = await validateMasterForm();
+
+        if (!isFormValid) {
+            // 유효성 검사 실패 시 (alert는 validateMasterForm에서 처리)
             return false;
         }
+
         // 검증 통과 시 폼 제출
+        form.submit();
     });
 }
 
@@ -107,10 +122,13 @@ function addBlurValidation(form, fieldName, validationFunction) {
 /**
  * 폼 제출 시 모든 유효성 검사 실행
  */
-function validateMasterForm() {
+async function validateMasterForm() {
+    const isUserIdValid = await validateUserId();
+
     // 개별 유효성 검사를 모두 실행 (결과를 allValid에 누적)
     const allValid = [
         validateName(),
+        isUserIdValid, // await로 받은 결과 사용
         validateUserId(),
         validatePassword(),
         validatePasswordConfirm(),
@@ -152,10 +170,11 @@ function validateName() {
     return clearError('name');
 }
 
-function validateUserId() {
+async function validateUserId() {
     const field = document.querySelector('input[name="userId"]');
     if (!field) return true;
 
+    // 1. 형식 유효성 검사
     const regex = /^[a-zA-Z0-9]{6,20}$/;
     if (field.value.trim() === "") {
         return showError('userId', '회원아이디를 입력해주세요.');
@@ -163,7 +182,42 @@ function validateUserId() {
     if (!regex.test(field.value)) {
         return showError('userId', '아이디는 6~20자의 영문 또는 숫자만 가능합니다.');
     }
-    return clearError('userId');
+
+    // 2. 형식 검사 통과 시, 서버에 중복 확인
+    try {
+        // CSRF 토큰 (이메일 인증과 동일)
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        const response = await fetch('/bnk/member/api/check-userid', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [header]: token // CSRF 토큰 추가
+            },
+            body: JSON.stringify({ userId: field.value })
+        });
+
+        if (!response.ok) {
+            throw new Error('서버 응답 오류');
+        }
+
+        const data = await response.json();
+
+        // 3. 서버 응답 결과에 따라 메시지 표시
+        if (data.available) {
+            // 사용 가능 (초록색)
+            return showSuccess('userId', data.message);
+        } else {
+            // 중복 (빨간색)
+            return showError('userId', data.message);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        // 서버 통신 자체 실패 시 (빨간색)
+        return showError('userId', '아이디 중복 확인 중 오류가 발생했습니다.');
+    }
 }
 
 function validatePassword() {
@@ -258,13 +312,6 @@ function validateEmail() {
         return showError('emailId', '이메일 도메인 형식이 올바르지 않습니다.');
     }
 
-    // 이메일 인증을 받은 상태에서 이메일을 변경하면 인증 플래그 초기화
-    if (isEmailVerified) {
-        // 인증 초기화 알림
-        alert('이메일이 변경되어 인증이 초기화됩니다. 다시 인증해주세요.');
-        isEmailVerified = false;
-    }
-
     return clearError('emailId');
 }
 
@@ -331,6 +378,31 @@ function showError(fieldName, message) {
     field.classList.add('input-error');
 
     return false; // 유효성 검사 실패(false) 반환
+}
+/**
+ * 성공 메시지를 표시
+ */
+function showSuccess(fieldName, message) {
+    const field = document.querySelector(`input[name="${fieldName}"]`);
+    if (!field) return;
+
+    const container = field.closest('td');
+    if (!container) return;
+
+    // ※ 기존 메시지(성공/실패) 모두 제거
+    clearError(fieldName);
+
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message'; // ⭐️ 초록색 클래스
+    successDiv.textContent = message;
+    successDiv.setAttribute('data-error-for', fieldName); // clearError로 지울 수 있게
+
+    container.appendChild(successDiv);
+
+    // 성공 시에는 input-error 클래스 제거
+    field.classList.remove('input-error');
+
+    return true; // 유효성 검사 성공(true) 반환
 }
 
 /**
