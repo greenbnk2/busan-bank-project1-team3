@@ -88,11 +88,57 @@ public class AdminInfoController {
         return "redirect:/admin/info/disclosures";
     }
 
+    ///////////////////////////////////////
+    ///////       수시공시      ////////////
+    //////////////////////////////////////
 
     @GetMapping("/ad-hoc")
-    public String adHocDisclosure() {
+    public String adHocDisclosure(Model model) {
+
+        List<InfoPostDTO> dtoList = infoPostService.findAllAdHoc();
+        model.addAttribute("dtoList",dtoList);
+
         return "admin/info&disclosures/ad-hoc_disclosure";
     }
+
+    // 수시공시 등록
+    @PostMapping("/ad-hoc")
+    public String createAdHoc(InfoPostDTO dto){
+        infoPostService.createAdHoc(dto);
+        return "redirect:/admin/info/ad-hoc";
+    }
+
+    // 수시공시 상세
+    @GetMapping("/ad-hoc/detail")
+    public String AdHocDetail(@RequestParam("postId") int postId, Model model){
+
+        InfoPostDTO dto = infoPostService.selectAdHocById(postId);
+        model.addAttribute("post",dto);
+
+        return "admin/info&disclosures/ad-hoc_disclosure";
+    }
+
+    // 수시공시 수정
+    @PostMapping("/ad-hoc/update")
+    public String updateAdHoc(InfoPostDTO dto) {
+        infoPostService.updateAdHoc(dto);
+        return "redirect:/admin/info/ad-hoc";
+    }
+
+    // 수시공시 삭제
+    @PostMapping("/ad-hoc/delete")
+    public String deleteAdHoc(@RequestParam int postId) {
+        infoPostService.deleteAdHoc(postId);
+        return "redirect:/admin/info/ad-hoc";
+    }
+
+
+
+
+
+    ///////////////////////////////////////
+    ///////       펀드정보      ////////////
+    //////////////////////////////////////
 
     @GetMapping("/fund-info")
     public String fundInfo() {

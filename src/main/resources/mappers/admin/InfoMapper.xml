@@ -64,9 +64,93 @@
         WHERE post_id = #{postId}
     </delete>
 
+    <!-- 수시공시 등록 -->
+    <insert id="insertAdHoc" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
+            SELECT info_post_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO info_post (
+        post_id,
+        post_type,
+        title,
+        content,
+        adhoc_type,
+        adhoc_no,
+        category_id,
+        status,
+        publish_start_at,
+        publish_end_at,
+        created_by,
+        created_at
+        ) VALUES (
+        #{postId},
+        'AD_HOC',
+        #{title, jdbcType=VARCHAR},
+        #{content, jdbcType=CLOB},
+        #{adhocType, jdbcType=VARCHAR},
+        #{adhocNo, jdbcType=VARCHAR},
+        #{categoryId, jdbcType=INTEGER},
+        #{status, jdbcType=VARCHAR},
+        #{publishStartAt, jdbcType=TIMESTAMP},
+        #{publishEndAt, jdbcType=TIMESTAMP},
+        #{createdBy, jdbcType=VARCHAR},
+        SYSDATE
+        )
+    </insert>
+
+    <!-- 수시공시 목록 -->
+    <select id="selectAllAdHoc" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id             AS postId,
+            title,
+            adhoc_type         AS adHocType,
+            adhoc_no           AS adHocNo,
+            category_id         AS categoryId,
+            content,
+            publish_start_at    AS publishStartAt,
+            publish_end_at      AS publishEndAt,
+            status,
+            created_by          AS createdBy,
+            created_at          AS createdAt,
+            updated_by          AS updatedBy,
+            updated_at          AS updatedAt
+        FROM info_post
+        WHERE post_type = 'AD_HOC'
+        ORDER BY post_id DESC
+    </select>
+
+    <!-- 수시공시 수정 -->
+    <update id="updateAdHoc" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        UPDATE info_post
+        SET
+            title = #{title},
+            adhoc_type = #{adhocType},
+            content = #{content},
+            publish_start_at = #{publishStartAt},
+            publish_end_at = #{publishEndAt}
+        WHERE
+            post_id = #{postId}
+          AND post_type = 'AD_HOC'
+    </update>
+
+    <!-- 수시공시 삭제 -->
+    <delete id="deleteAdHoc" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        DELETE FROM info_post
+        WHERE post_id = #{postId}
+          AND post_type = 'AD_HOC'
+    </delete>
 
 
-    
+
+
+
+
+
+
+
+
+
     <!-- 펀드정보 등록 -->
     <insert id="insertFundInfo" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
         <selectKey keyProperty="postId" resultType="int" order="BEFORE">
@@ -343,7 +427,7 @@
     <delete id="deleteFundMarket" parameterType="int">
         DELETE FROM info_post
         WHERE post_id = #{postId}
-            AND post_type = 'MARKET'
+            AND post_type = 'FUND_MARKET'
     </delete>
 
 </mapper>

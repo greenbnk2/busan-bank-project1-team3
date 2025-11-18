@@ -16,11 +16,11 @@ public interface InfoPostMapper {
     public void deleteInfoPost(int postId);
 
     // 수시공시
-    //public void insertInfoPost(InfoPostDTO infoPostDTO);
-    //public InfoPostDTO selectInfoPostById(int postId);
-    //public List<InfoPostDTO> selectAllInfoPost();
-    //public void updateInfoPost(InfoPostDTO infoPostDTO);
-    //public void deleteInfoPost(int postId);
+    public void insertAdHoc(InfoPostDTO infoPostDTO);
+    public InfoPostDTO selectAdHocById(int postId);
+    public List<InfoPostDTO> selectAllAdHoc();
+    public void updateAdHoc(InfoPostDTO infoPostDTO);
+    public void deleteAdHoc(int postId);
 
     // 펀드정보
     public void insertFundInfo(InfoPostDTO infoPostDTO);

@@ -386,6 +386,7 @@
                         // 삭제 모달에 데이터 채우기
                         document.getElementById('deleteMarketTitle').textContent = title || '';
                         document.getElementById('deleteMarketId').value = id;
+                        deleteConfirmBtn.setAttribute("data-id", id);
                         showModal(deleteModal);
                     }
                 });

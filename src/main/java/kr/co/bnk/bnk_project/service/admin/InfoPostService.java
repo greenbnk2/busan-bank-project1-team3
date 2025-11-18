@@ -200,6 +200,31 @@ public class InfoPostService {
         infoPostMapper.deleteInfoPost(postId);
     }
 
+    ////////////////////////////////////
+    ///////////   수시공시  /////////////
+    //////////////////////////////////
+    // 수시공시 등록
+    public void createAdHoc(InfoPostDTO infoPostDTO) {
+        infoPostMapper.insertAdHoc(infoPostDTO);
+    }
+
+    public List<InfoPostDTO> findAllAdHoc(){
+        return infoPostMapper.selectAllAdHoc();
+    }
+
+    public InfoPostDTO selectAdHocById(int postId) {
+        return infoPostMapper.selectAdHocById(postId);
+    }
+
+    public void updateAdHoc(InfoPostDTO infoPostDTO) {
+        infoPostMapper.updateAdHoc(infoPostDTO);
+    }
+
+    public void deleteAdHoc(int postId) {
+        infoPostMapper.deleteAdHoc(postId);
+    }
+
+
 
 
     ////////////////////////////////////
