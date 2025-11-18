@@ -203,3 +203,9 @@ h1 {
 .bottom-btn-area .btn:hover {
     opacity: 0.85;
 }
+.subtitle {
+    font-size: 16px;
+    color: #b22222;
+    margin-top: 25px;   /* ★ 헤더 아래 간격 조절 */
+    margin-bottom: 10px;
+}

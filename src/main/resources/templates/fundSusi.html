@@ -2,10 +2,61 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>펀드 수시공시</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BNK부산은행 - 펀드</title>
+    <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com crossorigin}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/index.css}">
     <link rel="stylesheet" th:href="@{/css/fundSusi.css}">
     <script th:src="@{/js/fundSusi.js}" defer></script>
-</head>
+<body>
+
+<header class="header">
+    <div class="header-top">
+        <div class="container">
+            <div class="logo">
+                <a th:href="@{/}">
+                    <img th:src="@{/images/main/h1_busanbank_new.png}" alt="BNK부산은행">
+                </a>
+            </div>
+            <div class="header-utils">
+                    <span sec:authorize="isAuthenticated()" style="display: flex; align-items: center; gap: 5px;">
+                        <a th:href="@{/my/dashboard}" class="util-link" style="font-weight: bold; color: #000; text-decoration: none;">
+                            <span th:text="${#authentication.principal.displayName} + '님'">홍길동님</span>
+                        </a>
+                        <span class="util-link" style="color: #ddd;">|</span>
+                        <span id="sessionTimer" class="util-link" style="color: #cb2b11; font-weight: bold;">20:00</span>
+                        <button type="button" id="sessionExtendBtn" class="util-link" style="background: none; border: 1px solid #ccc; padding: 2px 6px; font-size: 11px; border-radius: 4px; cursor: pointer; line-height: 1.4;">
+                            연장
+                        </button>
+                        <span class="util-link" style="color: #ddd;">|</span>
+                        <form th:action="@{/logout}" method="post" style="display: inline; margin: 0; padding: 0;">
+                            <button type="submit" class="util-link" style="background: none; border: none; padding: 0; font-size: 14px; cursor: pointer;">로그아웃</button>
+                        </form>
+                    </span>
+                <span sec:authorize="isAnonymous()">
+                            <a th:href="@{/member/login}" class="util-link">로그인</a>
+                    </span>
+                <button type="button" class="btn-search" title="검색하기">검색하기</button>
+                <button type="button" class="btn-allmenu" title="전체메뉴">전체메뉴</button>
+            </div>
+        </div>
+    </div>
+    <nav class="nav">
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a th:href="@{/fund/productList}">펀드상품</a></li>
+                <li><a href="#">펀드케어</a></li>
+                <li><a href="#">펀드정보센터</a></li>
+                <li><a href="#">펀드이용가이드</a></li>
+                <li><a href="#">펀드서비스</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
 <body>
 
 <div class="container">
