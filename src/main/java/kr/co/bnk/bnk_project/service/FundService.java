@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class productService {
+public class FundService {
 
     private final ProductMapper productMapper;
 
