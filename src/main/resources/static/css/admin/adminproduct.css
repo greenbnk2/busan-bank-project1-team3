@@ -346,6 +346,16 @@
     color: #333;
 }
 
+/* 상품명 칼럼 말줄임표 처리 */
+.product-table tbody tr td:nth-child(4),
+.product-table tbody tr td.product-name-cell {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
+
 .view-detail-btn {
     background: none;
     border: none;
@@ -1049,7 +1059,7 @@ table.form-table td > div {
 .modal-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px 25px;
     border-bottom: 1px solid #eee;
 }
@@ -1068,6 +1078,9 @@ table.form-table td > div {
     cursor: pointer;
     line-height: 1;
     transition: color 0.2s ease;
+    margin-left: 5px;
+    margin-top: 0;
+    align-self: flex-start;
 }
 
 .close:hover {
@@ -1169,6 +1182,32 @@ table.form-table td > div {
     color: #666;
 }
 
+/* PDF 문서 링크 섹션 */
+.pdf-documents-section {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+.pdf-document-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    font-size: 14px;
+    color: #333;
+}
+
+.pdf-document-item:hover {
+    opacity: 0.7;
+}
+
+.pdf-document-item i {
+    font-size: 16px;
+}
+
 .fund-info-section {
     display: flex;
     gap: 30px;
@@ -1176,6 +1215,141 @@ table.form-table td > div {
     padding: 20px;
     background: #f8f9fa;
     border-radius: 8px;
+}
+
+/* 회사 정보 섹션 */
+.company-info-section {
+    width: 370px;
+    background: white;
+    border-radius: 8px;
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+.company-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.company-tab-btn {
+    padding: 10px 20px;
+    background: white;
+    border: none;
+    border-right: 1px solid #ddd;
+    font-size: 0.88rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    flex: 1;
+    text-align: center;
+}
+
+.company-tab-btn:last-child {
+    border-right: none;
+}
+
+.company-tab-btn:hover {
+    color: #cd1317;
+    background: #fff5f5;
+}
+
+.company-tab-btn.active {
+    background: #cd1317;
+    color: white;
+    font-weight: 600;
+}
+
+.company-tab-content {
+    min-height: 200px;
+}
+
+/* 회사로고 탭 */
+.company-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.company-logo-img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* 회사개황 탭 */
+.company-overview-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.reference-date-text {
+    font-size: 14px;
+    color: #666;
+}
+
+.company-overview-table {
+    border-top: 1px solid #ddd;
+}
+
+.overview-row {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    padding: 12px 0;
+}
+
+.overview-label {
+    width: 140px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.overview-value {
+    flex: 1;
+    color: #666;
+    font-size: 14px;
+}
+
+/* 주요재무현황 탭 */
+.company-financial-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    align-items: center;
+    /*
+    margin-bottom: 20px;
+    */
+}
+
+.financial-header-left {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.unit-text {
+    font-size: 14px;
+    color: #666;
+}
+
+.financial-chart-container {
+    position: relative;
+    height: 240px;
+    width: 100%;
+    padding: 10px;
+    background: white;
 }
 
 .fund-price-section {
@@ -1305,7 +1479,9 @@ table.form-table td > div {
 .table-note {
     font-size: 0.85rem;
     color: #666;
+    /*
     margin-bottom: 15px;
+    */
     font-style: italic;
 }
 
@@ -1334,9 +1510,11 @@ table.form-table td > div {
     font-size: 1.1rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 15px;
+    padding-left: 3px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #eee;
+    /*
+    border-bottom: 2px solid #ddd;
+    */
 }
 
 .fund-tabs-nav {
@@ -1385,7 +1563,7 @@ table.form-table td > div {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .chart-controls {
@@ -1397,6 +1575,28 @@ table.form-table td > div {
 .unit-label {
     font-size: 0.9rem;
     color: #666;
+}
+
+.chart-controls .separator {
+    color: #ddd;
+    font-size: 0.9rem;
+}
+
+.chart-list-btn {
+    background: transparent;
+    border: none;
+    color: #333;
+    padding: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s ease;
+}
+
+.chart-list-btn:hover {
+    color: #cd1317;
 }
 
 .chart-query-section {
@@ -1472,6 +1672,71 @@ table.form-table td > div {
 
 .legend-icon {
     border-radius: 2px;
+}
+
+/* 수익률 추이차트 테이블 */
+.chart-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.chart-table-wrapper {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.return-chart-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 2px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.return-chart-table thead {
+    background: #f8f9fa;
+}
+
+.return-chart-table th,
+.return-chart-table td {
+    padding: 14px 12px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.return-chart-table th {
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #eee;
+}
+
+.return-chart-table td {
+    color: #666;
+}
+
+.return-chart-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.return-chart-table tbody tr:hover {
+    background: #f8f9ff;
+}
+
+.return-chart-table thead tr:first-child th {
+    border-bottom: 1px solid #ddd;
+}
+
+.return-chart-table thead tr:last-child th {
+    border-top: none;
+}
+
+.table-result-info {
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
 }
 
 .detail-grid {
@@ -1576,5 +1841,180 @@ table.form-table td > div {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     justify-items: center;
+}
+
+/* 결산 및 상환 섹션 */
+.settlement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.settlement-header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.settlement-unit {
+    font-size: 14px;
+    color: #666;
+}
+
+.settlement-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settlement-download-btn:hover {
+    background: #f8f9fa;
+    border-color: #cd1317;
+    color: #cd1317;
+}
+
+.settlement-download-btn .download-icon {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+.settlement-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.settlement-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 2px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.settlement-table thead {
+    background: #f8f9fa;
+}
+
+.settlement-table th,
+.settlement-table td {
+    padding: 14px 12px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.settlement-table th {
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #eee;
+}
+
+.settlement-table td {
+    color: #666;
+}
+
+.settlement-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.settlement-table tbody tr:hover {
+    background: #f8f9ff;
+}
+
+/* 공시관련 섹션 */
+.period-select {
+    height: 38px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 30px 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* 공시 목록 테이블 */
+.disclosure-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.disclosure-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 2px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.disclosure-table thead {
+    background: #f8f9fa;
+}
+
+.disclosure-table th,
+.disclosure-table td {
+    padding: 14px 12px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.disclosure-table th {
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #eee;
+}
+
+.disclosure-table td {
+    color: #666;
+}
+
+.disclosure-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.disclosure-table tbody tr:hover {
+    background: #f8f9ff;
+}
+
+/* 공시 구분 배지 */
+.disclosure-category-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #f0f0f0;
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.btn-icon-view {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 5px;
+    transition: opacity 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon-view:hover {
+    opacity: 0.7;
+}
+
+.btn-icon-view i {
+    font-size: 1.1rem;
 }
 
