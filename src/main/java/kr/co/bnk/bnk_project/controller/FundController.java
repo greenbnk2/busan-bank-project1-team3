@@ -1,14 +1,22 @@
 package kr.co.bnk.bnk_project.controller;
 
+import kr.co.bnk.bnk_project.dto.ProductDTO;
+import kr.co.bnk.bnk_project.service.productService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 
 @RequestMapping("/fund")
 @Controller
+@RequiredArgsConstructor
+public class FundController {
 
-public class fundController {
+    private final productService productService;
 
     @GetMapping("/depositGuide")
     public String depositGuide() {
@@ -21,9 +29,13 @@ public class fundController {
     }
 
     @GetMapping("/productList")
-    public String productList() {
-        return "productList";
+    public String productList(Model model) {
+        List<ProductDTO> list = productService.getProductList();
+        model.addAttribute("productList", list);
+        return "/productList";
     }
+
+
     @GetMapping("/productDetail")
     public String productDetail() {
         return "productDetail";
@@ -63,5 +75,3 @@ public class fundController {
         return "admin/info&disclosures/disclosures";
     }
 }
-
-

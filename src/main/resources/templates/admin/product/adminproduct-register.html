@@ -22,15 +22,38 @@
                 </header>
 
                 <!-- 펀드 검색 -->
-                <div class="product-classification-bar">
+                <!-- 펀드 검색 -->
+                <form th:action="@{/admin/product/register}" method="get" class="product-classification-bar">
                     <div class="classification-label">펀드 검색</div>
                     <div class="classification-inputs">
-                        <div class="search-input-wrapper-inline">
-                            <input type="text" class="form-input search-input-large" id="searchFund" placeholder="입력하세요">
-                            <button class="btn btn-search-inline" onclick="searchFunds()">검색</button>
+                        <select class="form-select search-select-small"
+                                id="searchType"
+                                name="searchType"
+                                th:value="${pageRequestDTO != null} ? ${pageRequestDTO.searchType} : 'code'">
+                            <option value="code"
+                                    th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'code'}">펀드코드</option>
+                            <option value="name"
+                                    th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'name'}">펀드명</option>
+                        </select>
+
+                        <div style="position: relative; width: 100%;">
+                            <input type="text"
+                                   class="form-input search-input-large"
+                                   id="searchKeyword"
+                                   name="keyword"
+                                   placeholder="입력하세요"
+                                   autocomplete="off"
+                                   th:value="${pageRequestDTO != null} ? ${pageRequestDTO.keyword} : ''">
+
+                            <!-- 자동완성 리스트 박스 -->
+                            <div id="searchSuggestions"
+                                 style="position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #ddd; border-top:none; z-index:1000; display:none; max-height:200px; overflow-y:auto;">
+                            </div>
                         </div>
+
+                        <button class="btn btn-search-inline" type="submit">검색</button>
                     </div>
-                </div>
+                </form>
 
                 <!-- 필수정보 -->
                 <div class="form-section">
@@ -39,65 +62,75 @@
                         <div class="form-row">
                             <div class="form-label">상품명</div>
                             <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="productName" placeholder="상품명을 입력하세요">
+                                <input type="text" class="form-input"
+                                       id="productName"
+                                       placeholder="상품명을 입력하세요"
+                                       th:value="${fund != null} ? ${fund.fundName} : ''">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-label">상품코드</div>
                             <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="productCode" placeholder="상품코드를 입력하세요">
+                                <input type="text" class="form-input"
+                                       id="productCode"
+                                       placeholder="상품코드를 입력하세요"
+                                       th:value="${fund != null} ? ${fund.fundCode} : ''">
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-label">상품유형</div>
+                            <div class="form-label">펀드유형</div>
                             <div class="form-input-wrapper">
-                                <select class="form-input" id="productType">
-                                    <option value="">상품유형을 선택하세요</option>
-                                    <option value="stock">주식형</option>
-                                    <option value="bond">채권형</option>
-                                    <option value="mixed">혼합형</option>
-                                    <option value="money">MMF</option>
-                                    <option value="index">지수형</option>
-                                    <option value="derivative">파생상품형</option>
-                                    <option value="real_estate">부동산형</option>
-                                    <option value="alternative">대체투자형</option>
-                                </select>
+                                <input type="text" class="form-input"
+                                       placeholder="펀드유형"
+                                       th:value="${fund != null} ? ${fund.fundTypeName} : ''" readonly>
                             </div>
                         </div>
+
                         <div class="form-row">
                             <div class="form-label">투자등급</div>
                             <div class="form-input-wrapper">
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="investmentGrade" value="1"> 1등급
+                                        <input type="radio" name="investmentGrade" value="1"
+                                               th:checked="${fund != null and fund.investGrade == '1'}"> 1등급
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investmentGrade" value="2"> 2등급
+                                        <input type="radio" name="investmentGrade" value="2"
+                                               th:checked="${fund != null and fund.investGrade == '2'}"> 2등급
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investmentGrade" value="3"> 3등급
+                                        <input type="radio" name="investmentGrade" value="3"
+                                               th:checked="${fund != null and fund.investGrade == '3'}"> 3등급
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investmentGrade" value="4"> 4등급
+                                        <input type="radio" name="investmentGrade" value="4"
+                                               th:checked="${fund != null and fund.investGrade == '4'}"> 4등급
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investmentGrade" value="5"> 5등급
+                                        <input type="radio" name="investmentGrade" value="5"
+                                               th:checked="${fund != null and fund.investGrade == '5'}"> 5등급
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-row">
+                        <!--<div class="form-row">
                             <div class="form-label">등록일</div>
                             <div class="form-input-wrapper">
                                 <input type="date" class="form-input" id="registrationDate">
                             </div>
-                        </div>
+                        </div>-->
                         <div class="form-row">
                             <div class="form-label">운용사</div>
                             <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="managementCompany" placeholder="운용사를 입력하세요">
+                                <input type="text"
+                                       class="form-input"
+                                       id="managementCompany"
+                                       placeholder="운용사를 입력하세요"
+                                       th:value="${fund != null} ? ${fund.assetManagerName} : ''">
                             </div>
                         </div>
+
+
                         <div class="form-row">
                             <div class="form-label">가입대상</div>
                             <div class="form-input-wrapper">
@@ -113,72 +146,6 @@
                     </div>
                 </div>
 
-                <!-- 상품안내 -->
-                <div class="form-section">
-                    <h2 class="section-title">상품안내</h2>
-                    <div class="form-table">
-                        <div class="form-row">
-                            <div class="form-label">출금(환매)방법</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="redemptionMethod" placeholder="출금(환매)방법을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">거래방법</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="transactionMethod" placeholder="거래방법을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">투자대상유형</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="investmentTargetType" placeholder="투자대상유형을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">투자지역</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="investmentRegion" placeholder="투자지역을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">가입방법</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="subscriptionMethod" placeholder="가입방법을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">선택자산운용</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="selectedAssetManagement" placeholder="선택자산운용을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">납입방법</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="paymentMethod" placeholder="납입방법을 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">선취수수료</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="frontEndFee" placeholder="선취수수료를 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">환매수수료</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="redemptionFee" placeholder="환매수수료를 입력하세요">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-label">유의사항</div>
-                            <div class="form-input-wrapper">
-                                <textarea class="form-textarea" id="precautions" rows="5" placeholder="유의사항을 입력하세요"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- 문서관리 -->
                 <div class="form-section">
@@ -235,102 +202,257 @@
     </div>
     <!-- 사이드바 스크립트 -->
     <div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
-    
     <script th:inline="javascript">
         /*<![CDATA[*/
-        // 약관 파일 업로드
-        document.getElementById('termsDoc').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                addFileToList('termsDocList', file, 'termsDoc');
-                // 파일 선택 버튼 숨기기
-                document.getElementById('termsDocUpload').style.display = 'none';
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ==========================
+            // 1. 파일 업로드 관련
+            // ==========================
+            const termsInput = document.getElementById('termsDoc');
+            const investmentInput = document.getElementById('investmentDoc');
+            const simpleInvestmentInput = document.getElementById('simpleInvestmentDoc');
+
+            if (termsInput) {
+                termsInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        addFileToList('termsDocList', file, 'termsDoc');
+                        document.getElementById('termsDocUpload').style.display = 'none';
+                    }
+                });
             }
-        });
 
-        // 투자설명서 파일 업로드
-        document.getElementById('investmentDoc').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                addFileToList('investmentDocList', file, 'investmentDoc');
-                // 파일 선택 버튼 숨기기
-                document.getElementById('investmentDocUpload').style.display = 'none';
+            if (investmentInput) {
+                investmentInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        addFileToList('investmentDocList', file, 'investmentDoc');
+                        document.getElementById('investmentDocUpload').style.display = 'none';
+                    }
+                });
             }
-        });
 
-        // 간이 투자 설명서 파일 업로드
-        document.getElementById('simpleInvestmentDoc').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                addFileToList('simpleInvestmentDocList', file, 'simpleInvestmentDoc');
-                // 파일 선택 버튼 숨기기
-                document.getElementById('simpleInvestmentDocUpload').style.display = 'none';
+            if (simpleInvestmentInput) {
+                simpleInvestmentInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        addFileToList('simpleInvestmentDocList', file, 'simpleInvestmentDoc');
+                        document.getElementById('simpleInvestmentDocUpload').style.display = 'none';
+                    }
+                });
             }
-        });
 
-        // 파일 목록에 추가
-        function addFileToList(listId, file, inputId) {
-            const fileList = document.getElementById(listId);
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.innerHTML = `
-                <span class="file-item-name">${file.name}</span>
-                <div class="file-actions">
-                    <a href="#" class="file-download" title="다운로드">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                        </svg>
-                    </a>
-                    <button type="button" class="file-item-remove" onclick="removeFile(this, '${listId}', '${inputId}')" title="삭제">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="delete-icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            `;
-            fileList.innerHTML = '';
-            fileList.appendChild(fileItem);
-        }
+            function addFileToList(listId, file, inputId) {
+                const fileList = document.getElementById(listId);
+                if (!fileList) return;
 
-        // 파일 삭제
-        function removeFile(button, listId, inputId) {
-            const fileList = document.getElementById(listId);
-            fileList.innerHTML = '';
-            
-            // 파일 input 초기화
-            document.getElementById(inputId).value = '';
-            
-            // 파일 선택 버튼 다시 표시
-            if (inputId === 'termsDoc') {
-                document.getElementById('termsDocUpload').style.display = 'flex';
-            } else if (inputId === 'investmentDoc') {
-                document.getElementById('investmentDocUpload').style.display = 'flex';
-            } else if (inputId === 'simpleInvestmentDoc') {
-                document.getElementById('simpleInvestmentDocUpload').style.display = 'flex';
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+            <span class="file-item-name">${file.name}</span>
+            <div class="file-actions">
+                <a href="#" class="file-download" title="다운로드">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                </a>
+                <button type="button" class="file-item-remove" onclick="removeFile(this, '${listId}', '${inputId}')" title="삭제">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="delete-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `;
+                fileList.innerHTML = '';
+                fileList.appendChild(fileItem);
             }
-        }
 
-        // 펀드 검색 함수
-        function searchFunds() {
-            const searchTerm = document.getElementById('searchFund').value;
-            // 검색 로직 구현
-            console.log('검색어:', searchTerm);
-        }
-
-        // 기존 파일 삭제
-        function deleteExistingFile(button, fileType) {
-            if (confirm('기존 파일을 삭제하시겠습니까?')) {
-                const fileItem = button.closest('.file-item');
-                const existingFiles = fileItem.closest('.existing-files');
-                fileItem.remove();
-                
-                // 기존 파일이 없으면 영역 숨기기 (선택사항)
-                if (existingFiles && existingFiles.querySelectorAll('.file-item').length === 0) {
-                    existingFiles.style.display = 'none';
+            window.removeFile = function(button, listId, inputId) {
+                const fileList = document.getElementById(listId);
+                if (fileList) {
+                    fileList.innerHTML = '';
                 }
+
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = '';
+                }
+
+                if (inputId === 'termsDoc') {
+                    document.getElementById('termsDocUpload').style.display = 'flex';
+                } else if (inputId === 'investmentDoc') {
+                    document.getElementById('investmentDocUpload').style.display = 'flex';
+                } else if (inputId === 'simpleInvestmentDoc') {
+                    document.getElementById('simpleInvestmentDocUpload').style.display = 'flex';
+                }
+            };
+
+            // ==========================
+            // 2. 펀드 자동완성 (코드/이름 모두 지원)
+            // ==========================
+            const searchTypeSelect = document.getElementById('searchType');
+            const searchInput = document.getElementById('searchKeyword');
+            const suggestionBox = document.getElementById('searchSuggestions');
+
+            if (!searchTypeSelect || !searchInput || !suggestionBox) {
+                console.error('자동완성에 필요한 요소를 찾을 수 없습니다.');
+                return;
             }
-        }
+
+            let suggestionTimer = null;
+            let activeIndex = -1;
+
+            function clearSuggestions() {
+                suggestionBox.style.display = 'none';
+                suggestionBox.innerHTML = '';
+                activeIndex = -1;
+            }
+
+            function applyActiveState(items) {
+                items.forEach((item, idx) => {
+                    if (idx === activeIndex) {
+                        item.style.backgroundColor = '#f0f4ff';
+                        item.style.fontWeight = '600';
+                    } else {
+                        item.style.backgroundColor = '#ffffff';
+                        item.style.fontWeight = 'normal';
+                    }
+                });
+            }
+
+            function selectSuggestion(item) {
+                const fundCode = item.getAttribute('data-fund-code');
+                const fundName = item.getAttribute('data-fund-name');
+                const currentType = searchTypeSelect.value; // 'code' or 'name'
+
+                if (currentType === 'code') {
+                    searchInput.value = fundCode;
+                } else {
+                    searchInput.value = fundName;
+                }
+
+                clearSuggestions();
+                // 현재 searchType + keyword 그대로 가지고 /admin/product/register GET 호출
+                searchInput.form.submit();
+            }
+
+            // 🔗 컨텍스트 경로까지 포함된 실제 URL 생성 (예: /bnk/admin/product/autocomplete)
+            const autocompleteUrl = /*[[@{/admin/product/autocomplete}]]*/ '';
+
+            // 입력 시 자동완성 호출
+            searchInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                const searchType = searchTypeSelect.value;
+
+                if (keyword.length < 1) {
+                    clearSuggestions();
+                    return;
+                }
+
+                if (suggestionTimer) {
+                    clearTimeout(suggestionTimer);
+                }
+
+                suggestionTimer = setTimeout(() => {
+                    fetch(`${autocompleteUrl}?searchType=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error('API 호출 실패');
+                            }
+                            return res.json();
+                        })
+                        .then(data => {
+                            console.log('자동완성 응답:', data);
+
+                            if (!data || data.length === 0) {
+                                clearSuggestions();
+                                return;
+                            }
+
+                            suggestionBox.innerHTML = '';
+
+                            data.forEach((item, idx) => {
+                                const div = document.createElement('div');
+                                div.className = 'suggestion-item';
+                                div.style.padding = '10px 12px';
+                                div.style.cursor = 'pointer';
+                                div.style.fontSize = '14px';
+                                div.style.borderBottom = '1px solid #eee';
+                                div.style.transition = 'background-color 0.2s';
+
+                                div.textContent = `${item.fundCode} - ${item.fundName}`;
+
+                                div.setAttribute('data-fund-code', item.fundCode);
+                                div.setAttribute('data-fund-name', item.fundName);
+
+                                div.addEventListener('mouseenter', () => {
+                                    activeIndex = idx;
+                                    applyActiveState([...suggestionBox.children]);
+                                });
+
+                                div.addEventListener('mouseleave', () => {
+                                    activeIndex = -1;
+                                    applyActiveState([...suggestionBox.children]);
+                                });
+
+                                div.addEventListener('click', () => {
+                                    selectSuggestion(div);
+                                });
+
+                                suggestionBox.appendChild(div);
+                            });
+
+                            suggestionBox.style.display = 'block';
+                            activeIndex = -1;
+                        })
+                        .catch(err => {
+                            console.error('자동완성 에러:', err);
+                            clearSuggestions();
+                        });
+                }, 200);
+            });
+
+            // ↑ / ↓ / Enter / ESC 처리
+            searchInput.addEventListener('keydown', function(e) {
+                const items = [...suggestionBox.children];
+
+                if (items.length === 0 || suggestionBox.style.display === 'none') {
+                    return;
+                }
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex + 1) % items.length;
+                    applyActiveState(items);
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex - 1 + items.length) % items.length;
+                    applyActiveState(items);
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'Enter') {
+                    if (activeIndex >= 0 && activeIndex < items.length) {
+                        e.preventDefault();
+                        selectSuggestion(items[activeIndex]);
+                    }
+                } else if (e.key === 'Escape') {
+                    clearSuggestions();
+                }
+            });
+
+            // 바깥 클릭하면 자동완성 닫기
+            document.addEventListener('click', function(e) {
+                if (!suggestionBox.contains(e.target) &&
+                    e.target !== searchInput &&
+                    e.target !== searchTypeSelect) {
+                    clearSuggestions();
+                }
+            });
+
+        });
         /*]]>*/
     </script>
+
 </body>
 </html>

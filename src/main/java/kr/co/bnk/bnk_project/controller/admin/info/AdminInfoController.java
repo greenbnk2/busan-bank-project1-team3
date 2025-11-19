@@ -133,17 +133,72 @@ public class AdminInfoController {
     }
 
 
-
-
-
     ///////////////////////////////////////
     ///////       펀드정보      ////////////
     //////////////////////////////////////
 
+    // 펀드정보 목록
     @GetMapping("/fund-info")
-    public String fundInfo() {
+    public String fundInfo(Model model) {
+
+        List<InfoPostDTO> dtoList = infoPostService.findAllFundInfo();
+        model.addAttribute("dtoList",dtoList);
+
         return "admin/info&disclosures/fund_info";
     }
+
+    // 펀드정보 등록
+    @PostMapping("/fund-info")
+    public String createFundInfo(InfoPostDTO dto){
+
+        if (dto.getStatus() == null || dto.getStatus().isBlank()) {
+            dto.setStatus("PUBLISHED");
+        }
+
+        if (dto.getCreatedBy() == null || dto.getCreatedBy().isBlank()) {
+            dto.setCreatedBy("admin");
+        }
+
+        infoPostService.createFundInfo(dto);
+        return "redirect:/admin/info/fund-info";
+    }
+
+    // 펀드정보 상세
+    @GetMapping("/fund-info/detail")
+    public String FundInfoDetail(@RequestParam("postId") int postId, Model model){
+
+        InfoPostDTO dto = infoPostService.selectFundInfoById(postId);
+        model.addAttribute("post",dto);
+
+        return "admin/info&disclosures/fund_info";
+    }
+
+    // 펀드정보 수정
+    @PostMapping("/fund-info/update")
+    public String updateFundInfo(InfoPostDTO dto) {
+        infoPostService.updateFundInfo(dto);
+        return "redirect:/admin/info/fund-info";
+    }
+
+    // 펀드정보 삭제
+    @PostMapping("/fund-info/delete")
+    public String deleteFundInfo(@RequestParam int postId) {
+        infoPostService.deleteFundInfo(postId);
+        return "redirect:/admin/info/fund-info";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     ///////////////////////////////////////

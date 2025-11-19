@@ -43,69 +43,29 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr
-                            data-id="FND-1035"
-                            data-code="FND-1035"
-                            data-name="글로벌 혁신 테크 펀드"
-                            data-type="주식형"
-                            data-company="BNK자산운용"
-                            data-start-date="2024-02-14"
-                            data-description="글로벌 혁신 테크 펀드 상세 설명입니다."
-                            data-status="판매중">
-                        <td>FND-1035</td>
-                        <td class="text-left">글로벌 혁신 테크 펀드</td>
-                        <td>주식형</td>
-                        <td>BNK자산운용</td>
-                        <td>2024-02-14</td>
-                        <td>판매중</td>
+                    <tr  th:each="post : ${dtoList}"
+                         th:attr="
+                            data-id=${post.postId},
+                            data-code=${post.fundCode},
+                            data-name=${post.title},
+                            data-type=${post.fundInfoType},
+                            data-company=${post.company},
+                            data-start-date=${#temporals.format(post.createdAt, 'yyyy-MM-dd')},
+                            data-description=${post.content},
+                            data-status=${post.content}">
+                        <td th:text="${post.fundCode}"></td>
+                        <td th:text="${post.title}" class="text-left"></td>
+                        <td th:text="${post.fundInfoType}"></td>
+                        <td th:text="${post.company}"></td>
+                        <td th:text="${#temporals.format(post.createdAt,'yyyy-MM-dd')}"></td>
+                        <td th:text="${post.status}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
                             <button type="button" class="btn-action" data-action="delete">삭제</button>
                         </td>
                     </tr>
-                    <tr
-                            data-id="FND-1028"
-                            data-code="FND-1028"
-                            data-name="안정 채권 플러스"
-                            data-type="채권형"
-                            data-company="ABC자산운용"
-                            data-start-date="2023-12-01"
-                            data-description="안정 채권 플러스 상세 설명입니다."
-                            data-status="등록대기">
-                        <td>FND-1028</td>
-                        <td class="text-left">안정 채권 플러스</td>
-                        <td>채권형</td>
-                        <td>ABC자산운용</td>
-                        <td>2023-12-01</td>
-                        <td>등록대기</td>
-                        <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="detail">상세</button>
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
-                        </td>
-                    </tr>
-                    <tr
-                            data-id="FND-1001"
-                            data-code="FND-1001"
-                            data-name="글로벌 성장 펀드"
-                            data-type="주식형"
-                            data-company="ABC자산운용"
-                            data-start-date="2023-11-30"
-                            data-description="글로벌 성장 펀드 상세 설명입니다."
-                            data-status="판매중">
-                        <td>FND-1001</td>
-                        <td class="text-left">글로벌 성장 펀드</td>
-                        <td>주식형</td>
-                        <td>ABC자산운용</td>
-                        <td>2023-11-30</td>
-                        <td>판매중</td>
-                        <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="detail">상세</button>
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
-                        </td>
-                    </tr>
+
                     </tbody>
                 </table>
                 <div class="pagination">
@@ -126,15 +86,16 @@
 <div id="fundModal" class="modal-overlay">
     <div class="modal-card">
         <h3>펀드정보 등록</h3>
-        <form id="fundForm" class="modal-form">
+        <form id="fundForm" class="modal-form"
+        th:action="@{/admin/info/fund-info}" method="post">
             <div class="field-row">
                 <div class="form-field">
                     <label for="fundCode">상품코드</label>
-                    <input type="text" id="fundCode" name="code" placeholder="상품코드를 입력하세요" required>
+                    <input type="text" id="fundCode" name="fundCode" placeholder="상품코드를 입력하세요" required>
                 </div>
                 <div class="form-field">
                     <label for="fundType">유형</label>
-                    <select id="fundType" name="type" required>
+                    <select id="fundType" name="fundInfoType" required>
                         <option value="">선택하세요</option>
                         <option value="주식형">주식형</option>
                         <option value="채권형">채권형</option>
@@ -145,7 +106,7 @@
             </div>
             <div class="form-field">
                 <label for="fundName">펀드명</label>
-                <input type="text" id="fundName" name="name" placeholder="펀드명을 입력하세요" required>
+                <input type="text" id="fundName" name="title" placeholder="펀드명을 입력하세요" required>
             </div>
             <div class="field-row">
                 <div class="form-field">
@@ -154,12 +115,12 @@
                 </div>
                 <div class="form-field">
                     <label for="fundStartDate">설정일</label>
-                    <input type="date" id="fundStartDate" name="start_date" required>
+                    <input type="date" id="fundStartDate" required>
                 </div>
             </div>
             <div class="form-field">
                 <label for="fundDescription">설명</label>
-                <textarea id="fundDescription" name="description" rows="6" placeholder="상품 상세 설명을 입력하세요" required></textarea>
+                <textarea id="fundDescription" name="content" rows="6" placeholder="상품 상세 설명을 입력하세요" required></textarea>
             </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -215,16 +176,17 @@
 <div id="fundEditModal" class="modal-overlay">
     <div class="modal-card">
         <h3>펀드정보 수정</h3>
-        <form id="fundEditForm" class="modal-form">
-            <input type="hidden" id="editFundId" name="id">
+        <form id="fundEditForm" class="modal-form"
+        th:action="@{/admin/info/fund-info/update}" method="post">
+            <input type="hidden" id="editFundId" name="postId">
             <div class="field-row">
                 <div class="form-field">
                     <label for="editFundCode">상품코드</label>
-                    <input type="text" id="editFundCode" name="code" placeholder="상품코드를 입력하세요" required>
+                    <input type="text" id="editFundCode" name="fundCode" placeholder="상품코드를 입력하세요" required>
                 </div>
                 <div class="form-field">
                     <label for="editFundType">유형</label>
-                    <select id="editFundType" name="type" required>
+                    <select id="editFundType" name="fundInfoType" required>
                         <option value="">선택하세요</option>
                         <option value="주식형">주식형</option>
                         <option value="채권형">채권형</option>
@@ -235,7 +197,7 @@
             </div>
             <div class="form-field">
                 <label for="editFundName">펀드명</label>
-                <input type="text" id="editFundName" name="name" placeholder="펀드명을 입력하세요" required>
+                <input type="text" id="editFundName" name="title" placeholder="펀드명을 입력하세요" required>
             </div>
             <div class="field-row">
                 <div class="form-field">
@@ -244,12 +206,12 @@
                 </div>
                 <div class="form-field">
                     <label for="editFundStartDate">설정일</label>
-                    <input type="date" id="editFundStartDate" name="start_date" required>
+                    <input type="date" id="editFundStartDate" name="createdAt" required>
                 </div>
             </div>
             <div class="form-field">
                 <label for="editFundDescription">설명</label>
-                <textarea id="editFundDescription" name="description" rows="6" placeholder="상품 상세 설명을 입력하세요" required></textarea>
+                <textarea id="editFundDescription" name="content" rows="6" placeholder="상품 상세 설명을 입력하세요" required></textarea>
             </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -263,6 +225,8 @@
 <div id="fundDeleteModal" class="modal-overlay">
     <div class="modal-card">
         <h3>펀드정보 삭제</h3>
+        <form id="fundInfoDeleteForm" method="post" th:action="@{/admin/info/fund-info/delete}">
+            <input type="hidden" id="deleteFundId" name="postId">
         <div class="modal-form">
             <div class="form-field">
                 <p style="margin: 0; color: #495057; font-size: 1rem;">
@@ -273,10 +237,11 @@
                 </p>
             </div>
             <div class="modal-actions">
-                <button type="button" id="fundDeleteConfirm" class="btn btn-primary">삭제</button>
+                <button type="submit" id="fundDeleteConfirm" class="btn btn-primary">삭제</button>
                 <button type="button" id="fundDeleteModalClose" class="btn btn-secondary">취소</button>
             </div>
         </div>
+        </form>
     </div>
 </div>
 
@@ -316,9 +281,9 @@
         closeBtn?.addEventListener('click', () => closeModal(modal));
 
         form?.addEventListener('submit', function (event) {
-            event.preventDefault();
+            //event.preventDefault();
             // TODO: 등록 API 호출
-            closeModal(modal);
+            //closeModal(modal);
         });
 
         modal?.addEventListener('click', function (event) {
@@ -344,19 +309,26 @@
         });
 
         editForm?.addEventListener('submit', function (event) {
-            event.preventDefault();
+            //event.preventDefault();
             // TODO: 수정 API 호출
-            closeModal(editModal);
+            //closeModal(editModal);
+            const dateOnly = document.getElementById('editFundStartDate').value; // yyyy-MM-dd
+            if (dateOnly) {
+                const dateTimeValue = dateOnly + "T00:00:00";   // LocalDateTime 형식으로 변환
+                document.getElementById('editFundStartDate').value = dateTimeValue;
+            }
         });
 
         // 삭제 모달
         deleteCloseBtn?.addEventListener('click', () => closeModal(deleteModal));
         deleteConfirmBtn?.addEventListener('click', function () {
             // TODO: 삭제 API 호출
-            const id = deleteConfirmBtn.getAttribute('data-id');
+            document.getElementById('deleteFundId').value =
+                deleteConfirmBtn.getAttribute('data-id');
             console.log('삭제할 펀드 ID:', id);
             closeModal(deleteModal);
             // 삭제 후 테이블 새로고침 또는 행 제거
+            document.getElementById('fundInfoDeleteForm').submit();
         });
 
         deleteModal?.addEventListener('click', function (event) {
@@ -387,7 +359,7 @@
                         document.getElementById('detailFundName').textContent = name || '-';
                         document.getElementById('detailFundType').textContent = type || '-';
                         document.getElementById('detailFundCompany').textContent = company || '-';
-                        document.getElementById('detailFundStartDate').textContent = startDate || '-';
+                        document.getElementById('detailFundStartDate').textContent = startDate ? startDate.substring(0, 10) : '-';
                         document.getElementById('detailFundDescription').textContent = description || '-';
                         document.getElementById('detailFundStatus').textContent = status || '-';
                         showModal(detailModal);
@@ -398,7 +370,13 @@
                         document.getElementById('editFundName').value = name || '';
                         document.getElementById('editFundType').value = type || '';
                         document.getElementById('editFundCompany').value = company || '';
-                        document.getElementById('editFundStartDate').value = startDate || '';
+                        let formatted = '';
+                        if (startDate && startDate.length >= 10) {
+                            formatted = startDate.substring(0, 10);
+                        } else {
+                            formatted = document.getElementById('editFundStartDate').value;
+                        }
+                        document.getElementById('editFundStartDate').value = formatted;
                         document.getElementById('editFundDescription').value = description || '';
                         showModal(editModal);
                     } else if (action === 'delete') {

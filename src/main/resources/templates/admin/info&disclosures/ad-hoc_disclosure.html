@@ -338,6 +338,8 @@
             buttons.forEach(button => {
                 button.addEventListener('click', function () {
                     const action = this.getAttribute('data-action');
+
+                    const postId = row.getAttribute('data-postid');
                     const adhocNo = row.getAttribute('data-adhocno');
                     const title = row.getAttribute('data-title');
                     const type = row.getAttribute('data-type');
@@ -371,13 +373,24 @@
                         showModal(editModal);
                     } else if (action === 'delete') {
                         // 삭제 모달에 데이터 채우기
-                        document.getElementById('deleteAdhocTitle').textContent = title || '';
-                        deleteConfirmBtn.setAttribute('data-adhocno', adhocNo || '');
+                        document.getElementById('deleteAdhocTitle').textContent = title;
+
+                        // 삭제할 postId 저장
+                        deleteConfirmBtn.setAttribute('data-postid', postId);
+
                         showModal(deleteModal);
                     }
                 });
             });
         });
+        deleteConfirmBtn.addEventListener('click', function () {
+            const postId = deleteConfirmBtn.getAttribute('data-postid');
+
+            document.getElementById('deletePostId').value = postId;
+
+            document.getElementById('adhocDeleteForm').submit();
+        });
+
     });
 </script>
 <!-- 사이드바 스크립트 -->

@@ -37,5 +37,7 @@ public class InfoPostDTO {
     private String marketType; // 펀드시황 내부 분류 : 주간 리포트, 월간전망, 시장속보 등.
 
     private String adhocNo; // 수시공시번호
-    private String fundInfoCode; // 펀드정보 , 코드
+    private String fundCode; // 펀드정보 , 코드
+
+    private String company; // 운용사
 }

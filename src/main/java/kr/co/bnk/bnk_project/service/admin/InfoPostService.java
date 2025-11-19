@@ -224,6 +224,30 @@ public class InfoPostService {
         infoPostMapper.deleteAdHoc(postId);
     }
 
+    ////////////////////////////////////
+    ///////////   펀도정보  /////////////
+    //////////////////////////////////
+    // 펀드정보 등록
+    public void createFundInfo(InfoPostDTO infoPostDTO) {
+        infoPostMapper.insertFundInfo(infoPostDTO);
+    }
+
+    public List<InfoPostDTO> findAllFundInfo(){
+        return infoPostMapper.selectAllFundInfo();
+    }
+
+    public InfoPostDTO selectFundInfoById(int postId) {
+        return infoPostMapper.selectFundInfoById(postId);
+    }
+
+    public void updateFundInfo(InfoPostDTO infoPostDTO) {
+        infoPostMapper.updateFundInfo(infoPostDTO);
+    }
+
+    public void deleteFundInfo(int postId) {
+        infoPostMapper.deleteFundInfo(postId);
+    }
+
 
 
 

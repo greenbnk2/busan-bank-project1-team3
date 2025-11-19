@@ -21,6 +21,8 @@
 
         <result property="joinDate"   column="JOIN_DATE"/>
         <result property="statusCode" column="STATUS_CODE"/>
+
+
     </resultMap>
 
 
