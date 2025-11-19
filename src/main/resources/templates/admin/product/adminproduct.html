@@ -89,10 +89,20 @@
             </div>
 
             <!-- 상품 목록 테이블 -->
+
             <div class="table-section">
                 <div class="table-info">
-                    <span>총 <strong id="totalCount">0</strong>개</span>
-                    <span class="pagination-info"><span id="currentPage">1</span> / <span id="totalPages">1</span> page</span>
+                    <span>
+                            총
+                            <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건
+                        </span>
+                    <span class="pagination-info"
+                          th:if="${pageResponse != null and pageResponse.total > 0}">
+                            현재:
+                            <span th:text="${pageRequestDTO.pg}">1</span> /
+                            <span th:text="${(pageResponse.total + pageRequestDTO.size - 1) / pageRequestDTO.size}">1</span>
+                            페이지
+                        </span>
                 </div>
                 <table class="product-table">
                     <thead>
@@ -110,19 +120,19 @@
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
-                        <tr th:each="fund : ${fundList}">
-                            <td>[[${num}]]</td>
-                            <td>[[${fund.code}]]</td>
-                            <td>[[${fund.type}]]</td>
-                            <td th:title="${fund.name}">[[${fund.name}]]</td>
+                        <tr th:each="fund, stat : ${dtoList}">
+                            <td th:text="${stat.index + 1}"></td>
+                            <td th:text="${fund.fundCode}"></td>
+                            <td th:text="${fund.fundType}"></td>
+                            <td th:title="${fund.fundName}"></td>
                             <td>
                                 <button class="view-detail-btn" onclick="viewProductDetail(2)" title="상세보기">
                                     <i class="fa fa-search"></i>
                                 </button>
                             </td>
-                            <td>[[${fund.company}]]</td>
-                            <td>[[${fund.createdat}]]</td>
-                            <td><span class="status-badge modifying">[[${fund.status}]]</span></td>
+                            <td th:text="${fund.operatorName}"></td>
+                            <td th:text="${#temporals.format(fund.regDate, 'yyyy-MM-dd')}"></td>
+                            <td><span class="status-badge modifying" th:text="${fund.operStatus}"></span></td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn resume" onclick="resumeProduct(4)">재개</button>
@@ -133,87 +143,45 @@
                                 <button class="action-btn edit" onclick="editProduct(5)">수정</button>
                             </td>
                         </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>0015400182</td>
-                            <td>적금</td>
-                            <td title="더음ㄴㅇㄹㄴㄹㄴㄹㄴㅇㄹㄴㄹㄴㅇㄹㅇㄹㄴㄹㅇㄴㄹㄴㄹㄴㄹㄴㅇㄹㄴㅇㄹㄴㅇㄹㄴㄹㄴㄹ">더음ㄴㅇㄹㄴㄹㄴㄹㄴㅇㄹㄴㄹㄴㅇㄹㅇㄹㄴㄹㅇㄴㄹㄴㄹㄴㄹㄴㅇㄹㄴㅇㄹㄴㅇㄹㄴㄹㄴㄹ</td>
-                            <td>
-                                <button class="view-detail-btn" onclick="viewProductDetail(2)" title="상세보기">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </td>
-                            <td>신한은행</td>
-                            <td>2022-03-15</td>
-                            <td><span class="status-badge modifying">수정중</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn resume" onclick="resumeProduct(2)">재개</button>
-                                    <button class="action-btn stop" onclick="endProduct(2)">상품종료</button>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="action-btn edit" onclick="editProduct(2)">수정</button>
-                            </td>
-                        </tr>
+
                         
-                        <tr>
-                            <td>2</td>
-                            <td>0014500678</td>
-                            <td>대출</td>
-                            <td title="키드">키드</td>
-                            <td>
-                                <button class="view-detail-btn" onclick="viewProductDetail(4)" title="상세보기">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </td>
-                            <td>우리은행</td>
-                            <td>2023-05-10</td>
-                            <td><span class="status-badge stop">중단</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="action-btn resume" onclick="resumeProduct(4)">재개</button>
-                                    <button class="action-btn stop" onclick="endProduct(4)">상품종료</button>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="action-btn edit" onclick="editProduct(4)">수정</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>0016700890</td>
-                            <td>대출</td>
-                            <td title="기업대출상품">기업대출상품</td>
-                            <td>
-                                <button class="view-detail-btn" onclick="viewProductDetail(5)" title="상세보기">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </td>
-                            <td>NH은행</td>
-                            <td>2023-08-25</td>
-                            <td><span class="status-badge pending">대기중</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                </div>
-                            </td>
-                            <td>
-                                <button class="action-btn edit" onclick="editProduct(5)">수정</button>
-                            </td>
-                        </tr>
+
+
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" onclick="prevPage()">&lt;</button>
+                <!-- 페이징 -->
+                <div class="pagination"
+                     th:if="${pageResponse != null and pageResponse.total > 0}">
+
+                    <!-- 이전 버튼 -->
+                    <button class="page-btn prev"
+                            th:if="${pageResponse.prev}"
+                            th:onclick="|location.href='@{/admin/product(pg=${response.start - 1}, size=${pageRequestDTO.size}, keyword=${pageRequestDTO.keyword})}'|">
+                        &lt;
+                    </button>
+
+                    <!-- 페이지 번호 -->
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
-                        <button class="page-number">2</button>
-                        <button class="page-number">3</button>
-                        <button class="page-number">4</button>
-                        <button class="page-number">5</button>
+                        <button class="page-number"
+                                th:each="p : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                th:text="${p}"
+                                th:classappend="${p == pageRequestDTO.pg} ? ' active'"
+                                th:onclick="|location.href='@{/admin/product(pg=${p}, size=${pageRequestDTO.size}, keyword=${pageRequestDTO.keyword})}'|">
+                        </button>
                     </div>
-                    <button class="page-btn next" onclick="nextPage()">&gt;</button>
+
+                    <!-- 다음 버튼 -->
+                    <button class="page-btn next"
+                            th:if="${pageResponse.next}"
+                            th:onclick="|location.href='@{/admin/product(pg=${response.end + 1}, size=${pageRequestDTO.size}, keyword=${pageRequestDTO.keyword})}'|">
+                        &gt;
+                    </button>
+
                 </div>
+
+
+
+
             </div>
             <!-- 푸터 영역 -->
             <footer class="admin-footer"></footer>

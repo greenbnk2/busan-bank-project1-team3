@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.bnk.bnk_project.mapper.admin.ProductMapper">
+    <!-- 상품 목록 페이지 조회 -->
+    <select id="selectProductList" parameterType="kr.co.bnk.bnk_project.dto.admin.ProductListDTO">
+        SELECT
+            fm.fund_code           AS fundCode,
+            fm.fund_type           AS fundType,
+            fm.fund_name           AS fundName,
+            amc.operator_name      AS operatorName,
+            fm.reg_date            AS regDate,
+            fm.oper_status         AS operStatus
+        FROM fund_master fm
+                 JOIN asset_management_company amc
+                      ON fm.asset_manager_id = amc.operator_id
+        ORDER BY fm.reg_date DESC
+        OFFSET #{pageRequestDTO.offset} ROWS
+        FETCH NEXT #{pageRequestDTO.size} ROWS ONLY
+    </select>
+
+    <select id="selectProductTotal" resultType="int">
+        SELECT COUNT(*)
+        FROM fund_master
+    </select>
+
+</mapper>
