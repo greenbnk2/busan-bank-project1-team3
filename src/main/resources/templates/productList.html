@@ -102,7 +102,21 @@
                         <th>가입</th>
                     </tr>
                     </thead>
-                    <tbody id="fund-list"></tbody>
+                    <tbody id="fund-list">
+                    <tr th:each="item : ${productList}">
+                        <td class="title">
+                            <a th:href="@{'/fund/productDetail'}"
+                               th:text="${item.fundName}"></a>
+                        </td>
+                        <td th:text="${item.perf1M} + '%'"></td>
+                        <td th:text="${item.perf3M} + '%'"></td>
+                        <td th:text="${item.perf6M} + '%'"></td>
+                        <td th:text="${item.perf12M} + '%'"></td>
+                        <td>
+                            <a th:href="@{'/fund/detail/' + ${item.fundCode}}" class="join-btn">가입</a>
+                        </td>
+                    </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
