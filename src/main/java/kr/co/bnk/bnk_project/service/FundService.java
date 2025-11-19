@@ -1,7 +1,7 @@
 package kr.co.bnk.bnk_project.service;
 
 import kr.co.bnk.bnk_project.dto.ProductDTO;
-import kr.co.bnk.bnk_project.mapper.ProductMapper;
+import kr.co.bnk.bnk_project.mapper.FundMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FundService {
 
-    private final ProductMapper productMapper;
+    private final FundMapper productMapper;
 
     public List<ProductDTO> getProductList(){
         return productMapper.findProductList();
