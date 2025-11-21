@@ -47,11 +47,9 @@
         // 1. 체크박스 변경 감지
         checkbox.addEventListener('change', function() {
             if (this.checked) {
-                // 체크되면: 키보드 보이기 + 랜덤 배열 생성 + 키보드 초기화
                 keyboardBox.style.display = 'block';
                 initKeyboard();
             } else {
-                // 체크 해제되면: 키보드 숨기기
                 keyboardBox.style.display = 'none';
             }
         });
@@ -61,29 +59,36 @@
             // 숫자 0~9를 배열로 만들어서 무작위로 섞음 (Shuffle)
             const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
             shuffleArray(numbers);
-
-            // 섞인 숫자를 키보드 레이아웃 형식 문자열로 변환
-            // 예: "1 2 3 4 5 6 7 8 9 0" -> "5 0 2 8 1 9 3 7 4 6"
-            const numRow = numbers.join(" ");
+            const numRow = numbers.join(" "); // 예: "5 0 2 8 1 9 3 7 4 6"
 
             // 키보드 옵션 설정
             const keyboardOptions = {
                 onChange: input => onChange(input),
                 onKeyPress: button => onKeyPress(button),
+                layoutName: "default", // 기본 레이아웃 시작
                 layout: {
-                    // default 레이아웃 정의 (숫자줄을 변수(numRow)로 대체)
+                    // 1) 기본 영문 레이아웃 (특수문자 버튼 추가됨)
                     default: [
-                        numRow + " {bksp}", // 첫째 줄: 랜덤 숫자 + 백스페이스
+                        numRow + " {bksp}",
                         "q w e r t y u i o p",
                         "a s d f g h j k l",
-                        "{shift} z x c v b n m",
+                        "{shift} z x c v b n m {special}", // {special} 버튼 추가
                         "{space}"
                     ],
+                    // 2) Shift(대문자) 레이아웃
                     shift: [
                         numRow + " {bksp}",
                         "Q W E R T Y U I O P",
                         "A S D F G H J K L",
-                        "{shift} Z X C V B N M",
+                        "{shift} Z X C V B N M {special}",
+                        "{space}"
+                    ],
+                    // 3) 특수문자 레이아웃 (새로 추가됨)
+                    special: [
+                        numRow + " {bksp}", // 랜덤 숫자는 그대로 유지
+                        "! @ # $ % ^ & * ( )",
+                        "- _ = + [ ] { } \\ |",
+                        "{normal} ; : ' \" , . < > / ? {normal}", // {normal}로 복귀
                         "{space}"
                     ]
                 },
@@ -91,44 +96,59 @@
                     "{bksp}": "⌫",
                     "{shift}": "⇧",
                     "{space}": "SPACE",
+                    "{special}": "!#$", // 특수문자 버튼 라벨
+                    "{normal}": "ABC"   // 복귀 버튼 라벨
                 },
-                // 숫자키에만 특별한 클래스를 줘서 색상을 다르게 함 (선택사항)
                 buttonTheme: [
                     {
                         class: "hg-button-numpad",
                         buttons: numRow
+                    },
+                    {
+                        class: "hg-button-function", // 기능키 색상 구분(선택)
+                        buttons: "{shift} {special} {normal} {bksp}"
                     }
                 ]
             };
 
-            // 이미 키보드가 있으면 제거하고 새로 생성 (재랜덤화 위해)
             if(myKeyboard) myKeyboard.destroy();
-
-            // 키보드 생성 (클래스명 .simple-keyboard 에 연결)
             myKeyboard = new SimpleKeyboard.default(keyboardOptions);
         }
 
-        // 3. 입력 처리 (키보드 누를 때마다 input 값 업데이트)
+        // 3. 입력 처리
         function onChange(input) {
             inputElement.value = input;
         }
 
+        // 4. 키 버튼 클릭 처리 (특수문자/한영 전환 로직 추가)
         function onKeyPress(button) {
-            // 시프트 키 처리 등 특수 기능 필요 시 여기에 작성
-            if (button === "{shift}" || button === "{lock}") {
-                handleShift();
+            // (1) Shift 키 처리
+            if (button === "{shift}") {
+                let currentLayout = myKeyboard.options.layoutName;
+                let shiftToggle = currentLayout === "default" ? "shift" : "default";
+
+                // 특수문자 화면에서는 Shift 작동 안 하게 하거나, 필요 시 로직 추가
+                if(currentLayout === "special") return;
+
+                myKeyboard.setOptions({
+                    layoutName: shiftToggle
+                });
+            }
+            // (2) 특수문자 화면으로 전환
+            else if (button === "{special}") {
+                myKeyboard.setOptions({
+                    layoutName: "special"
+                });
+            }
+            // (3) 일반 영문 화면으로 복귀
+            else if (button === "{normal}") {
+                myKeyboard.setOptions({
+                    layoutName: "default"
+                });
             }
         }
 
-        function handleShift() {
-            let currentLayout = myKeyboard.options.layoutName;
-            let shiftToggle = currentLayout === "default" ? "shift" : "default";
-            myKeyboard.setOptions({
-                layoutName: shiftToggle
-            });
-        }
-
-        // 4. 배열 무작위 섞기 (Fisher-Yates Shuffle 알고리즘)
+        // 5. 배열 무작위 섞기
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -136,7 +156,7 @@
             }
         }
 
-        // (추가) 사용자가 물리 키보드로 입력할 때도 가상 키보드 내부 상태 동기화
+        // 물리 키보드 동기화
         inputElement.addEventListener("input", event => {
             if(myKeyboard) {
                 myKeyboard.setInput(event.target.value);
