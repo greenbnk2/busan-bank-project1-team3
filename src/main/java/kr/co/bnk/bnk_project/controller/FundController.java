@@ -32,7 +32,7 @@ public class FundController {
     public String productList(Model model) {
         List<ProductDTO> list = productService.getProductList();
         model.addAttribute("productList", list);
-        return "/productList";
+        return "productList";
     }
 
 
