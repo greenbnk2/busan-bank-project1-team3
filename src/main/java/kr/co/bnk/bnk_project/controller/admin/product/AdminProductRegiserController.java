@@ -60,4 +60,22 @@ public class AdminProductRegiserController {
                 })
                 .toList();
     }
+
+    @GetMapping("/edit")
+    public String productEdit(@RequestParam(required = false) Long id) {
+        return "admin/product/adminproduct-edit";
+    }
+
+
+
+/*    @GetMapping("/edit")
+    public String productEdit(@RequestParam(required = false) Long id,PageRequestDTO pageRequestDTO, Model model) {
+
+        AdminFundMasterDTO fund = adminFundService.getPendingFund(pageRequestDTO);
+
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        model.addAttribute("fund", fund);
+
+        return "admin/product/adminproduct-edit";
+    }*/
 }

@@ -104,6 +104,7 @@ public class MemberController {
             return "redirect:/member/complete";
 
         } catch (Exception e) {
+            log.error("회원가입 진행 중 에러 발생: ", e);
             redirectAttributes.addFlashAttribute("error", "회원가입 중 오류가 발생했습니다: " + e.getMessage());
             return "redirect:/member/register";
         }

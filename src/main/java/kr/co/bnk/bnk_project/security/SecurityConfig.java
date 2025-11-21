@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +44,7 @@ public class SecurityConfig {
                 // 2. /admin/** 경로에 대한 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/login").permitAll() // 관리자 로그인 페이지는 모두 허용
+                        .requestMatchers("/admin/monitor/**").hasRole("SAD")
                         .requestMatchers("/admin/cs/**").hasAnyRole("CS", "ADM", "SAD") // CS 페이지는 3가지 역할 모두
                         .requestMatchers("/admin/**").hasAnyRole("ADM", "SAD") // 그 외 관리자 페이지는 ADM, SAD만
                         .anyRequest().authenticated() // 혹시 모를 나머지 admin 경로는 인증만 되면 허용

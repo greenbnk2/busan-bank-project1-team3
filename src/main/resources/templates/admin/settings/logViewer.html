@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개발 관리 - 시스템 로그</title>
+    <link rel="stylesheet" th:href="@{/css/admin/admin_styles.css}">
+</head>
+<body>
+<div th:replace="~{admin/_sidebar :: sidebar('dev-logs')}"></div>
+
+<div class="main-content">
+    <div th:replace="~{admin/_header :: header}"></div>
+
+    <div class="main-content-body">
+        <div class="container">
+
+            <div class="chart-card" style="height: auto; min-height: 800px;">
+                <div class="chart-header" style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <h2 style="margin:0;">📜 시스템 실시간 로그</h2>
+                        <span style="font-size: 12px; color: #666;">당일 서버 로그를 확인합니다. (자동 갱신 안됨)</span>
+                    </div>
+                    <button class="refresh-btn" onclick="location.reload()">
+                        <span>🔄</span> 새로고침
+                    </button>
+                </div>
+
+                <div class="log-container" id="logBox">
+                    <div th:each="line : ${logs}" class="log-line"
+                         th:classappend="${#strings.contains(line, 'ERROR')} ? 'log-error' :
+                                            (${#strings.contains(line, 'WARN')} ? 'log-warn' :
+                                            (${#strings.contains(line, 'INFO')} ? 'log-info' : ''))">
+                        <span th:text="${line}"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
+
+<script>
+    // (선택사항) 페이지 로딩 시 스크롤을 맨 아래로 이동하고 싶으면 주석 해제
+    /*
+    window.onload = function() {
+        const logBox = document.getElementById("logBox");
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+    */
+</script>
+</body>
+</html>

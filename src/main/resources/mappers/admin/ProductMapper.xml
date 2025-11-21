@@ -50,6 +50,7 @@
         SELECT
             fm.fund_code           AS fundCode,
             fm.fund_type           AS fundType,
+            fc.category_name       AS categoryName, <!-- 한글 유형-->
             fm.fund_name           AS fundName,
             amc.operator_name      AS operatorName,
             fm.reg_date            AS regDate,
@@ -57,6 +58,8 @@
         FROM fund_master fm
                  JOIN asset_management_company amc
                       ON fm.asset_manager_id = amc.operator_id
+                 JOIN fund_category fc
+                      ON fm.fund_type = fc.category_code
 
         <include refid="productWhere"/>
 

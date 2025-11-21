@@ -14,11 +14,10 @@
     <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
     <link rel="preconnect" th:href="@{https://fonts.gstatic.com crossorigin}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" th:href="@{/css/index.css}">
     <link rel="stylesheet" th:href="@{/css/fundGuide.css}">
-
     <script th:src="@{/js/fundGuide.js}" defer></script>
+    <script th:src="@{/js/sidebar.js}"></script>
 </head>
 
 <body>
@@ -87,48 +86,9 @@
 </header>
 <!-- ===================== /HEADER ===================== -->
 
-
-
-<!-- ===================== PAGE WRAPPER ===================== -->
 <div class="main-container">
     <div class="content-wrapper">
-
-        <!-- ========== 사이드바 ========== -->
-        <aside class="sidebar">
-            <div class="sidebar-title">펀드 이용 가이드</div>
-
-            <ul class="sidebar-menu">
-
-                <li class="menu-item">
-                    <button class="menu-btn active">펀드 안내</button>
-                    <ul class="submenu" style="display:block;">
-                        <li>
-                            <a th:href="@{/fund/guide}"
-                               style="color:#b22222; font-weight:bold;">
-                                펀드 안내
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu-item">
-                    <button class="menu-btn">펀드 가입절차</button>
-                    <ul class="submenu">
-                        <li><a href="#">가입 절차</a></li>
-                    </ul>
-                </li>
-
-                <li class="menu-item">
-                    <button class="menu-btn">FAQ</button>
-                    <ul class="submenu">
-                        <li><a href="#">자주 묻는 질문</a></li>
-                    </ul>
-                </li>
-
-            </ul>
-        </aside>
-        <!-- ========== /사이드바 ========== -->
-
+        <div th:replace="~{sidebar :: sidebar}"></div>
 
         <!-- ========== 본문 영역 ========== -->
         <main class="main-content">

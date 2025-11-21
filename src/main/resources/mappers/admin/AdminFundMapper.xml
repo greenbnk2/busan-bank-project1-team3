@@ -24,7 +24,7 @@
     </resultMap>
 
     <!--
-        등록대기 상태 펀드 단일 조회
+        펀드 단일 조회
      -->
     <select id="selectPendingFund"
             parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
@@ -48,14 +48,14 @@
         ON fm.FUND_TYPE = fc.CATEGORY_CODE
         WHERE 1 = 1
         <choose>
-            <!-- 펀드코드 검색: 정확히 일치 -->
+            <!-- 펀드코드 검색: 정확히 일치 (대소문자 무시) -->
             <when test="searchType == null or searchType == '' or searchType == 'code'">
-                AND fm.FUND_CODE = #{keyword}
+                AND UPPER(fm.FUND_CODE) = UPPER(#{keyword})
             </when>
 
-            <!-- 펀드명 검색: 정확히 일치 (LIKE 아님) -->
+            <!-- 펀드명 검색: 정확히 일치 (LIKE 아님, 대소문자 무시) -->
             <when test="searchType == 'name'">
-                AND fm.FUND_NAME = #{keyword}
+                AND UPPER(fm.FUND_NAME) = UPPER(#{keyword})
             </when>
         </choose>
     </select>
@@ -90,19 +90,19 @@
           and oper_status = '등록대기'
 
         <choose>
-            <!-- 코드 기준 자동완성 -->
+            <!-- 코드 기준 자동완성 (대소문자 무시) -->
             <when test="searchType == 'code'">
-                AND fm.FUND_CODE LIKE #{keyword} || '%'
+                AND UPPER(fm.FUND_CODE) LIKE UPPER(#{keyword}) || '%'
             </when>
 
-            <!-- 이름 기준 자동완성 -->
+            <!-- 이름 기준 자동완성 (대소문자 무시) -->
             <when test="searchType == 'name'">
-                AND fm.FUND_NAME LIKE '%' || #{keyword} || '%'
+                AND UPPER(fm.FUND_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
             </when>
 
             <!-- 혹시 몰라서 기본값은 코드로 -->
             <otherwise>
-                AND fm.FUND_CODE LIKE #{keyword} || '%'
+                AND UPPER(fm.FUND_CODE) LIKE UPPER(#{keyword}) || '%'
             </otherwise>
         </choose>
 
@@ -123,6 +123,72 @@
             LAST_UPD_DATE = SYSDATE
         WHERE FUND_CODE = #{fundCode}
     </update>
+
+
+
+    <!-- =============================================================== -->
+
+
+
+    <!-- 자동완성 -->
+    <select id="selectFundSuggestionsEdit"
+            parameterType="map"
+            resultMap="FundMasterResultMap">
+
+        SELECT *
+        FROM (
+        SELECT
+        fm.FUND_CODE,
+        fm.FUND_SHORT_CODE,
+        fm.FUND_NAME,
+        fm.FUND_TYPE,
+        fm.INVEST_GRADE,
+        fm.FUND_FEATURE,
+        fm.OPER_STATUS,
+        fm.ASSET_MANAGER_ID,
+        am.OPERATOR_NAME,
+        fc.CATEGORY_NAME AS FUND_TYPE_NAME
+        FROM BNK.FUND_MASTER fm
+        LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
+        ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
+        LEFT JOIN BNK.FUND_CATEGORY fc
+        ON fm.FUND_TYPE = fc.CATEGORY_CODE
+        WHERE 1 = 1
+
+        <choose>
+            <!-- 코드 기준 자동완성 (대소문자 무시) -->
+            <when test="searchType == 'code'">
+                AND UPPER(fm.FUND_CODE) LIKE UPPER(#{keyword}) || '%'
+            </when>
+
+            <!-- 이름 기준 자동완성 (대소문자 무시) -->
+            <when test="searchType == 'name'">
+                AND UPPER(fm.FUND_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
+            </when>
+
+            <!-- 혹시 몰라서 기본값은 코드로 -->
+            <otherwise>
+                AND UPPER(fm.FUND_CODE) LIKE UPPER(#{keyword}) || '%'
+            </otherwise>
+        </choose>
+
+        ORDER BY fm.FUND_CODE
+        )
+        WHERE ROWNUM &lt;= 5
+    </select>
+
+    <update id="updateFundForEdit"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
+
+        UPDATE BNK.FUND_MASTER
+        SET
+            FUND_NAME     = #{fundName},
+            INVEST_GRADE  = #{investGrade},
+            FUND_FEATURE  = #{fundFeature},
+            LAST_UPD_DATE = SYSDATE
+        WHERE FUND_CODE = #{fundCode}
+    </update>
+
 
 
 

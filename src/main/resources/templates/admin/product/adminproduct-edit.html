@@ -18,18 +18,14 @@
             <div class="container">
                 <!-- 페이지 헤더 -->
                 <header class="page-header">
-                    <h1>펀드 수정</h1>
+                    <h1>펀드 관리(상세)</h1>
                 </header>
 
-                <!-- 펀드 검색 -->
-                <div class="product-classification-bar">
-                    <div class="classification-label">펀드 검색</div>
-                    <div class="classification-inputs">
-                        <div class="search-input-wrapper-inline">
-                            <input type="text" class="form-input search-input-large" id="searchFund" placeholder="입력하세요">
-                            <button class="btn btn-search-inline" onclick="searchFunds()">검색</button>
-                        </div>
-                    </div>
+                <!-- 관리 기능 버튼 -->
+                <div class="management-actions">
+                    <button type="button" class="action-btn resume" onclick="resumeProduct()" id="resumeBtn" style="display: none;">운용재개</button>
+                    <button type="button" class="action-btn stop" onclick="endProduct()" id="stopBtn">운용중단</button>
+                    <button type="button" class="action-btn reserve" onclick="reserveProduct()">반영예약</button>
                 </div>
 
                 <!-- 필수정보 -->
@@ -148,7 +144,7 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-label">선택자산운용</div>
+                            <div class="form-label">신탁자산운용</div>
                             <div class="form-input-wrapper">
                                 <input type="text" class="form-input" id="selectedAssetManagement" placeholder="선택자산운용을 입력하세요">
                             </div>
@@ -171,10 +167,23 @@
                                 <input type="text" class="form-input" id="redemptionFee" placeholder="환매수수료를 입력하세요">
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 유의사항 -->
+                <div class="form-section">
+                    <h2 class="section-title">유의사항</h2>
+                    <div class="form-table">
                         <div class="form-row">
-                            <div class="form-label">유의사항</div>
+                            <div class="form-label">상품별 주요 투자 위험</div>
                             <div class="form-input-wrapper">
-                                <textarea class="form-textarea" id="precautions" rows="5" placeholder="유의사항을 입력하세요"></textarea>
+                                <textarea class="form-textarea" id="precautions1" rows="5" placeholder="유의사항을 입력하세요"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">이익 및 손실 발행 구조</div>
+                            <div class="form-input-wrapper">
+                                <textarea class="form-textarea" id="precautions2" rows="5" placeholder="유의사항을 입력하세요"></textarea>
                             </div>
                         </div>
                     </div>
@@ -280,7 +289,7 @@
                 <!-- 폼 액션 버튼 -->
                 <div class="form-actions">
                     <button type="button" class="btn btn-red">수정</button>
-                    <a th:href="@{/admin/product}" class="btn btn-secondary">취소</a>
+                    <a th:href="@{/admin/product/pending}" class="btn btn-secondary">취소</a>
                 </div>
                 <!-- 푸터 영역 -->
                 <footer class="admin-footer"></footer>
@@ -289,6 +298,12 @@
     </div>
     <script th:inline="javascript">
         /*<![CDATA[*/
+
+        var editUrl = /*[[@{/admin/product/edit}]]*/ '';
+        function editProduct(productId) {
+            location.href = editUrl + '?id=' + productId;
+        }
+
         // 약관 파일 업로드
         document.getElementById('termsDoc').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -366,6 +381,37 @@
             const searchTerm = document.getElementById('searchFund').value;
             // 검색 로직 구현
             console.log('검색어:', searchTerm);
+        }
+
+
+        // 운용재개 함수
+        function resumeProduct() {
+            if (confirm('운용을 재개하시겠습니까?')) {
+                // TODO: 운용재개 API 호출
+                alert('운용이 재개되었습니다.');
+                // 상태에 따라 버튼 토글
+                document.getElementById('resumeBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'inline-block';
+            }
+        }
+
+        // 운용중단 함수
+        function endProduct() {
+            if (confirm('운용을 중단하시겠습니까?')) {
+                // TODO: 운용중단 API 호출
+                alert('운용이 중단되었습니다.');
+                // 상태에 따라 버튼 토글
+                document.getElementById('stopBtn').style.display = 'none';
+                document.getElementById('resumeBtn').style.display = 'inline-block';
+            }
+        }
+
+        // 반영예약 함수
+        function reserveProduct() {
+            if (confirm('변경사항을 반영예약하시겠습니까?')) {
+                // TODO: 반영예약 API 호출
+                alert('반영예약이 완료되었습니다.');
+            }
         }
 
         // 기존 파일 삭제

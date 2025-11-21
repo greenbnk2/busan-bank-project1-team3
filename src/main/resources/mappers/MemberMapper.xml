@@ -55,7 +55,8 @@
             ZIP_CODE,
             ADDR1,
             ADDR2,
-            join_date
+            join_date,
+            gender
         ) VALUES (
             #{custNo},
             #{userId},
@@ -66,20 +67,21 @@
             #{zipcode},
             #{address1},
             #{address2},
-            SYSDATE
+            SYSDATE,
+            #{gender}
         )
     </insert>
 
     <!-- 계좌 정보 저장 -->
     <insert id="insertAccount" parameterType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
         INSERT INTO bnk_account (
-            account_id,
+--             account_id,
             cust_no,
             acct_no,
             acct_pass,
             reg_date
         ) VALUES (
-            bnk_account_seq.NEXTVAL,
+--             bnk_account_seq.NEXTVAL,
             #{custNo},
             #{accountNumber},
             #{accountPassword},

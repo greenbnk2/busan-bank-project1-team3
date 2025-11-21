@@ -41,10 +41,7 @@ public class AdminProductController {
         return "admin/product/adminproduct-pending";
     }
 
-    @GetMapping("/edit")
-    public String productEdit(@RequestParam(required = false) Long id) {
-        return "admin/product/adminproduct-edit";
-    }
+
 
     @GetMapping("/documents")
     public String productDocuments() {

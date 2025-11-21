@@ -2,7 +2,6 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
 <head>
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -20,6 +19,7 @@
 
     <!-- 공통 스크립트 (세션, 사이드바 등) -->
     <script th:src="@{/js/fundInformation.js}" defer></script>
+    <script th:src="@{/js/sidebar.js}"></script>
 </head>
 
 <body>
@@ -94,48 +94,9 @@
 <!-- ===================== PAGE LAYOUT ===================== -->
 <div class="main-container">
     <div class="content-wrapper">
+        <div th:replace="~{sidebar :: sidebar}"></div>
 
-        <!-- ========== 사이드바 ========== -->
-        <aside class="sidebar">
-            <div class="sidebar-title">펀드정보센터</div>
-
-            <ul class="sidebar-menu">
-
-                <!-- 펀드시황 -->
-                <li class="menu-item">
-                    <button class="menu-btn">펀드 시황</button>
-                    <ul class="submenu">
-                        <li><a th:href="@{/fund/sihwang}">펀드시황</a></li>
-                    </ul>
-                </li>
-
-                <!-- 상품설명서 (현재 페이지) -->
-                <li class="menu-item">
-                    <button class="menu-btn active">상품설명서</button>
-                    <ul class="submenu" style="display:block;">
-                        <li>
-                            <a th:href="@{/fund/information}" style="color:#b22222;font-weight:bold;">
-                                상품설명서
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- 공시/공지 -->
-                <li class="menu-item">
-                    <button class="menu-btn">공지 / 공시</button>
-                    <ul class="submenu">
-                        <li><a href="#">공지사항</a></li>
-                        <li><a href="#">공시자료</a></li>
-                    </ul>
-                </li>
-
-            </ul>
-        </aside>
-        <!-- ========== /사이드바 ========== -->
-
-
-        <!-- ========== 콘텐츠 영역 ========== -->
+        <!-- ========== 메인 ========== -->
         <main class="main-content">
 
             <h1>펀드 상품설명서</h1>

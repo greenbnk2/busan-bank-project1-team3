@@ -12,6 +12,8 @@
     <link rel="stylesheet" th:href="@{/css/index.css}">
     <link rel="stylesheet" th:href="@{/css/fundSihwang.css}">
     <script th:src="@{/js/fundSihwang.js}" defer></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+
 </head>
 
 <body>
@@ -86,37 +88,7 @@
     <div class="content-wrapper">
 
         <!-- ========== 사이드바 ========== -->
-        <aside class="sidebar">
-            <div class="sidebar-title">펀드정보센터</div>
-            <ul class="sidebar-menu">
-
-                <li class="menu-item">
-                    <button class="menu-btn">펀드 시황</button>
-                    <ul class="submenu">
-                        <li><a th:href="@{/fund/sihwang}">펀드시황</a></li>
-                    </ul>
-                </li>
-
-                <li class="menu-item">
-                    <button class="menu-btn">펀드 뉴스</button>
-                    <ul class="submenu">
-                        <li><a href="#">국내 뉴스</a></li>
-                        <li><a href="#">해외 뉴스</a></li>
-                    </ul>
-                </li>
-
-                <li class="menu-item">
-                    <button class="menu-btn">공지사항</button>
-                    <ul class="submenu">
-                        <li><a href="#">은행 공지</a></li>
-                        <li><a href="#">펀드 공시</a></li>
-                    </ul>
-                </li>
-
-            </ul>
-        </aside>
-        <!-- ========== /사이드바 ========== -->
-
+        <div th:replace="~{sidebar :: sidebar}"></div>
 
         <!-- ========== 본문: 펀드시황 ========== -->
         <main class="main-content">

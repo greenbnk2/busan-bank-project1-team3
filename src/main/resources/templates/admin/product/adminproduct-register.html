@@ -35,22 +35,26 @@
                                 th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'name'}">펀드명</option>
                     </select>
 
-                    <div style="position: relative; width: 100%;">
+                    <div class="search-input-wrapper-inline" style="position: relative; width: 100%;">
                         <input type="text"
                                class="form-input search-input-large"
                                id="searchKeyword"
                                name="keyword"
                                placeholder="입력하세요"
                                autocomplete="off"
-                               th:value="${pageRequestDTO != null} ? ${pageRequestDTO.keyword} : ''">
+                               th:value="${pageRequestDTO != null} ? ${pageRequestDTO.keyword} : ''"
+                               style="padding-right: 90px;">
+
+                        <button class="btn btn-search-inline" type="submit"
+                                style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
+                            검색
+                        </button>
 
                         <!-- 자동완성 리스트 박스 -->
                         <div id="searchSuggestions"
-                             style="position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #ddd; border-top:none; z-index:1000; display:none; max-height:200px; overflow-y:auto;">
+                             style="position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid #ddd; border-top:none; z-index:1000; display:none; max-height:200px; overflow-y:auto;">
                         </div>
                     </div>
-
-                    <button class="btn btn-search-inline" type="submit">검색</button>
                 </div>
             </form>
 

@@ -21,7 +21,7 @@
             <header class="page-header">
                 <h1>펀드 목록</h1>
                 <div class="header-actions">
-                    <a th:href="@{/admin/product/register}" class="btn btn-red">상품신규등록</a>
+                    <a th:href="@{/admin/product/pending}" class="btn btn-red">펀드관리</a>
                 </div>
             </header>
 
@@ -116,14 +116,13 @@
                             <th>등록일자</th>
                             <th>상태</th>
                             <th>상품관리</th>
-                            <th>수정</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
                         <tr th:each="dtoList, stat : ${dtoList}">
                             <td th:text="${stat.index + 1}"></td>
                             <td th:text="${dtoList.fundCode}"></td>
-                            <td th:text="${dtoList.fundType}"></td>
+                            <td th:text="${dtoList.categoryName}"></td>
                             <td th:text="${dtoList.fundName}"></td>
                             <td>
                                 <button class="view-detail-btn" onclick="viewProductDetail(2)" title="상세보기">
@@ -133,15 +132,18 @@
                             <td th:text="${dtoList.operatorName}"></td>
                             <td th:text="${#temporals.format(dtoList.regDate, 'yyyy-MM-dd')}"></td>
                             <td><span class="status-badge modifying" th:text="${dtoList.operStatus}"></span></td>
-                            <td>
+<!--                            <td>
                                 <div class="action-buttons">
                                     <button class="action-btn resume" onclick="resumeProduct(4)">재개</button>
                                     <button class="action-btn stop" onclick="endProduct(4)">상품종료</button>
                                 </div>
-                            </td>
+                            </td>-->
                             <td>
-                                <button class="action-btn edit" onclick="editProduct(5)">수정</button>
+                                <div class="action-buttons">
+                                    <a th:href="@{/admin/product/pending}" class="btn btn-gry">펀드관리</a>
+                                </div>
                             </td>
+
                         </tr>
 
                         

@@ -1,10 +1,7 @@
 package kr.co.bnk.bnk_project.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.*;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -35,6 +32,9 @@ public class BnkUserDTO {
 
     @NotEmpty(message = "비밀번호 확인은 필수 항목입니다.")
     private String passwordConfirm;   // 비밀번호 확인
+
+    @NotEmpty(message = "성별은 필수 항목입니다.")
+    private String gender; //성별
 
     @NotEmpty(message = "핸드폰 번호는 필수 항목입니다.")
     @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "핸드폰 번호 형식이 올바르지 않습니다. (010-XXXX-XXXX)")

@@ -41,9 +41,26 @@ public class AdminFundService {
         return adminFundMapper.selectFundSuggestions(searchType, keyword);
 
     }
-
-
     public void updateFundAndChangeStatus(AdminFundMasterDTO dto) {
         adminFundMapper.updateFundForRegister(dto);
+    }
+
+    /*---------------------수정-----------------------------*/
+
+
+
+    public List<AdminFundMasterDTO> getFundSuggestionsEdit(String searchType, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+        if (searchType == null || searchType.isBlank()) {
+            searchType = "code";
+        }
+        return adminFundMapper.selectFundSuggestionsEdit(searchType, keyword);
+
+    }
+
+    public void updateFundAndChangeStatusEdit(AdminFundMasterDTO dto) {
+        adminFundMapper.updateFundForEdit(dto);
     }
 }

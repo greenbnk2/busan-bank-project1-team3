@@ -7,13 +7,7 @@ body {
 }
 
 /* 중앙 컨테이너 */
-.container {
-    width: 1000px;
-    margin: 40px auto;
-    padding: 20px 40px;
-    box-sizing: border-box;
-    background: #fff;
-}
+
 
 h1 {
     font-size: 22px;
@@ -55,6 +49,10 @@ p {
     font-size: 14px;
     line-height: 1.6;
     color: #333;
+}
+
+.container{
+    padding-left: 20px;
 }
 
 /* 테이블 */

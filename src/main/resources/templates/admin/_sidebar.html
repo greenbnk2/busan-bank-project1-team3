@@ -19,14 +19,14 @@
                     <ul class="submenu">
                         <li><a th:href="@{/admin/product}" 
                                th:classappend="${activeMenu == 'product-list' ? 'active' : ''}">펀드 목록</a></li>
-                        <li><a th:href="@{/admin/product/register}" 
-                               th:classappend="${activeMenu == 'product-register' ? 'active' : ''}">펀드 등록</a></li>
+<!--                        <li><a th:href="@{/admin/product/register}"
+                               th:classappend="${activeMenu == 'product-register' ? 'active' : ''}">펀드 등록</a></li>-->
                         <li><a th:href="@{/admin/product/pending}" 
-                               th:classappend="${activeMenu == 'product-pending' ? 'active' : ''}">펀드 등록 대기</a></li>
-                        <li><a th:href="@{/admin/product/edit}" 
-                               th:classappend="${activeMenu == 'product-edit' ? 'active' : ''}">펀드 수정</a></li>
-                        <li><a th:href="@{/admin/product/documents}" 
-                               th:classappend="${activeMenu == 'product-documents' ? 'active' : ''}">펀드 문서 관리</a></li>
+                               th:classappend="${activeMenu == 'product-pending' ? 'active' : ''}">펀드 관리</a></li>
+<!--                        <li><a th:href="@{/admin/product/edit}"
+                               th:classappend="${activeMenu == 'product-edit' ? 'active' : ''}">펀드 수정</a></li>-->
+                        <!--<li><a th:href="@{/admin/product/documents}"
+                               th:classappend="${activeMenu == 'product-documents' ? 'active' : ''}">펀드 문서 관리</a></li>-->
                         <li><a th:href="@{/admin/product/status}"
                                th:classappend="${activeMenu == 'product-status' ? 'active' : ''}">펀드 가입 현황</a></li>
                     </ul>
@@ -78,6 +78,8 @@
                                th:classappend="${activeMenu == 'settings-category' ? 'active' : ''}">카테고리 관리</a></li>
                         <li><a th:href="@{/admin/settings/terms}"
                                th:classappend="${activeMenu == 'settings-terms' ? 'active' : ''}">약관 관리</a></li>
+                        <li><a th:href="@{/admin/dev/logs}"
+                               th:classappend="${activeMenu == 'dev-logs' ? 'active' : ''}">개발 관리</a></li>
                     </ul>
                 </li>
                 <li class="menu-item">

@@ -59,6 +59,23 @@
     background: #e0e0e0;
 }
 
+.btn-gry {
+    padding: 6px 12px;
+    border: 1px solid #f0f0f0;
+    background: #f0f0f0;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.btn-gry:hover {
+    background: #e0e0e0;
+    border-color: #e0e0e0;
+    color: #333;
+}
+
 .btn-search {
     background: #cd1317;
     color: white;
@@ -620,6 +637,21 @@
     padding: 8px 30px 0 0;
 }
 
+.form-section .section-subtitle {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.edit-tab-content {
+    display: block;
+}
+
+.edit-tab-content[style*="display: none"] {
+    display: none !important;
+}
+
 .section-title {
     font-size: 1.3rem;
     font-weight: 600;
@@ -886,11 +918,20 @@ table.form-table td > div {
 }
 
 
+.management-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .form-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
     justify-content: flex-end;
+    gap: 10px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
 }
 
 /* 상품 상세 페이지 */
@@ -1522,7 +1563,7 @@ table.form-table td > div {
 }
 
 .fund-tabs-nav {
-    display: flex;
+    display: inline-flex;
     gap: 0;
     border-top: 1px solid #333;
     border-bottom: 1px solid #ddd;
@@ -1539,7 +1580,8 @@ table.form-table td > div {
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
-    flex: 1;
+    flex: none;
+    white-space: nowrap;
     text-align: center;
 }
 
