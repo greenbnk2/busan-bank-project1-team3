@@ -2,6 +2,8 @@ package kr.co.bnk.bnk_project.service.admin;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import kr.co.bnk.bnk_project.dto.PageRequestDTO;
+import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.InfoAttachmentDTO;
 import kr.co.bnk.bnk_project.dto.admin.InfoPostDTO;
 import kr.co.bnk.bnk_project.mapper.admin.InfoAttachmentMapper;
@@ -101,9 +103,30 @@ public class InfoPostService {
         return infoPostMapper.selectInfoPostById(postId);
     }
 
-    // 공시자료 목록 전체
+    // 공시자료 목록 전체 (페이징 사용으로 주석처리)
+    /*
     public List<InfoPostDTO> findAllInfoPost(){
         return infoPostMapper.selectAllInfoPost();
+    }
+    */
+
+    // 공시자료 페이징 목록
+    public PageResponseDTO<InfoPostDTO> findInfoPostPage(PageRequestDTO pageRequestDTO) {
+
+        // 방어 코드
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        // 목록
+        List<InfoPostDTO> list = infoPostMapper.selectInfoPostList(pageRequestDTO);
+
+        // 총 개수
+        int total = infoPostMapper.selectInfoPostTotal(pageRequestDTO);
+
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
+
+
     }
 
     // 공시자료 수정 (글 + 파일)
@@ -205,11 +228,41 @@ public class InfoPostService {
     //////////////////////////////////
     // 수시공시 등록
     public void createAdHoc(InfoPostDTO infoPostDTO) {
+        // 기본값
+        if (infoPostDTO.getStatus() == null || infoPostDTO.getStatus().isBlank()) {
+            infoPostDTO.setStatus("PUBLISHED");
+        }
+        if (infoPostDTO.getCreatedBy() == null || infoPostDTO.getCreatedBy().isBlank()) {
+            infoPostDTO.setCreatedBy("admin");
+        }
+
         infoPostMapper.insertAdHoc(infoPostDTO);
     }
 
+    // 수시공시 목록 전체 (페이징 사용으로 주석처리)
+    /*
     public List<InfoPostDTO> findAllAdHoc(){
         return infoPostMapper.selectAllAdHoc();
+    }
+    */
+
+    // 수시공시 페이징 목록
+    public PageResponseDTO<InfoPostDTO> findAdHocPage(PageRequestDTO pageRequestDTO) {
+
+        // 방어 코드
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        // 목록
+        List<InfoPostDTO> list = infoPostMapper.selectAdHocList(pageRequestDTO);
+
+        // 총 개수
+        int total = infoPostMapper.selectAdHocTotal(pageRequestDTO);
+
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
+
+
     }
 
     public InfoPostDTO selectAdHocById(int postId) {
@@ -229,11 +282,41 @@ public class InfoPostService {
     //////////////////////////////////
     // 펀드정보 등록
     public void createFundInfo(InfoPostDTO infoPostDTO) {
+        // 기본값
+        if (infoPostDTO.getStatus() == null || infoPostDTO.getStatus().isBlank()) {
+            infoPostDTO.setStatus("PUBLISHED");
+        }
+        if (infoPostDTO.getCreatedBy() == null || infoPostDTO.getCreatedBy().isBlank()) {
+            infoPostDTO.setCreatedBy("admin");
+        }
+
         infoPostMapper.insertFundInfo(infoPostDTO);
     }
 
+    // 펀드정보 목록 전체 (페이징 사용으로 주석처리)
+    /*
     public List<InfoPostDTO> findAllFundInfo(){
         return infoPostMapper.selectAllFundInfo();
+    }
+    */
+
+    // 펀드정보 페이징 목록
+    public PageResponseDTO<InfoPostDTO> findFundInfoPage(PageRequestDTO pageRequestDTO) {
+
+        // 방어 코드
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        // 목록
+        List<InfoPostDTO> list = infoPostMapper.selectFundInfoList(pageRequestDTO);
+
+        // 총 개수
+        int total = infoPostMapper.selectFundInfoTotal(pageRequestDTO);
+
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
+
+
     }
 
     public InfoPostDTO selectFundInfoById(int postId) {
@@ -320,9 +403,30 @@ public class InfoPostService {
         infoAttachmentMapper.insertInfoAttachment(fileDTO);
     }
 
-    // 펀드 가이드 목록 전체
+    // 펀드 가이드 목록 전체 (페이징 사용으로 주석처리)
+    /*
     public List<InfoPostDTO> findAllFundGuide() {
         return infoPostMapper.selectAllFundGuide();
+    }
+    */
+
+    // 펀드 가이드 페이징 목록
+    public PageResponseDTO<InfoPostDTO> findFundGuidePage(PageRequestDTO pageRequestDTO) {
+
+        // 방어 코드
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        // 목록
+        List<InfoPostDTO> list = infoPostMapper.selectFundGuideList(pageRequestDTO);
+
+        // 총 개수
+        int total = infoPostMapper.selectFundGuideTotal(pageRequestDTO);
+
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
+
+
     }
 
     // 펀드 가이드 상세
@@ -492,9 +596,30 @@ public class InfoPostService {
         infoAttachmentMapper.insertInfoAttachment(fileDTO);
     }
 
-    // 펀드 시황 목록 전체
+    // 펀드 시황 목록 전체 (페이징 사용으로 주석처리)
+    /*
     public List<InfoPostDTO> findAllFundMarket() {
         return infoPostMapper.selectAllFundMarket();
+    }
+    */
+
+    // 펀드 시황 페이징 목록
+    public PageResponseDTO<InfoPostDTO> findFundMarketPage(PageRequestDTO pageRequestDTO) {
+
+        // 방어 코드
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        // 목록
+        List<InfoPostDTO> list = infoPostMapper.selectFundMarketList(pageRequestDTO);
+
+        // 총 개수
+        int total = infoPostMapper.selectFundMarketTotal(pageRequestDTO);
+
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
+
+
     }
 
     // 펀드 시황 상세

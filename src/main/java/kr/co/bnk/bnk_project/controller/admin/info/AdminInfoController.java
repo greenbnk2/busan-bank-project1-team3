@@ -1,5 +1,7 @@
 package kr.co.bnk.bnk_project.controller.admin.info;
 
+import kr.co.bnk.bnk_project.dto.PageRequestDTO;
+import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.InfoPostDTO;
 import kr.co.bnk.bnk_project.service.admin.InfoPostService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin/info")
@@ -22,12 +23,13 @@ public class AdminInfoController {
     ///////       공시자료      ////////////
     //////////////////////////////////////
 
-    // 공시자료 목록 전체
+    // 공시자료 목록 페이징
     @GetMapping("/disclosures")
-    public String list(Model model) {
+    public String list(PageRequestDTO pageRequestDTO, Model model) {
 
-        List<InfoPostDTO> dtoList = infoPostService.findAllInfoPost();
-        model.addAttribute("dtoList",dtoList);
+        PageResponseDTO<InfoPostDTO> pageResponse = infoPostService.findInfoPostPage(pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
 
         // 모달 등록용 폼 객체
         InfoPostDTO postForm = new InfoPostDTO();
@@ -54,7 +56,6 @@ public class AdminInfoController {
         model.addAttribute("post",dto);
 
         return "admin/info&disclosures/disclosures_documents";
-
     }
 
     // 공시자료 수정
@@ -84,7 +85,6 @@ public class AdminInfoController {
     public String deleteDisclosure(@RequestParam("id") int postId){
 
         infoPostService.deleteDisclosure(postId);
-
         return "redirect:/admin/info/disclosures";
     }
 
@@ -92,11 +92,13 @@ public class AdminInfoController {
     ///////       수시공시      ////////////
     //////////////////////////////////////
 
+    // 수시공시 목록 페이징
     @GetMapping("/ad-hoc")
-    public String adHocDisclosure(Model model) {
+    public String adHocDisclosure(PageRequestDTO pageRequestDTO, Model model) {
 
-        List<InfoPostDTO> dtoList = infoPostService.findAllAdHoc();
-        model.addAttribute("dtoList",dtoList);
+        PageResponseDTO<InfoPostDTO> pageResponse = infoPostService.findAdHocPage(pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
 
         return "admin/info&disclosures/ad-hoc_disclosure";
     }
@@ -132,17 +134,17 @@ public class AdminInfoController {
         return "redirect:/admin/info/ad-hoc";
     }
 
-
     ///////////////////////////////////////
     ///////       펀드정보      ////////////
     //////////////////////////////////////
 
-    // 펀드정보 목록
+    // 펀드정보 목록 페이징
     @GetMapping("/fund-info")
-    public String fundInfo(Model model) {
+    public String fundInfo(PageRequestDTO pageRequestDTO, Model model) {
 
-        List<InfoPostDTO> dtoList = infoPostService.findAllFundInfo();
-        model.addAttribute("dtoList",dtoList);
+        PageResponseDTO<InfoPostDTO> pageResponse = infoPostService.findFundInfoPage(pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
 
         return "admin/info&disclosures/fund_info";
     }
@@ -150,15 +152,6 @@ public class AdminInfoController {
     // 펀드정보 등록
     @PostMapping("/fund-info")
     public String createFundInfo(InfoPostDTO dto){
-
-        if (dto.getStatus() == null || dto.getStatus().isBlank()) {
-            dto.setStatus("PUBLISHED");
-        }
-
-        if (dto.getCreatedBy() == null || dto.getCreatedBy().isBlank()) {
-            dto.setCreatedBy("admin");
-        }
-
         infoPostService.createFundInfo(dto);
         return "redirect:/admin/info/fund-info";
     }
@@ -187,35 +180,21 @@ public class AdminInfoController {
         return "redirect:/admin/info/fund-info";
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     ///////////////////////////////////////
     ///////       펀드시황      ////////////
     //////////////////////////////////////
 
+    // 펀드시황 목록 페이징
     @GetMapping("/fund-market")
-    public String fundMarket(Model model) {
+    public String fundMarket(PageRequestDTO pageRequestDTO, Model model) {
 
-        List<InfoPostDTO>  dtoList = infoPostService.findAllFundMarket();
-        model.addAttribute("dtoList",dtoList);
+        PageResponseDTO<InfoPostDTO> pageResponse = infoPostService.findFundMarketPage(pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
 
         // 모달 등록용 폼 객체
         InfoPostDTO postForm = new InfoPostDTO();
-        postForm.setStatus("게시중");
         model.addAttribute("postForm",postForm);
-
 
         return "admin/info&disclosures/fund_market";
     }
@@ -226,7 +205,6 @@ public class AdminInfoController {
                               @RequestParam("attachment")MultipartFile attachment) {
 
         infoPostService.createMarket(infoPostDTO,attachment);
-
         return "redirect:/admin/info/fund-market";
     }
 
@@ -247,7 +225,6 @@ public class AdminInfoController {
             @RequestParam("title") String title,
             @RequestParam("marketType") String marketType,
             @RequestParam("publishStartAt") String publishStartAt,
-            @RequestParam("channels") String channels,
             @RequestParam("summary") String summary,
             @RequestParam(value = "attachment" , required = false) MultipartFile attachment
     ) {
@@ -257,41 +234,33 @@ public class AdminInfoController {
         dto.setTitle(title);
         dto.setMarketType(marketType);
         dto.setPublishStartAt(LocalDateTime.parse(publishStartAt));
-        dto.setChannels(channels);
         dto.setSummary(summary);
 
         infoPostService.updateMarket(dto,attachment);
-
         return "redirect:/admin/info/fund-market";
     }
 
     // 펀드 시황 삭제
     @PostMapping("/market/delete")
     public String deleteMarket(@RequestParam("id") int postId){
-
         infoPostService.deleteMarket(postId);
-
         return  "redirect:/admin/info/fund-market";
     }
-
-
-
-
 
     ///////////////////////////////////////
     ///////       가이드      ////////////
     //////////////////////////////////////
 
-    // 펀드가이드 목록 전체
+    // 펀드가이드 목록 페이징
     @GetMapping("/guide")
-    public String guide(Model model) {
+    public String guide(PageRequestDTO pageRequestDTO, Model model) {
 
-        List<InfoPostDTO>  dtoList = infoPostService.findAllFundGuide();
-        model.addAttribute("dtoList",dtoList);
+        PageResponseDTO<InfoPostDTO> pageResponse = infoPostService.findFundGuidePage(pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
 
         // 모달 등록용 폼 객체
         InfoPostDTO postForm = new InfoPostDTO();
-        postForm.setStatus("노출중");
         model.addAttribute("postForm",postForm);
 
         return "admin/info&disclosures/guide";
@@ -303,7 +272,6 @@ public class AdminInfoController {
                               @RequestParam("attachment")MultipartFile attachment) {
 
         infoPostService.createGuide(infoPostDTO,attachment);
-
         return "redirect:/admin/info/guide";
     }
 
@@ -334,7 +302,6 @@ public class AdminInfoController {
         dto.setContent(content);
 
         infoPostService.updateGuide(dto,attachment);
-
         return "redirect:/admin/info/guide";
     }
 
@@ -343,7 +310,6 @@ public class AdminInfoController {
     public String deleteGuide(@RequestParam("id") int postId){
 
         infoPostService.deleteGuide(postId);
-
         return  "redirect:/admin/info/guide";
     }
 

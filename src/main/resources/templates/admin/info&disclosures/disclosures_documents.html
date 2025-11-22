@@ -27,8 +27,10 @@
 
             <section class="section-block">
                 <div class="table-info">
-                    <span>총 <strong>3</strong>건</span>
-                    <span class="pagination-info">1 / 1 page</span>
+                    <span>총 <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건</span>
+                    <span class="pagination-info" th:if="${pageResponse != null and pageResponse.total > 0}">
+                        현재: <span th:text="${pageRequestDTO.pg}">1</span> / <span th:text="${#numbers.formatDecimal((pageResponse.total + pageRequestDTO.size - 1) / pageRequestDTO.size, 0, 0)}">1</span> 페이지
+                    </span>
                 </div>
                 <table class="fund-table">
                     <thead>
@@ -36,28 +38,25 @@
                         <th>번호</th>
                         <th>제목</th>
                         <th>분류</th>
-                        <th>등록자</th>
                         <th>등록일</th>
                         <th>상태</th>
                         <th>관리</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="post : ${dtoList}"
+                    <tr th:each="post, stat : ${pageResponse != null ? pageResponse.dtoList : {}}"
                         th:attr="
                             data-id=${post.postId},
                             data-title=${post.title},
                             data-category=${post.disclosureType},
-                            data-author=${post.createdBy},
                             data-date=${post.createdAt},
                             data-content=${post.content},
                             data-status=${post.status}">
-                        <td th:text="${post.postId}"></td>
+                        <td th:text="${pageResponse.startNo - stat.index}"></td>
                         <td th:text="${post.title}" class="text-left"></td>
                         <td th:text="${post.disclosureType}"></td>
-                        <td th:text="${post.createdBy}"></td>
                         <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></td>
-                        <td th:text="${post.status}"></td>
+                        <td th:text="${post.status == 'PUBLISHED' ? '게시중' : (post.status == 'DRAFT' ? '임시저장' : post.status)}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
@@ -67,17 +66,15 @@
 
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" disabled>&lt;</button>
-
+                <div class="pagination" th:if="${pageResponse != null and pageResponse.total > 0}">
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
-                        <button class="page-number">2</button>
-                        <button class="page-number">3</button>
-                        <button class="page-number">4</button>
-                        <button class="page-number">5</button>
+                        <button class="page-number"
+                                th:each="p : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                th:text="${p}"
+                                th:classappend="${p == pageRequestDTO.pg} ? ' active'"
+                                th:onclick="|location.href='@{/admin/info/disclosures(pg=${p}, size=${pageRequestDTO.size})}'|">
+                        </button>
                     </div>
-                    <button class="page-btn next" disabled>&gt;</button>
                 </div>
             </section>
             <!-- 푸터 영역 -->
@@ -141,10 +138,6 @@
             <div class="form-field">
                 <label>분류</label>
                 <div class="detail-value" id="detailAnnouncementCategory"></div>
-            </div>
-            <div class="form-field">
-                <label>등록자</label>
-                <div class="detail-value" id="detailAnnouncementAuthor"></div>
             </div>
             <div class="form-field">
                 <label>등록일</label>
@@ -332,7 +325,6 @@
                     const id = row.getAttribute('data-id');
                     const title = row.getAttribute('data-title');
                     const category = row.getAttribute('data-category');
-                    const author = row.getAttribute('data-author');
                     const date = row.getAttribute('data-date');
                     const content = row.getAttribute('data-content');
                     const status = row.getAttribute('data-status');
@@ -342,10 +334,10 @@
                         document.getElementById('detailAnnouncementId').textContent = id || '-';
                         document.getElementById('detailAnnouncementTitle').textContent = title || '-';
                         document.getElementById('detailAnnouncementCategory').textContent = category || '-';
-                        document.getElementById('detailAnnouncementAuthor').textContent = author || '-';
-                        document.getElementById('detailAnnouncementDate').textContent = date || '-';
+                        document.getElementById('detailAnnouncementDate').textContent = date ? (date.includes('T') ? date.replace('T', ' ').substring(0, 16) : date + ' 00:00') : '-';
                         document.getElementById('detailAnnouncementContent').textContent = content || '-';
-                        document.getElementById('detailAnnouncementStatus').textContent = status || '-';
+                        const statusKo = status === 'PUBLISHED' ? '게시중' : (status === 'DRAFT' ? '임시저장' : status);
+                        document.getElementById('detailAnnouncementStatus').textContent = statusKo || '-';
                         showModal(detailModal);
                     } else if (action === 'edit') {
                         // 수정 모달에 데이터 채우기

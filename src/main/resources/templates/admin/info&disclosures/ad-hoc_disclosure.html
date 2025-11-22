@@ -27,38 +27,42 @@
 
             <section class="section-block">
                 <div class="table-info">
-                    <span>총 <strong>3</strong>건</span>
-                    <span class="pagination-info">1 / 1 page</span>
+                    <span>총 <strong th:text="${pageResponse != null ? pageResponse.total : 0}"></strong>건</span>
+                    <span class="pagination-info" th:if="${pageResponse != null and pageResponse.total > 0}">
+                        현재: <span th:text="${pageRequestDTO.pg}"></span> / <span th:text="${#numbers.formatDecimal((pageResponse.total + pageRequestDTO.size - 1) / pageRequestDTO.size, 0, 0)}"></span> 페이지
+                    </span>
                 </div>
                 <table class="fund-table">
                     <thead>
                     <tr>
+                        <th>번호</th>
                         <th>공시번호</th>
                         <th>제목</th>
                         <th>유형</th>
+                        <th>운용사</th>
                         <th>게시 시작</th>
-                        <th>게시 종료</th>
                         <th>상태</th>
                         <th>관리</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="post : ${dtoList}"
+                    <tr th:each="post, stat : ${pageResponse != null ? pageResponse.dtoList : {}}"
                         th:attr="
                             data-postid=${post.postId},
                             data-adhocno=${post.adhocNo},
                             data-title=${post.title},
                             data-type=${post.adhocType},
+                            data-company=${post.company},
                             data-start=${post.publishStartAt},
-                            data-end=${post.publishEndAt},
                             data-content=${post.content},
                             data-status=${post.status}">
+                        <td th:text="${pageResponse.startNo - stat.index}"></td>
                         <td th:text="${post.adhocNo}"></td>
                         <td th:text="${post.title}"></td>
                         <td th:text="${post.adhocType}"></td>
+                        <td th:text="${post.company != null ? post.company : '-'}"></td>
                         <td th:text="${#temporals.format(post.publishStartAt,'yyyy-MM-dd HH:mm')}"></td>
-                        <td th:text="${#temporals.format(post.publishEndAt,'yyyy-MM-dd HH:mm')}"></td>
-                        <td th:text="${post.status}"></td>
+                        <td th:text="${post.status == 'PUBLISHED' ? '게시중' : (post.status == 'DRAFT' ? '임시저장' : post.status)}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
@@ -68,12 +72,15 @@
 
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" disabled>&lt;</button>
+                <div class="pagination" th:if="${pageResponse != null and pageResponse.total > 0}">
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
+                        <button class="page-number"
+                                th:each="p : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                th:text="${p}"
+                                th:classappend="${p == pageRequestDTO.pg} ? ' active'"
+                                th:onclick="|location.href='@{/admin/info/ad-hoc(pg=${p}, size=${pageRequestDTO.size})}'|">
+                        </button>
                     </div>
-                    <button class="page-btn next" disabled>&gt;</button>
                 </div>
             </section>
             <!-- 푸터 영역 -->
@@ -88,9 +95,6 @@
         <h3>수시공시 등록</h3>
         <form id="adhocForm" class="modal-form"
               th:action="@{/admin/info/ad-hoc}" method="post">
-
-            <input type="hidden" name="createdBy" value="admin">
-            <input type="hidden" name="status" value="PUBLISHED">
 
             <div class="form-field">
                 <label for="adhocCode">공시번호</label>
@@ -109,15 +113,13 @@
                     <option value="긴급공시">긴급공시</option>
                 </select>
             </div>
-            <div class="field-row">
-                <div class="form-field">
-                    <label for="adhocStart">게시 시작</label>
-                    <input type="datetime-local" id="adhocStart" name="publishStartAt" required>
-                </div>
-                <div class="form-field">
-                    <label for="adhocEnd">게시 종료</label>
-                    <input type="datetime-local" id="adhocEnd" name="publishEndAt">
-                </div>
+            <div class="form-field">
+                <label for="adhocCompany">운용사</label>
+                <input type="text" id="adhocCompany" name="company" placeholder="운용사를 입력하세요">
+            </div>
+            <div class="form-field">
+                <label for="adhocStart">게시 시작</label>
+                <input type="datetime-local" id="adhocStart" name="publishStartAt" required>
             </div>
             <div class="form-field">
                 <label for="adhocContent">내용</label>
@@ -148,15 +150,13 @@
                 <label>공시유형</label>
                 <div class="detail-value" id="detailAdhocType"></div>
             </div>
-            <div class="field-row">
-                <div class="form-field">
-                    <label>게시 시작</label>
-                    <div class="detail-value" id="detailAdhocStart"></div>
-                </div>
-                <div class="form-field">
-                    <label>게시 종료</label>
-                    <div class="detail-value" id="detailAdhocEnd"></div>
-                </div>
+            <div class="form-field">
+                <label>운용사</label>
+                <div class="detail-value" id="detailAdhocCompany"></div>
+            </div>
+            <div class="form-field">
+                <label>게시 시작</label>
+                <div class="detail-value" id="detailAdhocStart"></div>
             </div>
             <div class="form-field">
                 <label>내용</label>
@@ -200,15 +200,13 @@
                     <option value="긴급공시">긴급공시</option>
                 </select>
             </div>
-            <div class="field-row">
-                <div class="form-field">
-                    <label for="editAdhocStart">게시 시작</label>
-                    <input type="datetime-local" id="editAdhocStart" name="publishStartAt" required>
-                </div>
-                <div class="form-field">
-                    <label for="editAdhocEnd">게시 종료</label>
-                    <input type="datetime-local" id="editAdhocEnd" name="publishEndAt">
-                </div>
+            <div class="form-field">
+                <label for="editAdhocCompany">운용사</label>
+                <input type="text" id="editAdhocCompany" name="company" placeholder="운용사를 입력하세요">
+            </div>
+            <div class="form-field">
+                <label for="editAdhocStart">게시 시작</label>
+                <input type="datetime-local" id="editAdhocStart" name="publishStartAt" required>
             </div>
             <div class="form-field">
                 <label for="editAdhocContent">내용</label>
@@ -343,8 +341,8 @@
                     const adhocNo = row.getAttribute('data-adhocno');
                     const title = row.getAttribute('data-title');
                     const type = row.getAttribute('data-type');
+                    const company = row.getAttribute('data-company');
                     const start = row.getAttribute('data-start');
-                    const end = row.getAttribute('data-end');
                     const content = row.getAttribute('data-content');
                     const status = row.getAttribute('data-status');
 
@@ -353,10 +351,11 @@
                         document.getElementById('detailAdhocCode').textContent = adhocNo || '-';
                         document.getElementById('detailAdhocTitle').textContent = title || '-';
                         document.getElementById('detailAdhocType').textContent = type || '-';
-                        document.getElementById('detailAdhocStart').textContent = start ? start.replace('T', ' ') : '-';
-                        document.getElementById('detailAdhocEnd').textContent = end ? end.replace('T', ' ') : '-';
+                        document.getElementById('detailAdhocCompany').textContent = company || '-';
+                        document.getElementById('detailAdhocStart').textContent = start ? start.replace('T', ' ').substring(0, 16) : '-';
                         document.getElementById('detailAdhocContent').textContent = content || '-';
-                        document.getElementById('detailAdhocStatus').textContent = status || '-';
+                        const statusKo = status === 'PUBLISHED' ? '게시중' : (status === 'DRAFT' ? '임시저장' : status);
+                        document.getElementById('detailAdhocStatus').textContent = statusKo || '-';
                         showModal(detailModal);
                     } else if (action === 'edit') {
                         // 수정 모달에 데이터 채우기
@@ -366,8 +365,10 @@
                         document.getElementById('editAdhocCode').value = adhocNo || '';
                         document.getElementById('editAdhocTitle').value = title || '';
                         document.getElementById('editAdhocType').value = type || '';
-                        document.getElementById('editAdhocStart').value = start || '';
-                        document.getElementById('editAdhocEnd').value = end || '';
+                        document.getElementById('editAdhocCompany').value = company || '';
+                        const raw = start || '';
+                        const converted = raw.replace(' ', 'T').substring(0, 16);
+                        document.getElementById('editAdhocStart').value = converted;
                         document.getElementById('editAdhocContent').value = content || '';
                         document.getElementById('editStatus').value = status || 'PUBLISHED';
                         showModal(editModal);

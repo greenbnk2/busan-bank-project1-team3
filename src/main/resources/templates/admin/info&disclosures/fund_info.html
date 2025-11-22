@@ -27,12 +27,15 @@
 
             <section class="section-block">
                 <div class="table-info">
-                    <span>총 <strong>3</strong>건</span>
-                    <span class="pagination-info">1 / 1 page</span>
+                    <span>총 <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건</span>
+                    <span class="pagination-info" th:if="${pageResponse != null and pageResponse.total > 0}">
+                        현재: <span th:text="${pageRequestDTO.pg}">1</span> / <span th:text="${#numbers.formatDecimal((pageResponse.total + pageRequestDTO.size - 1) / pageRequestDTO.size, 0, 0)}">1</span> 페이지
+                    </span>
                 </div>
                 <table class="fund-table">
                     <thead>
                     <tr>
+                        <th>번호</th>
                         <th>상품코드</th>
                         <th>펀드명</th>
                         <th>유형</th>
@@ -43,22 +46,23 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr  th:each="post : ${dtoList}"
+                    <tr  th:each="post, stat : ${pageResponse != null ? pageResponse.dtoList : {}}"
                          th:attr="
                             data-id=${post.postId},
                             data-code=${post.fundCode},
                             data-name=${post.title},
                             data-type=${post.fundInfoType},
                             data-company=${post.company},
-                            data-start-date=${#temporals.format(post.createdAt, 'yyyy-MM-dd')},
+                            data-start-date=${post.createdAt},
                             data-description=${post.content},
                             data-status=${post.content}">
+                        <td th:text="${pageResponse.startNo - stat.index}"></td>
                         <td th:text="${post.fundCode}"></td>
                         <td th:text="${post.title}" class="text-left"></td>
                         <td th:text="${post.fundInfoType}"></td>
                         <td th:text="${post.company}"></td>
                         <td th:text="${#temporals.format(post.createdAt,'yyyy-MM-dd')}"></td>
-                        <td th:text="${post.status}"></td>
+                        <td th:text="${post.status == 'PUBLISHED' ? '게시중' : (post.status == 'DRAFT' ? '임시저장' : post.status)}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
@@ -68,12 +72,15 @@
 
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" disabled>&lt;</button>
+                <div class="pagination" th:if="${pageResponse != null and pageResponse.total > 0}">
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
+                        <button class="page-number"
+                                th:each="p : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                th:text="${p}"
+                                th:classappend="${p == pageRequestDTO.pg} ? ' active'"
+                                th:onclick="|location.href='@{/admin/info/fund-info(pg=${p}, size=${pageRequestDTO.size})}'|">
+                        </button>
                     </div>
-                    <button class="page-btn next" disabled>&gt;</button>
                 </div>
             </section>
             <!-- 푸터 영역 -->
@@ -359,9 +366,10 @@
                         document.getElementById('detailFundName').textContent = name || '-';
                         document.getElementById('detailFundType').textContent = type || '-';
                         document.getElementById('detailFundCompany').textContent = company || '-';
-                        document.getElementById('detailFundStartDate').textContent = startDate ? startDate.substring(0, 10) : '-';
+                        document.getElementById('detailFundStartDate').textContent = startDate ? (startDate.includes('T') ? startDate.replace('T', ' ').substring(0, 16) : startDate + ' 00:00') : '-';
                         document.getElementById('detailFundDescription').textContent = description || '-';
-                        document.getElementById('detailFundStatus').textContent = status || '-';
+                        const statusKo = status === 'PUBLISHED' ? '게시중' : (status === 'DRAFT' ? '임시저장' : status);
+                        document.getElementById('detailFundStatus').textContent = statusKo || '-';
                         showModal(detailModal);
                     } else if (action === 'edit') {
                         // 수정 모달에 데이터 채우기

@@ -27,8 +27,10 @@
 
             <section class="section-block">
                 <div class="table-info">
-                    <span>총 <strong>3</strong>건</span>
-                    <span class="pagination-info">1 / 1 page</span>
+                    <span>총 <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건</span>
+                    <span class="pagination-info" th:if="${pageResponse != null and pageResponse.total > 0}">
+                        현재: <span th:text="${pageRequestDTO.pg}">1</span> / <span th:text="${#numbers.formatDecimal((pageResponse.total + pageRequestDTO.size - 1) / pageRequestDTO.size, 0, 0)}">1</span> 페이지
+                    </span>
                 </div>
                 <table class="fund-table">
                     <thead>
@@ -37,27 +39,24 @@
                         <th>제목</th>
                         <th>유형</th>
                         <th>게시일</th>
-                        <th>채널</th>
                         <th>상태</th>
                         <th>관리</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="post : ${dtoList}"
+                    <tr th:each="post, stat : ${pageResponse != null ? pageResponse.dtoList : {}}"
                         th:attr="
                             data-id=${post.postId},
                             data-title=${post.title},
                             data-type=${post.marketType},
                             data-publish=${post.publishStartAt},
-                            data-channel=${post.channels},
                             data-summary=${post.summary},
                             data-status=${post.status}">
-                        <td th:text="${post.postId}"></td>
+                        <td th:text="${pageResponse.startNo - stat.index}"></td>
                         <td th:text="${post.title}"></td>
                         <td th:text="${post.marketType}"></td>
-                        <td th:text="${#temporals.format(post.publishStartAt,'yyyy-MM-dd HH:mm')}"></td>
-                        <td th:text="${post.channels}"></td>
-                        <td th:text="${post.status}"></td>
+                        <td th:text="${#temporals.format(post.publishStartAt,'yyyy-MM-dd')}"></td>
+                        <td th:text="${post.status == 'PUBLISHED' ? '게시중' : (post.status == 'DRAFT' ? '임시저장' : post.status)}"></td>
                         <td class="cell-actions">
                             <button type="button" class="btn-action" data-action="detail">상세</button>
                             <button type="button" class="btn-action" data-action="edit">수정</button>
@@ -67,12 +66,15 @@
 
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" disabled>&lt;</button>
+                <div class="pagination" th:if="${pageResponse != null and pageResponse.total > 0}">
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
+                        <button class="page-number"
+                                th:each="p : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                th:text="${p}"
+                                th:classappend="${p == pageRequestDTO.pg} ? ' active'"
+                                th:onclick="|location.href='@{/admin/info/fund-market(pg=${p}, size=${pageRequestDTO.size})}'|">
+                        </button>
                     </div>
-                    <button class="page-btn next" disabled>&gt;</button>
                 </div>
             </section>
             <!-- 푸터 영역 -->
@@ -107,15 +109,6 @@
             <div class="form-field">
                 <label for="marketPublishAt">게시일</label>
                 <input type="datetime-local" id="marketPublishAt" name="publishStartAt" required>
-            </div>
-            <div class="form-field">
-                <label for="marketChannel">채널</label>
-                <select id="marketChannel" name="channels" required>
-                    <option value="">선택하세요</option>
-                    <option value="웹">웹</option>
-                    <option value="모바일">모바일</option>
-                    <option value="웹/모바일">웹/모바일</option>
-                </select>
             </div>
             <div class="form-field">
                 <label for="marketSummary">요약</label>
@@ -154,10 +147,6 @@
             <div class="form-field">
                 <label>게시일</label>
                 <div class="detail-value" id="detailMarketPublish"></div>
-            </div>
-            <div class="form-field">
-                <label>채널</label>
-                <div class="detail-value" id="detailMarketChannel"></div>
             </div>
             <div class="form-field">
                 <label>요약</label>
@@ -200,15 +189,6 @@
             <div class="form-field">
                 <label for="editMarketPublishAt">게시일</label>
                 <input type="datetime-local" id="editMarketPublishAt" name="publishStartAt" required>
-            </div>
-            <div class="form-field">
-                <label for="editMarketChannel">채널</label>
-                <select id="editMarketChannel" name="channels" required>
-                    <option value="">선택하세요</option>
-                    <option value="웹">웹</option>
-                    <option value="모바일">모바일</option>
-                    <option value="웹/모바일">웹/모바일</option>
-                </select>
             </div>
             <div class="form-field">
                 <label for="editMarketSummary">요약</label>
@@ -354,7 +334,6 @@
                     const title = row.getAttribute('data-title');
                     const type = row.getAttribute('data-type');
                     const publish = row.getAttribute('data-publish');
-                    const channel = row.getAttribute('data-channel');
                     const summary = row.getAttribute('data-summary');
                     const status = row.getAttribute('data-status');
 
@@ -363,10 +342,10 @@
                         document.getElementById('detailMarketId').textContent = id || '-';
                         document.getElementById('detailMarketTitle').textContent = title || '-';
                         document.getElementById('detailMarketType').textContent = type || '-';
-                        document.getElementById('detailMarketPublish').textContent = publish ? publish.replace('T', ' ') : '-';
-                        document.getElementById('detailMarketChannel').textContent = channel || '-';
+                        document.getElementById('detailMarketPublish').textContent = publish ? (publish.includes('T') ? publish.replace('T', ' ').substring(0, 16) : publish + ' 00:00') : '-';
                         document.getElementById('detailMarketSummary').textContent = summary || '-';
-                        document.getElementById('detailMarketStatus').textContent = status || '-';
+                        const statusKo = status === 'PUBLISHED' ? '게시중' : (status === 'DRAFT' ? '임시저장' : status);
+                        document.getElementById('detailMarketStatus').textContent = statusKo || '-';
                         showModal(detailModal);
                     } else if (action === 'edit') {
                         // 수정 모달에 데이터 채우기
@@ -379,7 +358,6 @@
                             .substring(0, 16);      // 초 제거하여 yyyy-MM-ddTHH:mm 형태로 맞춤
 
                         document.getElementById('editMarketPublishAt').value = converted;
-                        document.getElementById('editMarketChannel').value = channel || '';
                         document.getElementById('editMarketSummary').value = summary || '';
                         showModal(editModal);
                     } else if (action === 'delete') {

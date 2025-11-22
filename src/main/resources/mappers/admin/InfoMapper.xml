@@ -31,7 +31,8 @@
         )
     </insert>
 
-    <!-- 공시자료 목록 + 상세 -->
+    <!-- 공시자료 목록 + 상세 (페이징 사용으로 주석처리) -->
+    <!--
     <select id="selectAllInfoPost" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
         SELECT
             post_id         AS postId,
@@ -39,13 +40,41 @@
             disclosure_type AS disclosureType,
             created_by      AS createdBy,
             created_at      AS createdAt,
-            content,            <!-- 상세 모달에서 필요 -->
+            content,
             status
         FROM
             info_post
         WHERE
             post_type = 'DISCLOSURE'
         ORDER BY post_id DESC
+    </select>
+    -->
+
+    <!-- 공시자료 페이징 목록 -->
+    <select id="selectInfoPostList" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id         AS postId,
+            title,
+            disclosure_type AS disclosureType,
+            created_at      AS createdAt,
+            content,
+            status
+        FROM
+            info_post
+        WHERE
+            post_type = 'DISCLOSURE'
+        ORDER BY post_id DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 공시자료 총 개수 -->
+    <select id="selectInfoPostTotal" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM info_post
+        WHERE post_type = 'DISCLOSURE'
     </select>
 
     <!-- 공시자료 수정 -->
@@ -79,9 +108,9 @@
         adhoc_type,
         adhoc_no,
         category_id,
+        company,
         status,
         publish_start_at,
-        publish_end_at,
         created_by,
         created_at
         ) VALUES (
@@ -92,15 +121,16 @@
         #{adhocType, jdbcType=VARCHAR},
         #{adhocNo, jdbcType=VARCHAR},
         #{categoryId, jdbcType=INTEGER},
+        #{company, jdbcType=VARCHAR},
         #{status, jdbcType=VARCHAR},
         #{publishStartAt, jdbcType=TIMESTAMP},
-        #{publishEndAt, jdbcType=TIMESTAMP},
         #{createdBy, jdbcType=VARCHAR},
         SYSDATE
         )
     </insert>
 
-    <!-- 수시공시 목록 + 상세 -->
+    <!-- 수시공시 목록 + 상세 (페이징 사용으로 주석처리) -->
+    <!--
     <select id="selectAllAdHoc" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
         SELECT
             post_id             AS postId,
@@ -120,6 +150,39 @@
         WHERE post_type = 'AD_HOC'
         ORDER BY post_id DESC
     </select>
+    -->
+
+    <!-- 수시공시 페이징 목록 -->
+    <select id="selectAdHocList" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id             AS postId,
+            title,
+            adhoc_type         AS adHocType,
+            adhoc_no           AS adHocNo,
+            category_id         AS categoryId,
+            company,
+            content,
+            publish_start_at    AS publishStartAt,
+            status,
+            created_by          AS createdBy,
+            created_at          AS createdAt,
+            updated_by          AS updatedBy,
+            updated_at          AS updatedAt
+        FROM info_post
+        WHERE post_type = 'AD_HOC'
+        ORDER BY post_id DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 수시공시 총 개수 -->
+    <select id="selectAdHocTotal" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM info_post
+        WHERE post_type = 'AD_HOC'
+    </select>
 
     <!-- 수시공시 수정 -->
     <update id="updateAdHoc" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
@@ -127,9 +190,9 @@
         SET
             title = #{title},
             adhoc_type = #{adhocType},
+            company = #{company},
             content = #{content},
-            publish_start_at = #{publishStartAt},
-            publish_end_at = #{publishEndAt}
+            publish_start_at = #{publishStartAt}
         WHERE
             post_id = #{postId}
           AND post_type = 'AD_HOC'
@@ -173,7 +236,8 @@
         )
     </insert>
 
-    <!-- 펀드정보 목록 + 상세 -->
+    <!-- 펀드정보 목록 + 상세 (페이징 사용으로 주석처리) -->
+    <!--
     <select id="selectAllFundInfo" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
         SELECT
             post_id          AS postId,
@@ -190,6 +254,37 @@
             post_type = 'FUND_INFO'
         ORDER BY
             post_id DESC
+    </select>
+    -->
+
+    <!-- 펀드정보 페이징 목록 -->
+    <select id="selectFundInfoList" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id          AS postId,
+            fund_code        AS fundCode,
+            title            AS title,
+            fund_info_type   AS fundInfoType,
+            company          AS company,
+            created_at       AS createdAt,
+            content          AS content,
+            status           AS status
+        FROM
+            info_post
+        WHERE
+            post_type = 'FUND_INFO'
+        ORDER BY
+            post_id DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 펀드정보 총 개수 -->
+    <select id="selectFundInfoTotal" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM info_post
+        WHERE post_type = 'FUND_INFO'
     </select>
 
      <!-- 펀드정보 수정 -->
@@ -242,7 +337,8 @@
         )
     </insert>
 
-    <!-- 펀드 가이드 목록 + 상세 -->
+    <!-- 펀드 가이드 목록 + 상세 (페이징 사용으로 주석처리) -->
+    <!--
     <select id="selectAllFundGuide" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
         SELECT
             post_id         AS postId,
@@ -257,6 +353,35 @@
         WHERE
             post_type = 'FUND_GUIDE'
         ORDER BY post_id DESC
+    </select>
+    -->
+
+    <!-- 펀드 가이드 페이징 목록 -->
+    <select id="selectFundGuideList" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id         AS postId,
+            title,
+            guide_type AS guideType,
+            content,
+            status,
+            created_by      AS createdBy,
+            created_at      AS createdAt
+        FROM
+            info_post
+        WHERE
+            post_type = 'FUND_GUIDE'
+        ORDER BY post_id DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 펀드 가이드 총 개수 -->
+    <select id="selectFundGuideTotal" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM info_post
+        WHERE post_type = 'FUND_GUIDE'
     </select>
 
     <!-- 펀드 가이드 수정 -->
@@ -295,7 +420,6 @@
             title,
             market_type,
             summary,
-            channels,
             publish_start_at,
             content,
             status,
@@ -307,7 +431,6 @@
             #{title},
             #{marketType},
             #{summary},
-            #{channels},
             #{publishStartAt, jdbcType=TIMESTAMP},
             #{content, jdbcType=CLOB},
             NVL(#{status}, 'PUBLISHED'),
@@ -316,7 +439,8 @@
         )
     </insert>
 
-    <!-- 펀드시황관리 목록 + 상세 -->
+    <!-- 펀드시황관리 목록 + 상세 (페이징 사용으로 주석처리) -->
+    <!--
     <select id="selectAllFundMarket" resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
         SELECT
             post_id         AS postId,
@@ -335,6 +459,37 @@
             post_type = 'FUND_MARKET'
         ORDER BY post_id DESC
     </select>
+    -->
+
+    <!-- 펀드시황 페이징 목록 -->
+    <select id="selectFundMarketList" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
+        SELECT
+            post_id         AS postId,
+            title,
+            market_type AS  marketType,
+            summary,
+            publish_start_at AS publishStartAt,
+            content,
+            status,
+            created_by      AS createdBy,
+            created_at      AS createdAt
+        FROM
+            info_post
+        WHERE
+            post_type = 'FUND_MARKET'
+        ORDER BY post_id DESC
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 펀드시황 총 개수 -->
+    <select id="selectFundMarketTotal" parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM info_post
+        WHERE post_type = 'FUND_MARKET'
+    </select>
 
     <!-- 펀드시황관리 수정 -->
     <update id="updateFundMarket" parameterType="kr.co.bnk.bnk_project.dto.admin.InfoPostDTO">
@@ -343,7 +498,6 @@
             title = #{title},
             market_type = #{marketType},
             summary = #{summary},
-            channels = #{channels},
             publish_start_at = #{publishStartAt},
             updated_by = NVL(#{updatedBy,jdbcType=VARCHAR}, 'admin'),
             updated_at = SYSDATE
