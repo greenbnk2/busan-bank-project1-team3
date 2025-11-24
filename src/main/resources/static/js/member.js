@@ -112,6 +112,12 @@ function initRegisterPage() {
             return false;
         }
 
+        // 검증 통과 시 전체 화면 로딩 오버레이 표시
+        const loadingOverlay = document.getElementById('fullScreenLoading');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex'; // 화면에 표시
+        }
+
         // 검증 통과 시 폼 제출
         form.submit();
     });
@@ -508,7 +514,7 @@ async function sendEmailVerification() {
     const btnVerify = document.querySelector('button[onclick="sendEmailVerification()"]');
 
     btnVerify.disabled = true;
-    btnVerify.textContent = '전송중...';
+    btnVerify.innerHTML = '<span class="spinner-small"></span> 전송중...';
 
     try {
         // [주의] 이 API 엔드포인트는 서버에 구현해야 합니다.

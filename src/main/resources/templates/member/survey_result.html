@@ -1,0 +1,53 @@
+<div th:replace="~{member/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper" style="display: block; text-align: center; padding: 60px 20px;">
+
+            <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border: 1px solid #eee;">
+
+                <h2 style="color: #666; font-size: 18px; margin-bottom: 10px;">고객님의 투자 성향 분석 결과</h2>
+
+                <div style="margin: 30px 0;">
+                    <span style="font-size: 42px; font-weight: bold; color: #c6281f;" th:text="${riskType}">적극투자형</span>
+                    <div style="margin-top: 10px; font-size: 15px; color: #333;">
+                        높은 수익을 기대하며, <br>
+                        일정 수준의 손실 위험을 감수할 수 있는 투자자입니다.
+                    </div>
+                </div>
+
+                <div style="margin: 40px 0;">
+                    <div style="width: 100%; height: 10px; background: #eee; border-radius: 5px; position: relative; margin-top: 10px;">
+                        <div style="position: absolute; left: 80%; top: -35px; transform: translateX(-50%);">
+                            <span style="background: #c6281f; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">MY</span>
+                            <div style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #c6281f; margin: 0 auto;"></div>
+                        </div>
+                        <div style="width: 80%; height: 100%; background: linear-gradient(90deg, #ffcccb, #c6281f); border-radius: 5px;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; color: #888;">
+                        <span>안정형</span>
+                        <span>공격형</span>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+                <p style="margin-bottom: 20px; font-size: 16px;">
+                    고객님께 딱 맞는 <strong>BNK 펀드 상품</strong>을 확인해보세요.
+                </p>
+
+                <button type="button" class="btn-red" style="width: 100%; font-size: 18px;" onclick="location.href='/fund/productList'">
+                    추천 상품 보러가기
+                </button>
+
+                <div style="margin-top: 15px;">
+                    <a href="/" style="color: #888; text-decoration: underline; font-size: 13px;">메인으로 돌아가기</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{member/_tail.html}"></div>
