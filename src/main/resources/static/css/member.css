@@ -954,3 +954,227 @@
 .hg-button-numpad {
     background: #e3f2fd !important; /* 연한 파란색 */
 }
+
+
+/* ======================= 로딩 애니메이션 ======================= */
+
+/* 1. 로딩 스피너 애니메이션 정의 */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 2. 버튼 내부용 작은 스피너 */
+.spinner-small {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #333; /* 버튼 글자색에 맞춤 */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+/* 3. 전체 화면용 큰 스피너 */
+.spinner-large {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top-color: #c6281f; /* BNK 브랜드 컬러(빨강) */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto; /* 중앙 정렬 및 아래 여백 */
+}
+
+/* 4. 전체 화면 로딩 오버레이 (가림막) */
+.loading-overlay {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은 배경 */
+    z-index: 9999; /* 모든 요소 위에 뜸 */
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* 5. 로딩 메시지 박스 */
+.loading-message-box {
+    background: #fff;
+    padding: 30px 50px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.loading-text-main {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.loading-text-sub {
+    font-size: 13px;
+    color: #666;
+}
+
+/* ======================= 이메일인증 버튼 비활성화 스타일  ======================= */
+
+/* btn-secondary(이메일 인증 등) 버튼이 비활성화(disabled) 되었을 때 */
+.btn-secondary:disabled {
+    background-color: #f0f0f0;  /* 배경을 연한 회색으로 */
+    color: #999;                /* 글자를 흐린 회색으로 */
+    border-color: #ddd;         /* 테두리도 흐리게 */
+    cursor: not-allowed;        /* 마우스 올리면 '금지' 아이콘 표시 */
+    opacity: 0.7;               /* 전체적으로 약간 투명하게 */
+}
+
+/* 빨간색 메인 버튼이 비활성화 되었을 때도 대비 */
+.btn-red:disabled {
+    background-color: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+
+/* ======================= 투자성향분석 설문 (Survey) ======================= */
+.survey-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.survey-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background-color: #f0f0f0;
+    border-radius: 3px;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #c6281f;
+    width: 0%; /* JS로 제어 */
+    transition: width 0.3s ease;
+}
+
+/* 질문 카드 */
+.question-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+    opacity: 0.4; /* 활성화 안된 카드는 흐리게 */
+    pointer-events: none; /* 클릭 방지 */
+}
+
+.question-card.active {
+    opacity: 1;
+    pointer-events: auto;
+    border-color: #c6281f;
+    transform: translateY(-5px);
+}
+
+.question-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.question-title span {
+    color: #c6281f;
+    margin-right: 5px;
+}
+
+/* 답변 선택지 */
+.option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.option-label:hover {
+    background-color: #f9f9f9;
+}
+
+/* 라디오/체크박스 숨기고 커스텀 디자인 */
+.option-label input[type="radio"],
+.option-label input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 50%; /* 라디오는 원형 */
+    margin-right: 12px;
+    position: relative;
+}
+
+.option-label input[type="checkbox"] {
+    border-radius: 4px; /* 체크박스는 사각형 */
+}
+
+.option-label input:checked {
+    border-color: #c6281f;
+    background-color: #c6281f;
+}
+
+/* 체크 표시 (가상 요소) */
+.option-label input:checked::after {
+    content: '✔';
+    color: #fff;
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 선택된 항목 스타일 강조 */
+.option-label.selected {
+    border-color: #c6281f;
+    background-color: #fff5f5;
+    font-weight: bold;
+    color: #c6281f;
+}
+
+/* 결과 보기 버튼 */
+.btn-submit-survey {
+    width: 100%;
+    padding: 18px;
+    background-color: #c6281f;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+}

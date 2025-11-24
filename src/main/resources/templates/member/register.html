@@ -44,9 +44,8 @@
                         <h1 class="register-title">회원가입</h1>
                         <div class="step-indicator">
                             <span class="step">1</span>
-                            <span class="step">2</span>
-                            <span class="step active">3 정보입력</span>
-                            <span class="step">4</span>
+                            <span class="step active">2 정보입력</span>
+                            <span class="step">3</span>
                         </div>
                     </div>
 
@@ -340,26 +339,6 @@
                                 </td>
                                 </tr>
 
-                                <!-- 자동차소유 -->
-                                <tr>
-                                    <th><label>자동차소유 <span class="required">*</span></label></th>
-                                    <td>
-                                        <div class="inline-group">
-                                            <div class="radio-group" style="display: inline-flex;">
-                                                <label class="radio-inline">
-                                                    <input type="radio" name="hasCar" value="1" onclick="toggleCarNumber(true)"> 소유
-                                                </label>
-                                                <label class="radio-inline">
-                                                    <input type="radio" name="hasCar" value="2" onclick="toggleCarNumber(false)" checked> 미소유
-                                                </label>
-                                            </div>
-                                            <div id="carNumberGroup" style="display: none; margin-left: 50px;">
-                                                <label style="margin-right: 10px;">차량번호</label>
-                                                <input type="text" id="carNumber" name="carNumber" class="input-text input-medium">
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
                             </table>
                         </div>
 
@@ -375,4 +354,11 @@
         </div>
     </div>
 </main>
+<div id="fullScreenLoading" class="loading-overlay">
+    <div class="loading-message-box">
+        <div class="spinner-large"></div>
+        <p class="loading-text-main">처리 중입니다</p>
+        <p class="loading-text-sub">고객님의 정보를 안전하게 암호화하고 있습니다.<br>잠시만 기다려주세요.</p>
+    </div>
+</div>
 <div th:replace="~{member/_tail.html}"></div>

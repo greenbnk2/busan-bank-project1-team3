@@ -1,0 +1,209 @@
+<div th:replace="~{member/_head.html}"></div>
+
+<main style="background-color: #fdfdfd;"> <div class="survey-container">
+    <div class="survey-header">
+        <h1 style="font-size: 26px; font-weight: bold;">투자성향 분석</h1>
+        <p style="color: #666; margin-top: 10px; font-size: 14px;">
+            고객님께 가장 적합한 펀드 상품 추천을 위해<br>
+            몇 가지 질문에 답변해 주세요.
+        </p>
+    </div>
+
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <form id="surveyForm" th:action="@{/member/survey-result}" method="post">
+
+        <div class="question-card active" id="q1_card">
+            <div class="question-title"><span>Q1.</span> 고객님의 연령대는 어떻게 되시나요?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q1" value="1"> 19세 이하</label>
+                <label class="option-label"><input type="radio" name="q1" value="2"> 20대</label>
+                <label class="option-label"><input type="radio" name="q1" value="3"> 30대</label>
+                <label class="option-label"><input type="radio" name="q1" value="4"> 40대</label>
+                <label class="option-label"><input type="radio" name="q1" value="5"> 50대</label>
+                <label class="option-label"><input type="radio" name="q1" value="6"> 60대 이상</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q2_card">
+            <div class="question-title"><span>Q2.</span> 고객님의 연소득은 어떻게 되시나요?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q2" value="1"> 3천만원 이하</label>
+                <label class="option-label"><input type="radio" name="q2" value="2"> 5천만원 이하</label>
+                <label class="option-label"><input type="radio" name="q2" value="3"> 1억원 이하</label>
+                <label class="option-label"><input type="radio" name="q2" value="4"> 3억원 이하</label>
+                <label class="option-label"><input type="radio" name="q2" value="5"> 3억원 초과</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q3_card">
+            <div class="question-title"><span>Q3.</span> 주 수입원은 무엇인가요?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q3" value="1"> 현재 일정한 수입(근로, 사업, 임대) 발생 및 유지 예상</label>
+                <label class="option-label"><input type="radio" name="q3" value="2"> 현재 일정한 수입(연금) 발생 및 유지 예상</label>
+                <label class="option-label"><input type="radio" name="q3" value="3"> 현재 수입이 있으나 향후 감소/불안정 예상</label>
+                <label class="option-label"><input type="radio" name="q3" value="4"> 현재 일정한 수입이 없거나 소액 연금이 주 수입원</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q4_card">
+            <div class="question-title"><span>Q4.</span> 금융자산 중 투자 자금의 비중은?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q4" value="1"> 10% 이내</label>
+                <label class="option-label"><input type="radio" name="q4" value="2"> 30% 이내</label>
+                <label class="option-label"><input type="radio" name="q4" value="3"> 50% 이내</label>
+                <label class="option-label"><input type="radio" name="q4" value="4"> 80% 이내</label>
+                <label class="option-label"><input type="radio" name="q4" value="5"> 80% 초과</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q5_card">
+            <div class="question-title"><span>Q5.</span> 투자해본 금융상품을 모두 선택해 주세요 (중복가능)</div>
+            <div class="option-list">
+                <label class="option-label"><input type="checkbox" name="q5" value="1"> 은행 예적금, 국채, 보증채 등</label>
+                <label class="option-label"><input type="checkbox" name="q5" value="2"> 채권형 펀드, 원금보장형 ELS 등</label>
+                <label class="option-label"><input type="checkbox" name="q5" value="3"> 혼합형 펀드, 원금 일부 보장형 ELS 등</label>
+                <label class="option-label"><input type="checkbox" name="q5" value="4"> 주식형 펀드, 원금 비보장 ELS 등</label>
+                <label class="option-label"><input type="checkbox" name="q5" value="5"> 파생상품 펀드, 주식 신용거래, 선물옵션 등</label>
+            </div>
+            <button type="button" class="btn-secondary" style="width:100%; margin-top:10px;" onclick="nextQuestion('q5_card', 'q6_card')">다음 질문으로 ▼</button>
+        </div>
+
+        <div class="question-card" id="q6_card">
+            <div class="question-title"><span>Q6.</span> 파생상품 등 고위험 상품 투자 경험 기간은?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q6" value="1"> 1년 미만 (경험 없음 포함)</label>
+                <label class="option-label"><input type="radio" name="q6" value="2"> 1년 이상 ~ 3년 미만</label>
+                <label class="option-label"><input type="radio" name="q6" value="3"> 3년 이상</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q7_card">
+            <div class="question-title"><span>Q7.</span> 금융투자상품에 대한 이해도는?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q7" value="1"> 매우 높음 (파생상품 구조 이해)</label>
+                <label class="option-label"><input type="radio" name="q7" value="2"> 높음 (주식, 채권, 펀드 구조 이해)</label>
+                <label class="option-label"><input type="radio" name="q7" value="3"> 낮음 (주식과 채권 차이 구별 정도)</label>
+                <label class="option-label"><input type="radio" name="q7" value="4"> 매우 낮음 (예적금만 앎)</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q8_card">
+            <div class="question-title"><span>Q8.</span> 금융투자상품 가입 목적은?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q8" value="1"> 자산 증식 (여유 자금 투자)</label>
+                <label class="option-label"><input type="radio" name="q8" value="2"> 노후 자금 마련</label>
+                <label class="option-label"><input type="radio" name="q8" value="3"> 목적 자금 마련 (결혼, 주택 등)</label>
+                <label class="option-label"><input type="radio" name="q8" value="4"> 사용 예정 자금 단기 운용</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q9_card">
+            <div class="question-title"><span>Q9.</span> 예상 투자 기간은?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q9" value="1"> 6개월 미만</label>
+                <label class="option-label"><input type="radio" name="q9" value="2"> 6개월 이상 ~ 1년 미만</label>
+                <label class="option-label"><input type="radio" name="q9" value="3"> 1년 이상 ~ 3년 미만</label>
+                <label class="option-label"><input type="radio" name="q9" value="4"> 3년 이상</label>
+            </div>
+        </div>
+
+        <div class="question-card" id="q10_card">
+            <div class="question-title"><span>Q10.</span> 기대 수익과 감내 가능한 손실 수준은?</div>
+            <div class="option-list">
+                <label class="option-label"><input type="radio" name="q10" value="1"> 투자원금 보전 추구 (손실 불가)</label>
+                <label class="option-label"><input type="radio" name="q10" value="2"> 경미한 수준의 손실 감내 가능</label>
+                <label class="option-label"><input type="radio" name="q10" value="3"> -20% 이내 손실 감내 가능</label>
+                <label class="option-label"><input type="radio" name="q10" value="4"> -20% ~ -100% 손실 감내 가능</label>
+                <label class="option-label"><input type="radio" name="q10" value="5"> 원금 초과 손실 감내 가능 (초고위험)</label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit-survey">분석 결과 보기</button>
+
+    </form>
+</div>
+</main>
+
+<div th:replace="~{member/_tail.html}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalQuestions = 10;
+        const progressBar = document.getElementById('progressBar');
+
+        // 모든 옵션 라벨(라디오/체크박스)에 클릭 이벤트 추가
+        const labels = document.querySelectorAll('.option-label');
+
+        labels.forEach(label => {
+            label.addEventListener('click', function(e) {
+                // 1. 선택 스타일 적용 (CSS 클래스 추가/제거)
+                const input = this.querySelector('input');
+                const name = input.name;
+
+                // 라디오 버튼인 경우 같은 그룹의 다른 'selected' 클래스 제거
+                if(input.type === 'radio') {
+                    document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                        radio.closest('.option-label').classList.remove('selected');
+                    });
+                }
+                // 현재 클릭한 라벨에 selected 추가 (체크박스는 토글)
+                if(input.type === 'checkbox') {
+                    if(input.checked) this.classList.add('selected');
+                    else this.classList.remove('selected');
+                } else {
+                    this.classList.add('selected');
+                }
+
+                // 2. 진행률 업데이트
+                updateProgress();
+
+                // 3. 다음 질문으로 자동 스크롤 (라디오 버튼만)
+                // 체크박스(Q5)는 여러개 선택해야 하므로 자동 스크롤 제외
+                if(input.type === 'radio') {
+                    // 현재 질문 번호 추출 (q1 -> 1)
+                    const currentNum = parseInt(name.replace('q', ''));
+
+                    if(currentNum < totalQuestions) {
+                        const nextId = `q${currentNum + 1}_card`;
+                        const nextCard = document.getElementById(nextId);
+
+                        // 다음 카드 활성화 및 스크롤
+                        if(nextCard) {
+                            setTimeout(() => {
+                                nextCard.classList.add('active');
+                                nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300); // 0.3초 딜레이 후 이동 (자연스럽게)
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    // 진행률 바 업데이트 함수
+    function updateProgress() {
+        const total = 10;
+        let answered = 0;
+
+        for(let i=1; i<=total; i++) {
+            const name = `q${i}`;
+            const inputs = document.querySelectorAll(`input[name="${name}"]:checked`);
+            if(inputs.length > 0) answered++;
+        }
+
+        const percent = (answered / total) * 100;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+    }
+
+    // (Q5 전용) 수동 다음 버튼
+    function nextQuestion(currentId, nextId) {
+        const nextCard = document.getElementById(nextId);
+        if(nextCard) {
+            nextCard.classList.add('active');
+            nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+</script>
