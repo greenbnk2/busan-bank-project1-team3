@@ -50,11 +50,6 @@ public class AdminProductController {
         return productService.getProductDetail(fundCode);
     }
 
-    @GetMapping("/pending")
-    public String productPending() {
-        return "admin/product/adminproduct-pending";
-    }
-
 
 
     @GetMapping("/documents")

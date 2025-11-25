@@ -62,23 +62,20 @@
 
 <div class="container">
     <div class="subtitle">주식형</div>
-    <h1>미래에셋코어테크증권투자신탁(주식) 종류A-e</h1>
+    <h1 th:text="${detail.fundNm}"></h1>
 
     <!-- 기본정보 + 차트 -->
     <div class="info-box">
         <div class="info-left">
             <table class="info-table">
-                <tr><td>클래스명칭</td><td>수수료선취 온라인</td></tr>
+                <tr><td>클래스명칭</td><td th:text="${detail.classname}"></td></tr>
                 <tr><td>상품성향</td><td>적극투자형</td></tr>
                 <tr><td>가입대상</td><td>제한없음</td></tr>
-                <tr><td>투자등급</td><td>1등급 (매우 높은 위험)</td></tr>
-                <tr><td>설정일</td><td>2019년 10월 21일</td></tr>
-                <tr><td>운용사</td><td>미래에셋자산운용</td></tr>
+                <tr><td>투자등급</td><td th:text="${detail.investgrade}"></td></tr>
+                <tr><td>설정일</td><td>[[${detail.regdate}]]</td></tr>
+                <tr><td>운용사</td><td th:text="${detail.admincompany}"></td></tr>
                 <tr>
-                    <td colspan="2">
-                        정보통신, 반도체, 2차전지 등 미래 산업 성장주 중심으로 투자하는 기술주 펀드입니다.<br>
-                        AI, 로봇, 전기차, 메타버스 등 고성장 산업에 투자해 장기 수익을 추구합니다.
-                    </td>
+                    <td colspan="2" th:text="${detail.overview}"></td>
                 </tr>
             </table>
         </div>

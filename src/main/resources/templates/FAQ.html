@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부산은행 - FAQ(자주하시는질문)</title>
+    <link rel="stylesheet" th:href="@{/css/FAQ.css}">
+    <script th:src="@{/js/sidebar.js}"></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+    </header>
+
+    <!-- Main Content Section -->
+    <main>
+        <div class="main-container">
+            <div class="content-wrapper">
+                <div th:replace="~{sidebar :: sidebar}"></div>
+
+                <!-- Main Content Area -->
+                <div class="main-content">
+                    <div class="content-header">
+                        <h1>FAQ(자주하시는질문)</h1>
+                    </div>
+
+                    <!-- FAQ 안내 메시지 -->
+                    <div class="faq-guide">
+                        <ul>
+                            <li>부산은행 웹사이트 이용시 자주하는 질문을 정리하였습니다.</li>
+                            <li>원하는 질문 및 답변을 바로 찾으실려면 검색을 이용하여 주십시오.</li>
+                        </ul>
+                    </div>
+
+                    <!-- FAQ 검색 -->
+                    <div class="faq-search-section">
+                        <div class="faq-search-box">
+                            <input type="text" class="faq-search-input" placeholder="FAQ 검색" id="faqSearchInput">
+                            <button class="faq-search-btn">검색</button>
+                        </div>
+                        <div class="faq-popular-tags">
+                            <span class="popular-tag">#펀드</span>
+                            <span class="popular-tag">#대출</span>
+                            <span class="popular-tag">#디지털OTP</span>
+                            <span class="popular-tag">#한도제한계좌</span>
+                            <span class="popular-tag">#모바일뱅킹</span>
+                        </div>
+                    </div>
+
+                
+                    <!-- FAQ 목록 -->
+                    <div class="faq-list-section">
+                        <div class="faq-list-header">
+                            <span class="faq-list-count">총 15건 현재: 1/2페이지</span>
+                        </div>
+                        <div class="faq-list">
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">대출 만기가 되었는데, 기한연장 가능한가요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[모바일뱅킹] 동장사본 발급 할 수 있나요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[모바일뱅킹] 모바일뱅킹에서 이체한도 변경이 가능한가요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[모바일뱅킹] 모바일뱅킹에서 입출금동지서비스는 어떻게 가입하나요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[개인뱅킹] 인터넷뱅킹 이체한도 상향은 어떻게 하나요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[개인뱅킹] 계좌 비밀번호 3회 오류 났는데 어떻게 해야 하나요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">가계대출 신청 시 DSR 규제가 무엇인가요?</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">결제일 변경 방법을 알고 싶습니다.</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[기업뱅킹] 기업뱅킹 재이용신청 경로 알려 주세요.</span>
+                            </div>
+                            <div class="faq-list-item">
+                                <span class="faq-q-icon">Q</span>
+                                <span class="faq-question-text">[기업뱅킹] 기업뱅킹 증명서 발급 경로 알려주세요.</span>
+                            </div>
+                        </div>
+                        <div class="faq-pagination">
+                            <button class="faq-page-btn"><<</button>
+                            <button class="faq-page-btn"><</button>
+                            <button class="faq-page-btn faq-page-active">1</button>
+                            <button class="faq-page-btn">2</button>
+                            <button class="faq-page-btn">></button>
+                            <button class="faq-page-btn">>></button>
+                        </div>
+                    </div>
+
+                    <!-- 검색 결과 -->
+                    <div class="faq-search-results" id="faqSearchResults" style="display: none;">
+                        <h3 class="faq-results-title">검색결과</h3>
+                        <p class="faq-results-count" id="faqResultsCount"></p>
+                        <div class="faq-results-list" id="faqResultsList"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer>
+    </footer>
+
+    <script>
+        // FAQ 검색 기능
+        const faqSearchInput = document.getElementById('faqSearchInput');
+        const faqSearchBtn = document.querySelector('.faq-search-btn');
+        const faqSearchResults = document.getElementById('faqSearchResults');
+        const faqResultsCount = document.getElementById('faqResultsCount');
+        const faqResultsList = document.getElementById('faqResultsList');
+
+        // 샘플 FAQ 데이터
+        const faqData = [
+            {
+                question: '개인정보처리방침은 어디서 확인할 수 있나요?',
+                answer: '개인정보처리방침은 홈페이지 하단 또는 고객센터에서 확인하실 수 있습니다.'
+            },
+            {
+                question: '인터넷뱅킹 비밀번호를 변경하고 싶습니다.',
+                answer: '로그인 후 마이페이지 > 보안설정 > 비밀번호 변경에서 변경하실 수 있습니다.'
+            },
+            {
+                question: '계좌이체는 언제까지 가능한가요?',
+                answer: '이체는 평일 오전 9시부터 오후 4시까지 가능하며, 실시간 이체는 24시간 가능합니다.'
+            },
+            {
+                question: '카드 분실 신고는 어떻게 하나요?',
+                answer: '고객센터 1588-6200으로 연락하시거나 인터넷뱅킹에서 신고하실 수 있습니다.'
+            },
+            {
+                question: '대출 상담은 어디서 받을 수 있나요?',
+                answer: '고객센터 1588-6200 또는 영업점 방문 시 상담받으실 수 있습니다.'
+            }
+        ];
+
+        function performSearch() {
+            const searchTerm = faqSearchInput.value.trim().toLowerCase();
+            
+            if (searchTerm === '') {
+                faqSearchResults.style.display = 'none';
+                return;
+            }
+
+            const results = faqData.filter(faq => 
+                faq.question.toLowerCase().includes(searchTerm) ||
+                faq.answer.toLowerCase().includes(searchTerm)
+            );
+
+            if (results.length > 0) {
+                faqSearchResults.style.display = 'block';
+                faqResultsCount.textContent = `"${faqSearchInput.value}"의 검색결과입니다.(${results.length}건)`;
+                
+                faqResultsList.innerHTML = results.map(faq => `
+                    <div class="faq-result-item">
+                        <h4>${faq.question}</h4>
+                        <p>${faq.answer}</p>
+                    </div>
+                `).join('');
+            } else {
+                faqSearchResults.style.display = 'block';
+                faqResultsCount.textContent = `"${faqSearchInput.value}"의 검색결과입니다.(0건)`;
+                faqResultsList.innerHTML = '<p>검색 결과가 없습니다.</p>';
+            }
+        }
+
+        faqSearchBtn.addEventListener('click', performSearch);
+        faqSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+
+</body>
+</html>
+

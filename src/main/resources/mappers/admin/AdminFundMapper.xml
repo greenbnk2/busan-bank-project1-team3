@@ -16,6 +16,9 @@
         <result property="fundFeature"     column="FUND_FEATURE"/>
         <result property="operStatus"      column="OPER_STATUS"/>
 
+        <result property="notice1"      column="NOTICE_1"/>
+        <result property="notice2"      column="NOTICE_2"/>
+
         <result property="assetManagerId"   column="ASSET_MANAGER_ID"/>
         <result property="assetManagerName" column="OPERATOR_NAME"/>
 
@@ -40,7 +43,9 @@
         fm.OPER_STATUS,
         fm.ASSET_MANAGER_ID,
         am.OPERATOR_NAME,
-        fc.CATEGORY_NAME AS FUND_TYPE_NAME
+        fc.CATEGORY_NAME AS FUND_TYPE_NAME,
+        fm.NOTICE_1,
+        fm.NOTICE_2
         FROM BNK.FUND_MASTER fm
         LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
         ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
@@ -80,7 +85,9 @@
         fm.OPER_STATUS,
         fm.ASSET_MANAGER_ID,
         am.OPERATOR_NAME,
-        fc.CATEGORY_NAME AS FUND_TYPE_NAME
+        fc.CATEGORY_NAME AS FUND_TYPE_NAME,
+        fm.NOTICE_1,
+        fm.NOTICE_2
         FROM BNK.FUND_MASTER fm
         LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
         ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
@@ -119,6 +126,8 @@
             FUND_NAME     = #{fundName},
             INVEST_GRADE  = #{investGrade},
             FUND_FEATURE  = #{fundFeature},
+            NOTICE_1      =#{notice1},
+            NOTICE_2      =#{notice2},
             OPER_STATUS   = '등록',            -- 상태 변경
             LAST_UPD_DATE = SYSDATE
         WHERE FUND_CODE = #{fundCode}
@@ -130,13 +139,10 @@
 
 
 
-    <!-- 자동완성 -->
-    <select id="selectFundSuggestionsEdit"
-            parameterType="map"
+    <!-- 수정 -->
+    <select id="selectPendingFundEdit"
             resultMap="FundMasterResultMap">
 
-        SELECT *
-        FROM (
         SELECT
         fm.FUND_CODE,
         fm.FUND_SHORT_CODE,
@@ -147,34 +153,15 @@
         fm.OPER_STATUS,
         fm.ASSET_MANAGER_ID,
         am.OPERATOR_NAME,
-        fc.CATEGORY_NAME AS FUND_TYPE_NAME
+        fc.CATEGORY_NAME AS FUND_TYPE_NAME,
+        fm.NOTICE_1,
+        fm.NOTICE_2
         FROM BNK.FUND_MASTER fm
         LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
         ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
         LEFT JOIN BNK.FUND_CATEGORY fc
         ON fm.FUND_TYPE = fc.CATEGORY_CODE
-        WHERE 1 = 1
-
-        <choose>
-            <!-- 코드 기준 자동완성 (대소문자 무시) -->
-            <when test="searchType == 'code'">
-                AND UPPER(fm.FUND_CODE) LIKE UPPER(#{keyword}) || '%'
-            </when>
-
-            <!-- 이름 기준 자동완성 (대소문자 무시) -->
-            <when test="searchType == 'name'">
-                AND UPPER(fm.FUND_NAME) LIKE '%' || UPPER(#{keyword}) || '%'
-            </when>
-
-            <!-- 혹시 몰라서 기본값은 코드로 -->
-            <otherwise>
-                AND UPPER(fm.FUND_CODE) LIKE UPPER(#{keyword}) || '%'
-            </otherwise>
-        </choose>
-
-        ORDER BY fm.FUND_CODE
-        )
-        WHERE ROWNUM &lt;= 5
+        WHERE  FUND_CODE = #{fundCode}
     </select>
 
     <update id="updateFundForEdit"
@@ -182,13 +169,113 @@
 
         UPDATE BNK.FUND_MASTER
         SET
-            FUND_NAME     = #{fundName},
             INVEST_GRADE  = #{investGrade},
             FUND_FEATURE  = #{fundFeature},
+            NOTICE_1      =#{notice1},
+            NOTICE_2      =#{notice2},
+            OPER_STATUS   = '수정',            -- 상태 변경
             LAST_UPD_DATE = SYSDATE
         WHERE FUND_CODE = #{fundCode}
     </update>
 
+
+    <update id="stopFund"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
+
+        UPDATE BNK.FUND_MASTER
+        SET
+            OPER_STATUS   = '운용중단',            -- 상태 변경
+            LAST_UPD_DATE = SYSDATE
+        WHERE FUND_CODE = #{fundCode}
+    </update>
+
+    <update id="resumeFund"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
+
+        UPDATE BNK.FUND_MASTER
+        SET
+            OPER_STATUS   = '운용중',            -- 상태 변경
+            LAST_UPD_DATE = SYSDATE
+        WHERE FUND_CODE = #{fundCode}
+    </update>
+
+
+
+    <!--==============================================================================================================-->
+    <!-- 공통 WHERE 절 -->
+    <sql id="productWhere">
+        <where>
+
+            <!-- 1) 검색조건(searchType + keyword) -->
+            <if test="pageRequestDTO.searchType != null
+                      and pageRequestDTO.keyword != null
+                      and pageRequestDTO.keyword != ''">
+
+                <choose>
+                    <when test="pageRequestDTO.searchType == 'name'">
+                        AND fm.fund_name LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                    </when>
+
+                    <when test="pageRequestDTO.searchType == 'code'">
+                        AND fm.fund_code = #{pageRequestDTO.keyword}
+                    </when>
+
+                    <when test="pageRequestDTO.searchType == 'type'">
+                        AND fm.fund_type LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                    </when>
+                </choose>
+            </if>
+
+            <!-- 2) 펀드분류 -->
+            <if test="pageRequestDTO.category != null and pageRequestDTO.category != ''">
+                AND fm.fund_type = #{pageRequestDTO.category}
+            </if>
+
+            <!-- 3) 상태 -->
+            <if test="pageRequestDTO.status != null and pageRequestDTO.status != ''">
+                AND fm.oper_status = #{pageRequestDTO.status}
+            </if>
+
+        </where>
+    </sql>
+
+
+    <!-- 상품 목록 페이지 조회 -->
+    <select id="selectProductList"
+            parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.ProductListDTO">
+
+        SELECT
+        fm.fund_code           AS fundCode,
+        fm.fund_type           AS fundType,
+        fc.category_name       AS categoryName, <!-- 한글 유형-->
+        fm.fund_name           AS fundName,
+        amc.operator_name      AS operatorName,
+        fm.reg_date            AS regDate,
+        fm.oper_status         AS operStatus,
+        fm.last_upd_date       AS lastUpdDate
+        FROM fund_master fm
+        JOIN asset_management_company amc
+        ON fm.asset_manager_id = amc.operator_id
+        JOIN fund_category fc
+        ON fm.fund_type = fc.category_code
+
+        <include refid="productWhere"/>
+
+        ORDER BY fm.reg_date DESC
+        OFFSET #{pageRequestDTO.offset} ROWS
+        FETCH NEXT #{pageRequestDTO.size} ROWS ONLY
+
+    </select>
+
+    <select id="selectProductTotal"
+            parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM fund_master fm
+
+        <include refid="productWhere"/>
+    </select>
 
 
 

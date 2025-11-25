@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>펀드 등록 대기 - 은행 펀드 상품 관리자</title>
     <link rel="stylesheet" th:href="@{/css/admin/admin_styles.css}">
     <link rel="stylesheet" th:href="@{/css/admin/adminproduct.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+<!--
+    이름 : 설유진
+    내용 : 펀드 관리
+-->
 <body>
     <!-- 사이드바 Fragment -->
     <div th:replace="~{admin/_sidebar :: sidebar('product-pending')}"></div>
@@ -45,11 +51,34 @@
                         <tr>
                             <td class="search-label">펀드분류</td>
                             <td class="search-inputs">
-                                    <select class="form-select search-select-medium" id="searchCategory" name="category">
-                                        <option value="">전체</option>
-                                        <option value="주식형">주식형</option>
-                                        <option value="채권형">채권형</option>
-                                        <option value="혼합형">혼합형</option>
+                                <select class="form-select search-select-medium" id="searchCategory" name="category">
+                                    <option value="">전체</option>
+                                    <option value="EQTY"
+                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'EQTY'}">주식형</option>
+                                    <option value="MIXEQ"
+                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'MIXEQ'}">혼합주식형</option>
+                                    <option value="MIXBD"
+                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'MIXBD'}">혼합채권형</option>
+                                    <option value="BOND"
+                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'BOND'}">채권형</option>
+                                    <option value="MMF"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'MMF'}">단기금융</option>
+                                    <option value="INVC"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'INVC'}">투자계약</option>
+                                    <option value="DERIV"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'DERIV'}">파생상품</option>
+                                    <option value="REIT"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'REIT'}">부동산</option>
+                                    <option value="PHYS"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'PHYS'}">실물</option>
+                                    <option value="FOF"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'FOF'}">재간접</option>
+                                    <option value="VINS"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'VINS'}">변액보험</option>
+                                    <option value="SPEC"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'SPEC'}">특별자산</option>
+                                    <option value="MIXAS"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'MIXAS'}">혼합자산</option>
                                 </select>
                             </td>
                         </tr>
@@ -62,20 +91,44 @@
                                         <span>전체</span>
                                     </label>
                                     <label class="status-radio-label">
-                                            <input type="radio" name="status" value="게시중">
-                                        <span>게시중</span>
+                                            <input type="radio" name="status" value="등록">
+                                        <span>등록</span>
                                     </label>
                                     <label class="status-radio-label">
-                                            <input type="radio" name="status" value="수정중">
-                                        <span>수정중</span>
+                                            <input type="radio" name="status" value="등록대기">
+                                        <span>등록대기</span>
                                     </label>
                                     <label class="status-radio-label">
-                                            <input type="radio" name="status" value="대기중">
-                                        <span>대기중</span>
+                                            <input type="radio" name="status" value="등록반려">
+                                        <span>등록반려</span>
                                     </label>
                                     <label class="status-radio-label">
-                                            <input type="radio" name="status" value="중단">
-                                        <span>중단</span>
+                                            <input type="radio" name="status" value="운용대기">
+                                        <span>운용대기</span>
+                                    </label>
+                                    <label class="status-radio-label">
+                                            <input type="radio" name="status" value="운용중">
+                                        <span>운용중</span>
+                                    </label>
+                                    <label class="status-radio-label">
+                                            <input type="radio" name="status" value="운용중단">
+                                        <span>운용중단</span>
+                                    </label>
+                                    <label class="status-radio-label">
+                                            <input type="radio" name="status" value="수정">
+                                        <span>수정</span>
+                                    </label>
+                                    <label class="status-radio-label">
+                                            <input type="radio" name="status" value="수정대기">
+                                        <span>수정대기</span>
+                                    </label>
+                                    <label class="status-radio-label">
+                                            <input type="radio" name="status" value="수정완료">
+                                        <span>수정완료</span>
+                                    </label>
+                                    <label class="status-radio-label">
+                                            <input type="radio" name="status" value="수정반려">
+                                        <span>수정반려</span>
                                     </label>
                                 </div>
                             </td>
@@ -92,58 +145,125 @@
             <!-- 등록 대기 목록 테이블 -->
             <div class="table-section">
                 <div class="table-info">
-                    <span>총 <strong id="totalCount">0</strong>개</span>
+                    <span>
+                            총
+                            <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건
+                        </span>
+                    <span class="pagination-info"
+                          th:if="${pageResponse != null and pageResponse.total > 0}">
+                            현재:
+                            <span th:text="${pageRequestDTO.pg}">1</span> /
+                            <span th:text="${(pageResponse.total + pageRequestDTO.size - 1) / pageRequestDTO.size}">1</span>
+                            페이지
+                        </span>
                 </div>
                 <table class="product-table">
                     <thead>
                         <tr>
                             <th>상품코드</th>
                             <th>상품명</th>
-                            <th></th>
                             <th>회사명</th>
                             <th>상태</th>
-                            <th>관리</th>
+                            <th>최근수정일시</th>
+                            <th>수정</th>
+                            <th>운영관리</th>
                             <th>승인요청</th>
+                            <th>반영예약</th>
                         </tr>
                     </thead>
                     <tbody id="pendingTableBody">
-                        <tr>
-                            <td>0015400182</td>
-                            <td class="product-name-cell" onclick="viewPendingDetail(2)" style="cursor: pointer;" title="더음">더음</td>
+                        <tr th:each="dto, stat : ${dtoList}" th:attr="data-product-id=${dto.fundCode}">
+                            <td th:text="${dto.fundCode}"></td>
                             <td>
-                                <button class="view-detail-btn" onclick="viewPendingDetail(2)" title="상세보기">
-                                    <i class="fa fa-search"></i>
-                                </button>
+                                <span class="product-name-link"
+                                      th:text="${dto.fundName}"
+                                      th:attr="title=${dto.fundName}"></span>
                             </td>
-                            <td>신한은행</td>
-                            <td><span class="status-badge pending">대기중</span></td>
                             <td>
-                                <button class="action-btn edit" onclick="editProduct(2)">관리(상세)</button>
+                                <span class="company-name"
+                                      th:text="${dto.operatorName}"
+                                      th:attr="title=${dto.operatorName}"></span>
+                            </td>
+                            <td>
+                                <span class="status-text" th:text="${dto.operStatus}"></span>
+                            </td>
+                            <td th:text="${dto.lastUpdDate}"></td>
+                            <td>
+                                <button class="action-btn edit" th:attr="data-fund-code=${dto.fundCode}"
+                                        onclick="editProduct(this.dataset.fundCode)">수정</button>
+                            </td>
+                            <td>
+                                <button class="action-btn stop"
+                                        th:attr="data-fund-code=${dto.fundCode}"
+                                        onclick="stopFund(this.dataset.fundCode)"
+                                        th:style="${dto.operStatus == '운용중'} ? '' : 'display:none'">운용중단</button>
+
+                                <button class="action-btn resume"
+                                        th:attr="data-fund-code=${dto.fundCode}"
+                                        onclick="resumeFund(this.dataset.fundCode)"
+                                        th:style="${dto.operStatus == '운용중단'} ? '' : 'display:none'">운용재개</button>
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="action-btn approval" onclick="requestApproval(2)">승인요청</button>
-<!--
-                                    <button class="action-btn reserve" onclick="reserveProduct(2)">예약</button>
--->
+                                    <button class="action-btn approval" th:attr="data-fund-code=${dto.fundCode}"
+                                            onclick="requestApproval(this.dataset.fundCode)">승인요청</button>
                                 </div>
                             </td>
-
-
-
+                            <td>
+                                <button class="action-btn reserve" th:attr="data-fund-code=${dto.fundCode}"
+                                        onclick="reserveProduct(this.dataset.fundCode)">반영예약</button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" onclick="prevPage()">&lt;</button>
+                <div class="pagination"
+                     th:if="${pageResponse != null and pageResponse.total > 0}">
+
+                    <!-- 이전 버튼 -->
+                    <button class="page-btn prev"
+                            th:if="${pageResponse.prev}"
+                            th:onclick="|location.href='@{/admin/product/pending(
+                            pg=${pageResponse.start - 1},
+                            size=${pageRequestDTO.size},
+                            searchType=${pageRequestDTO.searchType},
+                            keyword=${pageRequestDTO.keyword},
+                            category=${pageRequestDTO.category},
+                            status=${pageRequestDTO.status}
+                            )}'|">
+                        &lt;
+                    </button>
+
+                    <!-- 페이지 번호 -->
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
-                        <button class="page-number">2</button>
-                        <button class="page-number">3</button>
-                        <button class="page-number">4</button>
-                        <button class="page-number">5</button>
+                        <button class="page-number"
+                                th:each="p : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                th:text="${p}"
+                                th:classappend="${p == pageRequestDTO.pg} ? ' active'"
+                                th:onclick="|location.href='@{/admin/product/pending(
+                                pg=${p},
+                                size=${pageRequestDTO.size},
+                                searchType=${pageRequestDTO.searchType},
+                                keyword=${pageRequestDTO.keyword},
+                                category=${pageRequestDTO.category},
+                                status=${pageRequestDTO.status}
+                                )}'|">
+                        </button>
                     </div>
-                    <button class="page-btn next" onclick="nextPage()">&gt;</button>
+
+                    <!-- 다음 버튼 -->
+                    <button class="page-btn next"
+                            th:if="${pageResponse.next}"
+                            th:onclick="|location.href='@{/admin/product/pending(
+                            pg=${pageResponse.end + 1},
+                            size=${pageRequestDTO.size},
+                            searchType=${pageRequestDTO.searchType},
+                            keyword=${pageRequestDTO.keyword},
+                            category=${pageRequestDTO.category},
+                            status=${pageRequestDTO.status}
+                            )}'|">
+                        &gt;
+                    </button>
+
                 </div>
             </div>
             <!-- 푸터 영역 -->
@@ -175,100 +295,146 @@
     </div>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        var editUrl = /*[[@{/admin/product/edit}]]*/ '';
-        function editProduct(productId) {
-            location.href = editUrl + '?id=' + productId;
+        const editUrl = /*[[@{/admin/product/edit}]]*/ '';
+        const stopUrl = /*[[@{/admin/product/stop}]]*/ '';
+        const resumeUrl = /*[[@{/admin/product/resume}]]*/ '';
+        const csrfToken = /*[[${_csrf.token}]]*/ '';
+        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+
+        function editProduct(fundCode) {
+            location.href = editUrl + '?fundCode=' + fundCode;
         }
 
-        // 상품 상세 데이터 (하드코딩, 나중에 서버에서 가져오기)
-        const pendingProductDetailData = {
-            1: {
-                productCode: '0010100177',
-                productType: '채권혼합형',
-                productName: '삼성알아서투자해주는EMP목표전환형증권투자신탁 제5호[채권혼합-재간접형](전환완료일 이후) 삼성알아서투자해주는EMP목표전환형증권투자신탁 제5호[채권-재간접형]',
-                shortCode: 'EMP005',
-                companyName: 'KB은행',
-                registerDate: '2025/11/07',
-                status: '대기중',
-                standardPrice: '9,996.16',
-                prevDayChange: '-3.84',
-                prevDayPercent: '-0.04%',
-                prevWeekChange: '9996.16',
-                prevWeekPercent: '0%',
-                referenceDate: '2025/11/10',
-                investmentRegion: '국내',
-                totalFee: '0',
-                setupAmount: '8,000',
-                netAssetValue: '7,997',
-                investmentGrade: '1등급',
-                managementCompany: 'KB자산운용',
-                administrativeCompany: 'KB펀드파트너스',
-                custodyCompany: 'KB은행',
-                salesCompany: '',
-                managementFee: '0',
-                salesFee: '0',
-                custodyFee: '0',
-                administrativeFee: '0',
-                totalFeeRatio: '0',
-                ter: '0',
-                frontEndFee: '0',
-                backEndFee: '0',
-                overview: 'EMP 목표전환형 증권투자신탁 상품입니다.',
-                category: '투자신탁',
-                trustAccountingPeriod: '0',
-                performanceDisclosureClassification: '(채권혼합고)일반',
-                initialSetupPrice: '10,000',
-                classificationCode: '12121212044101111262',
-                characteristicClassification: '일반',
-                trustPeriod: '0',
-                additionUnitClassification: '추가',
-                salesRegionClassification: '국내위탁',
-                publicPrivateClassification: '공모'
-            },
-            2: {
-                productCode: '0015400182',
-                productType: '주식형',
-                productName: '더음',
-                shortCode: 'DE001',
-                companyName: '신한은행',
-                registerDate: '2025/11/08',
-                status: '대기중',
-                standardPrice: '10,000.00',
-                prevDayChange: '0',
-                prevDayPercent: '0%',
-                prevWeekChange: '10000.00',
-                prevWeekPercent: '0%',
-                referenceDate: '2025/11/10',
-                investmentRegion: '국내',
-                totalFee: '0.5',
-                setupAmount: '5,000',
-                netAssetValue: '5,000',
-                investmentGrade: '2등급',
-                managementCompany: '신한자산운용',
-                administrativeCompany: '신한펀드파트너스',
-                custodyCompany: '신한은행',
-                salesCompany: '',
-                managementFee: '0.3',
-                salesFee: '0.1',
-                custodyFee: '0.05',
-                administrativeFee: '0.05',
-                totalFeeRatio: '0.5',
-                ter: '0.5',
-                frontEndFee: '0',
-                backEndFee: '0',
-                overview: '상품 개요 내용이 여기에 표시됩니다.',
-                category: '투자신탁',
-                trustAccountingPeriod: '0',
-                performanceDisclosureClassification: '(주식고)일반',
-                initialSetupPrice: '10,000',
-                classificationCode: '12121212044101111263',
-                characteristicClassification: '일반',
-                trustPeriod: '0',
-                additionUnitClassification: '추가',
-                salesRegionClassification: '국내위탁',
-                publicPrivateClassification: '공모'
+        function executeFundAction(url, fundCode, successMessage, nextStatus) {
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
             }
-        };
+
+            const params = new URLSearchParams();
+            params.append('fundCode', fundCode);
+
+            return fetch(url, {
+                method: 'POST',
+                headers,
+                body: params.toString()
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('요청 처리 중 오류가 발생했습니다.');
+                    }
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.indexOf('application/json') !== -1) {
+                        return response.json();
+                    }
+                    return null;
+                })
+                .then(() => {
+                    alert(successMessage);
+                    updateButtonVisibility(fundCode, nextStatus);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
+                });
+        }
+
+        // 운용중단 함수
+        function stopFund(fundCode) {
+            if (!confirm('운용을 중단하시겠습니까?')) {
+                return;
+            }
+            executeFundAction(stopUrl, fundCode, '운용이 중단되었습니다.', '운용중단');
+        }
+
+        // 운용재개 함수
+        function resumeFund(fundCode) {
+            if (!confirm('운용을 재개하시겠습니까?')) {
+                return;
+            }
+            executeFundAction(resumeUrl, fundCode, '운용이 재개되었습니다.', '운용중');
+        }
+
+        // 반영예약 함수
+        function reserveProduct(fundCode) {
+            if (confirm('변경사항을 반영예약하시겠습니까?')) {
+                // TODO: 반영예약 API 호출
+                alert('반영예약이 완료되었습니다.');
+            }
+        }
+
+        // 승인요청 함수
+        function requestApproval(fundCode) {
+            if (confirm('승인을 요청하시겠습니까?')) {
+                // TODO: 승인요청 API 호출
+                alert('승인요청이 완료되었습니다.');
+            }
+        }
+
+        // 상태에 따라 버튼 표시/숨김 처리
+        function updateButtonVisibility(fundCode, status) {
+            const row = document.querySelector(`tr[data-product-id="${fundCode}"]`);
+            if (!row) return;
+
+            const stopBtn = row.querySelector('.action-btn.stop');
+            const resumeBtn = row.querySelector('.action-btn.resume');
+            const statusBadge = row.querySelector('.status-text');
+
+            // 상태에 따라 운용중단 또는 운용재개 버튼 표시
+            if (status === '운용중') {
+                if (stopBtn) stopBtn.style.display = 'inline-block';
+                if (resumeBtn) resumeBtn.style.display = 'none';
+            } else if (status === '운용중단') {
+                if (stopBtn) stopBtn.style.display = 'none';
+                if (resumeBtn) resumeBtn.style.display = 'inline-block';
+            } else {
+                if (stopBtn) stopBtn.style.display = 'none';
+                if (resumeBtn) resumeBtn.style.display = 'none';
+            }
+
+            if (statusBadge) {
+                statusBadge.textContent = status;
+                statusBadge.className = 'status-text';
+            }
+        }
+
+        // 상태에 따른 CSS 클래스 반환
+        function getStatusClass(status) {
+            const statusMap = {
+                '운용중': 'active',
+                '수정': 'modifying',
+                '수정대기': 'modifying',
+                '수정완료': 'modifying',
+                '수정반려': 'modifying',
+                '등록': 'pending',
+                '등록대기': 'pending',
+                '등록반려': 'pending',
+                '운용대기': 'pending',
+                '운용중단': 'stopped'
+            };
+            return statusMap[status] || 'pending';
+        }
+
+        // 페이지 로드 시 상태에 따라 버튼 표시/숨김 처리
+        function initializeButtonVisibility() {
+            const rows = document.querySelectorAll('#pendingTableBody tr');
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.status-text');
+                if (statusBadge) {
+                    const status = statusBadge.textContent.trim();
+                    const fundCode = row.getAttribute('data-product-id') || 
+                                    row.querySelector('.action-btn.edit')?.dataset?.fundCode;
+                    
+                    if (fundCode) {
+                        row.setAttribute('data-product-id', fundCode);
+                        updateButtonVisibility(fundCode, status);
+                    }
+                }
+            });
+        }
+
 
         function viewPendingDetail(productId) {
             const product = pendingProductDetailData[productId];
@@ -281,960 +447,6 @@
             document.getElementById('fundFullName').textContent = product.productName;
             document.getElementById('fundCode').textContent = product.productCode;
 
-            const modalBody = document.getElementById('modalBody');
-            modalBody.innerHTML = `
-                <!-- PDF 문서 링크 -->
-                <div class="pdf-documents-section">
-                    <div class="pdf-document-item">
-                        <i class="fa fa-file-pdf"></i>
-                        <span>약관</span>
-                    </div>
-                    <div class="pdf-document-item">
-                        <i class="fa fa-file-pdf"></i>
-                        <span>투자설명서</span>
-                    </div>
-                    <div class="pdf-document-item">
-                        <i class="fa fa-file-pdf"></i>
-                        <span>간이 투자설명서</span>
-                    </div>
-                </div>
-                
-                <!-- 펀드정보 섹션 -->
-                <div class="fund-info-section">
-                    <!-- 회사 정보 섹션 -->
-                    <div class="company-info-section">
-                        <div class="company-tabs">
-                            <button class="company-tab-btn active" onclick="switchCompanyTab('logo', this)">회사로고</button>
-                            <button class="company-tab-btn" onclick="switchCompanyTab('overview', this)">회사개황</button>
-                            <button class="company-tab-btn" onclick="switchCompanyTab('financial', this)">주요재무현황</button>
-                        </div>
-                        
-                        <!-- 회사로고 탭 -->
-                        <div class="company-tab-content" id="companyLogoTab">
-                            <div class="company-logo-container">
-                                <img src="/images/company-logo.png" alt="회사로고" class="company-logo-img">
-                            </div>
-                        </div>
-                        
-                        <!-- 회사개황 탭 -->
-                        <div class="company-tab-content" id="companyOverviewTab" style="display: none;">
-                            <div class="company-overview-header">
-                                <span class="reference-date-text">기준일: 2025/09/30</span>
-                            </div>
-                            <div class="company-overview-table">
-                                <div class="overview-row">
-                                    <div class="overview-label">설립일</div>
-                                    <div class="overview-value">1997-07-18</div>
-                                </div>
-                                <div class="overview-row">
-                                    <div class="overview-label">대표전화(대표자)</div>
-                                    <div class="overview-value">02-1577-1640 (최창훈, 이준용)</div>
-                                </div>
-                                <div class="overview-row">
-                                    <div class="overview-label">자본금</div>
-                                    <div class="overview-value">67,860,715,000</div>
-                                </div>
-                                <div class="overview-row">
-                                    <div class="overview-label">홈페이지</div>
-                                    <div class="overview-value">investments.miraeasset.com</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 주요재무현황 탭 -->
-                        <div class="company-tab-content" id="companyFinancialTab" style="display: none;">
-                            <div class="company-financial-header">
-                                <div class="financial-header-left">
-                                    <span class="reference-date-text">기준일: 2025/09/30</span>
-                                    <span class="unit-text">[단위: 억원, %]</span>
-                                </div>
-                                <button class="chart-list-btn">
-<!--                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
-                                    </svg>
-                                    목록보기-->
-                                </button>
-                            </div>
-                            <div class="financial-chart-container">
-                                <canvas id="financialChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="fund-price-section">
-                        <div class="standard-price">
-                            <div class="price-label">기준가</div>
-                            <div class="price-value">${product.standardPrice}</div>
-                        </div>
-                        <div class="price-comparison">
-                            <div class="comparison-item">
-                                <div class="comparison-label">전일대비</div>
-                                <div class="comparison-value ${parseFloat(product.prevDayChange) >= 0 ? 'positive' : 'negative'}">
-                                    ${product.prevDayChange}, ${product.prevDayPercent}
-                                </div>
-                            </div>
-                            <div class="comparison-item">
-                                <div class="comparison-label">전주대비</div>
-                                <div class="comparison-value">
-                                    ${product.prevWeekChange}, ${product.prevWeekPercent}
-                                </div>
-                            </div>
-                            <div class="reference-date">기준일: ${product.referenceDate}</div>
-                        </div>
-                    </div>
-                    <div class="fund-details-table">
-                        <table class="detail-table">
-                            <tr>
-                                <td>펀드유형</td>
-                                <td>${product.productType}</td>
-                            </tr>
-                            <tr>
-                                <td>투자지역</td>
-                                <td>${product.investmentRegion}</td>
-                            </tr>
-                            <tr>
-                                <td>단축코드</td>
-                                <td>${product.shortCode}</td>
-                            </tr>
-                            <tr>
-                                <td>총보수</td>
-                                <td>${product.totalFee}</td>
-                            </tr>
-                            <tr>
-                                <td>최초설정일</td>
-                                <td>${product.registerDate}</td>
-                            </tr>
-                            <tr>
-                                <td>설정원본</td>
-                                <td>${product.setupAmount}</td>
-                            </tr>
-                            <tr>
-                                <td>순자산총액</td>
-                                <td>${product.netAssetValue}</td>
-                            </tr>
-                            <tr>
-                                <td>운용상태</td>
-                                <td>${product.status}</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- 탭 네비게이션 -->
-                <div class="fund-tabs-nav">
-                    <button class="fund-tab-btn active" onclick="switchFundTab('basic', this)">펀드기본정보</button>
-                    <button class="fund-tab-btn" onclick="switchFundTab('chart', this)">수익률 추이차트</button>
-                    <button class="fund-tab-btn" onclick="switchFundTab('price', this)">가격변동 추이</button>
-                    <button class="fund-tab-btn" onclick="switchFundTab('asset', this)">자산구성내역</button>
-                    <button class="fund-tab-btn" onclick="switchFundTab('settlement', this)">결산 및 상환</button>
-                    <button class="fund-tab-btn" onclick="switchFundTab('disclosure', this)">공시관련</button>
-                </div>
-
-                <!-- 펀드 기본 정보 및 관련 정보 -->
-                <div class="fund-detail-sections">
-                    <!-- 펀드 기본 정보 -->
-                    <div class="detail-section fund-tab-content" id="basicTab">
-                        <h3 class="section-subtitle">펀드기본정보</h3>
-                        <div class="detail-grid">
-                            <div class="detail-grid-item">
-                                <div class="detail-label">구분</div>
-                                <div class="detail-value">${product.category || '투자신탁'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">설정일</div>
-                                <div class="detail-value">${product.registerDate}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">신탁회계기간</div>
-                                <div class="detail-value">${product.trustAccountingPeriod || '0'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">운용실적공시분류</div>
-                                <div class="detail-value">${product.performanceDisclosureClassification || '(주식고)일반'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">최초설정기준가격</div>
-                                <div class="detail-value">${product.initialSetupPrice || '10,000'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">상품분류</div>
-                                <div class="detail-value">${product.productType}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">분류코드</div>
-                                <div class="detail-value">${product.classificationCode || '12121212044101111262'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">투자지역구분</div>
-                                <div class="detail-value">${product.investmentRegion}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">특성분류</div>
-                                <div class="detail-value">${product.characteristicClassification || 'ETF'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">신탁기간</div>
-                                <div class="detail-value">${product.trustPeriod || '0'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">추가/단위구분</div>
-                                <div class="detail-value">${product.additionUnitClassification || '추가'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">단축코드</div>
-                                <div class="detail-value">${product.shortCode}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">판매지역구분</div>
-                                <div class="detail-value">${product.salesRegionClassification || '국내위탁'}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">공시/사모구분</div>
-                                <div class="detail-value">${product.publicPrivateClassification || '공모'}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 관련보수 -->
-                    <div class="detail-section fund-tab-content" id="basicTab">
-                        <h3 class="section-subtitle">관련보수</h3>
-                        <p class="table-note">()은 주식형 유형평균보수 비율입니다.</p>
-                        <div class="detail-grid">
-                            <div class="detail-grid-item">
-                                <div class="detail-label">운용보수</div>
-                                <div class="detail-value">${product.managementFee} (${product.managementFee})</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">판매보수</div>
-                                <div class="detail-value">${product.salesFee} (${product.salesFee})</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">수탁보수</div>
-                                <div class="detail-value">${product.custodyFee} (${product.custodyFee})</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">일반사무관리보수</div>
-                                <div class="detail-value">${product.administrativeFee} (${product.administrativeFee})</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">보수합계</div>
-                                <div class="detail-value">${product.totalFeeRatio} (${product.totalFeeRatio})</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">총비용비율(TER)</div>
-                                <div class="detail-value">${product.ter} (${product.ter})</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 관련수수료 -->
-                    <div class="detail-section fund-tab-content" id="basicTab">
-                        <h3 class="section-subtitle">관련수수료</h3>
-                        <div class="detail-grid">
-                            <div class="detail-grid-item">
-                                <div class="detail-label">선취수수료</div>
-                                <div class="detail-value">${product.frontEndFee}</div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">후취수수료</div>
-                                <div class="detail-value">${product.backEndFee}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 관련회사 정보 -->
-                    <div class="detail-section fund-tab-content" id="basicTab">
-                        <h3 class="section-subtitle">관련회사 정보</h3>
-                        <p class="table-note">* 회사명을 클릭하시면 해당 회사 홈페이지로 이동합니다.</p>
-                        <div class="detail-grid">
-                            <div class="detail-grid-item">
-                                <div class="detail-label">운용회사</div>
-                                <div class="detail-value"><a href="#" class="company-link">${product.managementCompany}</a></div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">일반사무관리회사</div>
-                                <div class="detail-value"><a href="#" class="company-link">${product.administrativeCompany}</a></div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">수탁회사</div>
-                                <div class="detail-value"><a href="#" class="company-link">${product.custodyCompany}</a></div>
-                            </div>
-                            <div class="detail-grid-item">
-                                <div class="detail-label">판매회사</div>
-                                <div class="detail-value">${product.salesCompany || '-'}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 수익률 추이차트 -->
-                    <div class="detail-section fund-tab-content" id="chartTab" style="display: none;">
-                        <div class="chart-header">
-                            <h3 class="section-subtitle">수익률 추이차트</h3>
-                            <div class="chart-controls">
-                                <span class="unit-label">단위: 백만원, %</span>
-                                <span class="separator">|</span>
-                                <button class="chart-list-btn" id="chartListViewBtn" onclick="toggleChartListView()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
-                                    </svg>
-                                    목록보기
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 조회 조건 -->
-                    <div class="form-table">
-                        <div class="form-row">
-                                <div class="form-label">조회기간</div>
-                                <div class="form-input-wrapper">
-                                    <div style="display: flex; align-items: center; gap: 15px;">
-                                        <div class="date-input-group">
-                                            <input type="date" class="form-input date-input" value="2025-10-11">
-                                            <span class="date-separator">~</span>
-                                            <input type="date" class="form-input date-input" value="2025-11-11">
-                                        </div>
-                                        <div class="radio-group">
-                                            <label class="radio-label">
-                                                <input type="radio" name="chartBasis" value="daily" checked> 일일기준
-                                            </label>
-                                            <label class="radio-label">
-                                                <input type="radio" name="chartBasis" value="monthly"> 월말기준
-                                            </label>
-                                        </div>
-                                        <button class="btn btn-search">검색</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-label">벤치마크 지수 선택</div>
-                            <div class="form-input-wrapper">
-                                    <div class="checkbox-group" style="flex-direction: row; gap: 20px;">
-                                        <label class="checkbox-label">
-                                            <input type="checkbox" name="benchmark" value="kospi"> KOSPI
-                                        </label>
-                                        <label class="checkbox-label">
-                                            <input type="checkbox" name="benchmark" value="kosdaq"> KOSDAQ
-                                        </label>
-                                        <label class="checkbox-label">
-                                            <input type="checkbox" name="benchmark" value="govt"> 국공채
-                                        </label>
-                                        <label class="checkbox-label">
-                                            <input type="checkbox" name="benchmark" value="corp"> 회사채
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 차트 영역 -->
-                        <div id="chartView">
-                            <div class="chart-container">
-                                <canvas id="returnChart" style="width: 100%; height: 400px;"></canvas>
-                            </div>
-                            
-                            <!-- 범례 -->
-                            <div class="chart-legend">
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="width: 16px; height: 16px; display: inline-block; margin-right: 5px; vertical-align: middle;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffc107" style="width: 100%; height: 100%;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
-                                        </svg>
-                                    </span>
-                                    <span>운용수익률</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="width: 16px; height: 16px; display: inline-block; margin-right: 5px; vertical-align: middle;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2196F3" style="width: 100%; height: 100%;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                                        </svg>
-                                    </span>
-                                    <span>설정원본</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="background: #4CAF50; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
-                                    <span>KOSPI</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="background: #9C27B0; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
-                                    <span>KOSDAQ</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="background: #FF69B4; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
-                                    <span>국공채</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="background: #607D8B; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
-                                    <span>회사채</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 테이블 영역 -->
-                        <div class="chart-table-container" id="tableView" style="display: none;">
-                            <div class="chart-table-wrapper">
-                                <table class="return-chart-table">
-                                    <thead>
-                                        <tr>
-                                            <th>기준일</th>
-                                            <th>설정원본</th>
-                                            <th>운용수익률</th>
-                                            <th>KOSPI</th>
-                                            <th>KOSDAQ</th>
-                                            <th>국공채</th>
-                                            <th>회사채</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>20251020</td>
-                                            <td>2,370.0</td>
-                                            <td>0</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251021</td>
-                                            <td>2,386.0</td>
-                                            <td>1.08</td>
-                                            <td>0.24</td>
-                                            <td>-0.37</td>
-                                            <td>1.21</td>
-                                            <td>0.85</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251022</td>
-                                            <td>2,400.0</td>
-                                            <td>1.44</td>
-                                            <td>1.81</td>
-                                            <td>0.39</td>
-                                            <td>0.12</td>
-                                            <td>0.25</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251023</td>
-                                            <td>2,413.0</td>
-                                            <td>2.47</td>
-                                            <td>0.81</td>
-                                            <td>-0.43</td>
-                                            <td>1.40</td>
-                                            <td>0.92</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251024</td>
-                                            <td>2,438.0</td>
-                                            <td>1.79</td>
-                                            <td>3.33</td>
-                                            <td>0.83</td>
-                                            <td>0.86</td>
-                                            <td>0.55</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251027</td>
-                                            <td>2,585.0</td>
-                                            <td>4.05</td>
-                                            <td>5.98</td>
-                                            <td>3.08</td>
-                                            <td>1.99</td>
-                                            <td>1.45</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 가격변동 추이 -->
-                    <div class="detail-section fund-tab-content" id="priceTab" style="display: none;">
-                        <div class="chart-header">
-                            <h3 class="section-subtitle">가격변동 추이</h3>
-                            <div class="chart-controls">
-                                <span class="unit-label">단위: %</span>
-                                <span class="separator">|</span>
-                                <button class="chart-list-btn" id="priceListViewBtn" onclick="togglePriceListView()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
-                                    </svg>
-                                    목록보기
-                                </button>
-                                <span class="separator">|</span>
-                                <button class="chart-list-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                    </svg>
-                                    다운로드
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- 조회 조건 -->
-                        <div class="form-table">
-                        <div class="form-row">
-                                <div class="form-label">조회기간</div>
-                            <div class="form-input-wrapper">
-                                    <div style="display: flex; align-items: center; gap: 15px;">
-                                        <div class="date-input-group">
-                                            <input type="date" class="form-input date-input" value="2025-10-11">
-                                            <span class="date-separator">~</span>
-                                            <input type="date" class="form-input date-input" value="2025-11-11">
-                                        </div>
-                                        <div class="radio-group">
-                                            <label class="radio-label">
-                                                <input type="radio" name="priceBasis" value="daily"> 일일기준
-                                            </label>
-                                            <label class="radio-label">
-                                                <input type="radio" name="priceBasis" value="monthly" checked> 월말기준
-                                            </label>
-                                        </div>
-                                        <button class="btn btn-search">검색</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 차트 영역 -->
-                        <div id="priceChartView">
-                            <div class="chart-container">
-                                <canvas id="priceChart" style="width: 100%; height: 400px;"></canvas>
-                            </div>
-                            
-                            <!-- 범례 -->
-                            <div class="chart-legend">
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="background: #ff9800; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;"></span>
-                                    <span>기준가격</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-icon" style="width: 16px; height: 16px; display: inline-block; margin-right: 5px; vertical-align: middle;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#2196F3" style="width: 100%; height: 100%;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                                        </svg>
-                                    </span>
-                                    <span>설정원본</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 테이블 영역 -->
-                        <div class="chart-table-container" id="priceTableView" style="display: none;">
-                            <div class="chart-table-wrapper">
-                                <div class="table-result-info" style="margin-bottom: 10px; color: #666; font-size: 14px;">
-                                    검색결과: 총 22건
-                                </div>
-                                <table class="return-chart-table">
-                                    <thead>
-                                        <tr>
-                                            <th>기준일자</th>
-                                            <th>기준가격</th>
-                                            <th>전일대비 등락</th>
-                                            <th>과표기준 가격</th>
-                                            <th>설정원본</th>
-                                            <th>KOSPI</th>
-                                            <th>KOSPI200</th>
-                                            <th>KOSDAQ</th>
-                                            <th>국공채(3년만기)</th>
-                                            <th>회사채(3년만기)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>2025/11/18</td>
-                                            <td>1,881.60</td>
-                                            <td>30.07</td>
-                                            <td>1,257.73</td>
-                                            <td>3,232</td>
-                                            <td>3,953.62</td>
-                                            <td>556.45</td>
-                                            <td>878.70</td>
-                                            <td>0.000</td>
-                                            <td>0.000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/17</td>
-                                            <td>1,851.53</td>
-                                            <td>-61.11</td>
-                                            <td>1,261.59</td>
-                                            <td>3,205</td>
-                                            <td>4,089.25</td>
-                                            <td>576.65</td>
-                                            <td>902.67</td>
-                                            <td>2.914</td>
-                                            <td>4.020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/14</td>
-                                            <td>1,912.64</td>
-                                            <td>14.19</td>
-                                            <td>1,267.70</td>
-                                            <td>3,179</td>
-                                            <td>4,011.57</td>
-                                            <td>563.43</td>
-                                            <td>897.90</td>
-                                            <td>2.944</td>
-                                            <td>4.056</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/13</td>
-                                            <td>1,898.45</td>
-                                            <td>21.03</td>
-                                            <td>1,267.75</td>
-                                            <td>3,166</td>
-                                            <td>4,170.63</td>
-                                            <td>588.65</td>
-                                            <td>918.37</td>
-                                            <td>2.932</td>
-                                            <td>4.024</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/12</td>
-                                            <td>1,877.42</td>
-                                            <td>15.89</td>
-                                            <td>1,260.73</td>
-                                            <td>3,159</td>
-                                            <td>4,150.39</td>
-                                            <td>586.73</td>
-                                            <td>906.51</td>
-                                            <td>2.923</td>
-                                            <td>4.007</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/11</td>
-                                            <td>1,861.53</td>
-                                            <td>33.23</td>
-                                            <td>1,254.87</td>
-                                            <td>3,083</td>
-                                            <td>4,106.39</td>
-                                            <td>581.41</td>
-                                            <td>884.27</td>
-                                            <td>2.831</td>
-                                            <td>3.919</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 자산구성내역 -->
-                    <div class="detail-section fund-tab-content" id="assetTab" style="display: none;">
-                        <h3 class="section-subtitle">자산구성내역</h3>
-                        
-                        <!-- 헤더 정보 -->
-                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-bottom: 30px;">
-                            <div style="font-size: 14px; color: #666;">
-                                <span>기준일자: </span>
-                                <span style="font-weight: 500;">2025/11/11</span>
-                            </div>
-                            <div style="font-size: 14px; color: #666;">
-                                <span>단위: </span>
-                                <span style="font-weight: 500;">백만원, %</span>
-                            </div>
-                        </div>
-                        
-                        <!-- 자산구성 -->
-                        <div class="asset-composition-wrapper">
-                            <table class="asset-composition-table">
-                                <thead>
-                                    <tr>
-                                        <th>주식</th>
-                                        <th>채권</th>
-                                        <th>유동성</th>
-                                        <th>기타</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>96.38</td>
-                                        <td>0</td>
-                                        <td>3.62</td>
-                                        <td>0</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- 테이블 영역 -->
-                        <div>
-                                
-                                <!-- 하위 테이블들 -->
-                                <div class="asset-detail-tables-wrapper">
-                                    <!-- 자산구분 테이블 -->
-                                    <table class="asset-detail-table">
-                                        <thead>
-                                            <tr>
-                                                <th>자산구분</th>
-                                                <th>비중(%)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>KSE</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>KOSDAQ</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>기타</td>
-                                                <td>100</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    
-                                    <!-- 종목별 테이블 -->
-                                    <table class="asset-detail-table">
-                                        <thead>
-                                            <tr>
-                                                <th>종목별</th>
-                                                <th>비중(%)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>CD</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>CP</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>콜론</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>예금</td>
-                                                <td>22.19</td>
-                                            </tr>
-                                            <tr>
-                                                <td>기타</td>
-                                                <td>77.81</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    
-                                    <!-- 종류 테이블 -->
-                                    <table class="asset-detail-table">
-                                        <thead>
-                                            <tr>
-                                                <th>종류</th>
-                                                <th>비중(%)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>국고채</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>통안채</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>금융채</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>회사채</td>
-                                                <td>0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>기타</td>
-                                                <td>0</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 결산 및 상환 -->
-                    <div class="detail-section fund-tab-content" id="settlementTab" style="display: none;">
-                        <div class="chart-header">
-                            <h3 class="section-subtitle">결산 및 상환</h3>
-                            <div class="chart-controls">
-                                <span class="unit-label">단위: 백만원, %</span>
-                                <span class="separator">|</span>
-                                <button class="chart-list-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                    </svg>
-                                    다운로드
-                                </button>
-                            </div>
-                        </div>
-                        <div class="settlement-table-container">
-                            <table class="settlement-table">
-                                <thead>
-                                    <tr>
-                                        <th rowspan="2">신탁회계기초</th>
-                                        <th rowspan="2">신탁회계기말</th>
-                                        <th rowspan="2">경과일수</th>
-                                        <th colspan="2">기준가격(원)</th>
-                                        <th rowspan="2">설정원본</th>
-                                        <th rowspan="2">구분명</th>
-                                    </tr>
-                                    <tr>
-                                        <th>기준</th>
-                                        <th>과표</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>2024/04/01</td>
-                                        <td>2025/03/31</td>
-                                        <td>364</td>
-                                        <td>1,241.79</td>
-                                        <td>1,198.57</td>
-                                        <td>1,305</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2023/04/01</td>
-                                        <td>2024/03/31</td>
-                                        <td>365</td>
-                                        <td>1,211.74</td>
-                                        <td>1,153.95</td>
-                                        <td>1,037</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2022/04/01</td>
-                                        <td>2023/03/31</td>
-                                        <td>364</td>
-                                        <td>1,031.73</td>
-                                        <td>1,064.86</td>
-                                        <td>1,076</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2021/04/01</td>
-                                        <td>2022/03/31</td>
-                                        <td>364</td>
-                                        <td>1,202.79</td>
-                                        <td>1,113.04</td>
-                                        <td>814</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2020/04/01</td>
-                                        <td>2021/03/31</td>
-                                        <td>364</td>
-                                        <td>1,383.18</td>
-                                        <td>1,155.31</td>
-                                        <td>551</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2019/04/01</td>
-                                        <td>2020/03/31</td>
-                                        <td>365</td>
-                                        <td>825.01</td>
-                                        <td>1,025.72</td>
-                                        <td>311</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2018/04/01</td>
-                                        <td>2019/03/31</td>
-                                        <td>364</td>
-                                        <td>909.05</td>
-                                        <td>1,033.78</td>
-                                        <td>54</td>
-                                        <td>결산</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2017/12/07</td>
-                                        <td>2018/03/31</td>
-                                        <td>114</td>
-                                        <td>1,009.02</td>
-                                        <td>1,017.40</td>
-                                        <td>21</td>
-                                        <td>결산</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- 공시관련 -->
-                    <div class="detail-section fund-tab-content" id="disclosureTab" style="display: none;">
-                        <div class="chart-header">
-                            <h3 class="section-subtitle">공시관련</h3>
-                        </div>
-                        
-                        <!-- 조회 조건 -->
-                        <div class="form-table">
-                            <div class="form-row">
-                                <div class="form-label">조회기간</div>
-                                <div class="form-input-wrapper">
-                                    <div style="display: flex; align-items: center; gap: 15px;">
-                                        <div class="date-input-group">
-                                            <input type="date" class="form-input date-input" value="2024-08-08">
-                                            <span class="date-separator">~</span>
-                                            <input type="date" class="form-input date-input" value="2025-11-19">
-                                        </div>
-                                        <select class="form-select period-select" style="min-width: 120px;">
-                                            <option value="1week">1주일</option>
-                                            <option value="1month">1개월</option>
-                                            <option value="3month" selected>3개월</option>
-                                            <option value="6month">6개월</option>
-                                            <option value="9month">9개월</option>
-                                            <option value="1year">1년</option>
-                                            <option value="2year">2년</option>
-                                            <option value="3year">3년</option>
-                                        </select>
-                                        <div class="radio-group">
-                                            <label class="radio-label">
-                                                <input type="radio" name="disclosureType" value="adHoc"> 펀드수시공시
-                                            </label>
-                                            <label class="radio-label">
-                                                <input type="radio" name="disclosureType" value="regular" checked> 펀드정기공시
-                                            </label>
-                                        </div>
-                                        <button class="btn btn-search">검색</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 공시 목록 테이블 -->
-                        <div class="disclosure-table-container" style="margin-top: 20px;">
-                            <table class="disclosure-table">
-                                <thead>
-                                    <tr>
-                                        <th>구분</th>
-                                        <th>보고서명</th>
-                                        <th>기준일</th>
-                                        <th>공시대상</th>
-                                        <th>정정여부</th>
-                                        <th>조회</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><span class="disclosure-category-badge">정</span></td>
-                                        <td>자산운용보고서(공모펀드)</td>
-                                        <td>2025/09/30</td>
-                                        <td>셋우리아이 3억만들기...</td>
-                                        <td></td>
-                                        <td>
-                                            <button class="btn-icon-view">
-                                                <i class="fa fa-file-pdf"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('productDetailModal').classList.add('active');
         }
         
         let returnChart = null;
@@ -1257,617 +469,6 @@
             corp: '#607D8B'
         };
         
-        function updateChart() {
-            if (!returnChart) {
-                console.log('차트가 초기화되지 않았습니다.');
-                return;
-            }
-            
-            const selectedBenchmarks = [];
-            const modal = document.getElementById('productDetailModal');
-            const checkboxes = modal ? modal.querySelectorAll('input[name="benchmark"]:checked') : document.querySelectorAll('input[name="benchmark"]:checked');
-            checkboxes.forEach(checkbox => {
-                selectedBenchmarks.push(checkbox.value);
-            });
-            
-            const datasets = [
-                {
-                    label: '운용수익률',
-                    type: 'line',
-                    data: [0, 2, 4, 11, 5.5, 8],
-                    borderColor: '#ffc107',
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    borderDash: [],
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    pointBackgroundColor: '#ffc107',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    yAxisID: 'y',
-                    order: 1
-                },
-                {
-                    label: '설정원본',
-                    type: 'bar',
-                    data: [2370, 2450, 2580, 2770, 2960, 3150],
-                    backgroundColor: '#2196F3',
-                    borderColor: '#2196F3',
-                    borderWidth: 0,
-                    yAxisID: 'y1',
-                    order: 2,
-                    barThickness: 40
-                }
-            ];
-            
-            selectedBenchmarks.forEach(benchmark => {
-                const data = benchmarkData[benchmark];
-                const color = benchmarkColors[benchmark];
-                const label = benchmark === 'kospi' ? 'KOSPI' : 
-                             benchmark === 'kosdaq' ? 'KOSDAQ' : 
-                             benchmark === 'govt' ? '국공채' : '회사채';
-                
-                const yAxisID = (benchmark === 'kospi' || benchmark === 'kosdaq') ? 'y1' : 'y';
-                let normalizedData;
-                if (benchmark === 'kospi' || benchmark === 'kosdaq') {
-                    // KOSPI, KOSDAQ: 오른쪽 Y축 사용 (그대로 사용)
-                    normalizedData = data;
-                } else {
-                    // 국공채, 회사채: 왼쪽 Y축 사용 (그대로 사용, 이미 0~12 범위)
-                    normalizedData = data;
-                }
-                
-                datasets.push({
-                    label: label,
-                    type: 'line',
-                    data: normalizedData,
-                    borderColor: color,
-                    backgroundColor: 'transparent',
-                    borderWidth: 2,
-                    borderDash: [],
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: color,
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointHoverBorderWidth: 2,
-                    pointStyle: 'circle',
-                    yAxisID: yAxisID,
-                    order: 1
-                });
-            });
-            
-            returnChart.data.datasets = datasets;
-            returnChart.update();
-        }
-        
-        function initReturnChart() {
-            const ctx = document.getElementById('returnChart');
-            if (!ctx) return;
-            
-            if (returnChart) {
-                returnChart.destroy();
-            }
-            
-            // 날짜 라벨 (샘플 데이터 - 이미지 기준)
-            const labels = ['20251020', '20251024', '20251030', '20251105', '20251111', '20251117'];
-            
-            returnChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '운용수익률',
-                            type: 'line',
-                            data: [0, 2, 4, 11, 5.5, 8],
-                            borderColor: '#ffc107',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            borderDash: [],
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            pointBackgroundColor: '#ffc107',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            yAxisID: 'y',
-                            order: 1
-                        },
-                        {
-                            label: '설정원본',
-                            type: 'bar',
-                            data: [2370, 2450, 2580, 2770, 2960, 3150],
-                            backgroundColor: '#2196F3',
-                            borderColor: '#2196F3',
-                            borderWidth: 0,
-                            yAxisID: 'y1',
-                            order: 2,
-                            barThickness: 40
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: true
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'category',
-                            grid: {
-                                display: true,
-                                color: '#f0f0f0',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#666',
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                            min: 0,
-                            max: 12,
-                            ticks: {
-                                stepSize: 2,
-                                color: '#666',
-                                font: {
-                                    size: 11
-                                }
-                            },
-                            grid: {
-                                display: true,
-                                color: '#f0f0f0',
-                                drawBorder: false
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            min: 2200,
-                            max: 3340,
-                            ticks: {
-                                stepSize: 190,
-                                color: '#666',
-                                font: {
-                                    size: 11
-                                }
-                            },
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            }
-                        }
-                    }
-                }
-            });
-            
-            const modal = document.getElementById('productDetailModal');
-            if (modal) {
-                modal.querySelectorAll('input[name="benchmark"]').forEach(checkbox => {
-                    checkbox.removeEventListener('change', updateChart);
-                    checkbox.addEventListener('change', updateChart);
-                });
-            }
-        }
-        
-        function initPriceChart() {
-            const ctx = document.getElementById('priceChart');
-            if (!ctx) return;
-            
-            if (priceChart) {
-                priceChart.destroy();
-            }
-            
-            const labels = ['20251011', '20251021', '20251031', '20251110', '20251120'];
-            
-            priceChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '기준가격',
-                            type: 'line',
-                            data: [9900, 9950, 10000, 10050, 10100],
-                            borderColor: '#ff9800',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            borderDash: [],
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#ff9800',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointHoverBorderWidth: 2,
-                            pointStyle: 'circle',
-                            yAxisID: 'y',
-                            order: 1
-                        },
-                        {
-                            label: '설정원본',
-                            type: 'bar',
-                            data: [8900, 8950, 9000, 9050, 9100],
-                            backgroundColor: '#2196F3',
-                            borderColor: '#2196F3',
-                            borderWidth: 0,
-                            yAxisID: 'y',
-                            order: 2,
-                            barThickness: 40
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: true
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'category',
-                            grid: {
-                                display: true,
-                                color: '#f0f0f0',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#666',
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                            min: 7000,
-                            max: 10400,
-                            ticks: {
-                                stepSize: 400,
-                                color: '#666',
-                                font: {
-                                    size: 11
-                                }
-                            },
-                            grid: {
-                                display: true,
-                                color: '#f0f0f0',
-                                drawBorder: false
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            min: 7000,
-                            max: 9400,
-                            ticks: {
-                                stepSize: 400,
-                                color: '#666',
-                                font: {
-                                    size: 11
-                                }
-                            },
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function initAssetChart() {
-            const ctx = document.getElementById('assetChart');
-            if (!ctx) return;
-            
-            if (assetChart) {
-                assetChart.destroy();
-            }
-            
-            assetChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['주식', '채권', '유동성', '기타'],
-                    datasets: [{
-                        data: [96.38, 0, 3.62, 0],
-                        backgroundColor: [
-                            '#ff9800',
-                            '#4CAF50',
-                            '#4CAF50',
-                            '#9E9E9E'
-                        ],
-                        borderWidth: 0,
-                        borderAlign: 'inner'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                usePointStyle: true,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    label += context.parsed + '%';
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    animation: {
-                        animateRotate: true,
-                        animateScale: true
-                    }
-                }
-            });
-        }
-        
-        let financialChart = null;
-
-        function initFinancialChart() {
-            const ctx = document.getElementById('financialChart');
-            if (!ctx) return;
-            
-            // 기존 차트가 있으면 제거
-            if (financialChart) {
-                financialChart.destroy();
-            }
-            
-            financialChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['당기순이익', '총자산', '총부채', '자본금', '자기자본금', '영업용순자본비율'],
-                    datasets: [{
-                        label: '억원',
-                        data: [6500, 57500, 12500, 1500, 46000, null],
-                        backgroundColor: [
-                            '#ff6b35',  // 당기순이익 - 주황색
-                            '#2196F3',  // 총자산 - 파란색
-                            '#4caf50',  // 총부채 - 초록색
-                            '#9c27b0',  // 자본금 - 보라색
-                            '#ff6b35',  // 자기자본금 - 주황색
-                            'transparent'  // 영업용순자본비율 - 막대 없음
-                        ],
-                        borderColor: [
-                            '#ff6b35',
-                            '#2196F3',
-                            '#4caf50',
-                            '#9c27b0',
-                            '#ff6b35',
-                            'transparent'
-                        ],
-                        borderWidth: 0,
-                        maxBarThickness: 15
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    categoryPercentage: 0.55,
-                    barPercentage: 0.98,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: true
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 60000,
-                            ticks: {
-                                stepSize: 10000,
-                                callback: function(value) {
-                                    return value.toLocaleString();
-                                }
-                            },
-                            grid: {
-                                color: '#f0f0f0'
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    size: 13
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function switchCompanyTab(tabName, element) {
-            // 모든 탭 버튼 비활성화
-            document.querySelectorAll('.company-tab-btn').forEach(btn => btn.classList.remove('active'));
-            // 모든 탭 콘텐츠 숨기기
-            document.querySelectorAll('.company-tab-content').forEach(content => content.style.display = 'none');
-            
-            // 선택한 탭 활성화
-            if (element) {
-                element.classList.add('active');
-            }
-            
-            // 해당 탭 콘텐츠 표시
-            const tabContent = document.getElementById('company' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab');
-            if (tabContent) {
-                tabContent.style.display = 'block';
-                
-                // 주요재무현황 탭인 경우 차트 초기화
-                if (tabName === 'financial') {
-                    setTimeout(() => {
-                        initFinancialChart();
-                    }, 100);
-                }
-            }
-        }
-
-        function switchFundTab(tabName, element) {
-            document.querySelectorAll('.fund-tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.fund-tab-content').forEach(content => content.style.display = 'none');
-            
-            if (element) {
-                element.classList.add('active');
-            }
-            
-            if (tabName === 'basic') {
-                document.querySelectorAll('#basicTab').forEach(content => {
-                    content.style.display = 'block';
-                });
-            } else {
-                const tabContent = document.getElementById(tabName + 'Tab');
-                if (tabContent) {
-                    tabContent.style.display = 'block';
-                    
-                    if (tabName === 'chart') {
-                        setTimeout(() => {
-                            initReturnChart();
-                        }, 100);
-                    }
-                    
-                    if (tabName === 'price') {
-                        setTimeout(() => {
-                            initPriceChart();
-                        }, 100);
-                    }
-                }
-            }
-        }
-
-        function toggleChartListView() {
-            const chartView = document.getElementById('chartView');
-            const tableView = document.getElementById('tableView');
-            const btn = document.getElementById('chartListViewBtn');
-            
-            if (chartView && tableView && btn) {
-                if (chartView.style.display === 'none') {
-                    // 차트 보기
-                    chartView.style.display = 'block';
-                    tableView.style.display = 'none';
-                    btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
-                        </svg>
-                        목록보기
-                    `;
-                } else {
-                    // 목록 보기
-                    chartView.style.display = 'none';
-                    tableView.style.display = 'block';
-                    btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                        </svg>
-                        차트 보기
-                    `;
-                }
-            }
-        }
-
-        function togglePriceListView() {
-            const chartView = document.getElementById('priceChartView');
-            const tableView = document.getElementById('priceTableView');
-            const btn = document.getElementById('priceListViewBtn');
-            
-            if (chartView && tableView && btn) {
-                if (chartView.style.display === 'none') {
-                    // 차트 보기
-                    chartView.style.display = 'block';
-                    tableView.style.display = 'none';
-                    btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
-                        </svg>
-                        목록보기
-                    `;
-                } else {
-                    // 목록 보기
-                    chartView.style.display = 'none';
-                    tableView.style.display = 'block';
-                    btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                        </svg>
-                        차트 보기
-                    `;
-                }
-            }
-        }
-        
-        function switchTab(tabName, element) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if (element) {
-                element.classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    if (btn.textContent.trim() === (tabName === 'basic' ? '펀드기본정보' : 
-                        tabName === 'fees' ? '관련보수' : 
-                        tabName === 'charges' ? '관련수수료' : '관련회사 정보')) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
-            document.getElementById(tabName + 'Tab').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('productDetailModal').classList.remove('active');
-        }
-
-        // 모달 외부 클릭 시 닫기
-        window.onclick = function(event) {
-            const modal = document.getElementById('productDetailModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
 
         // 상품명 35자로 제한
         function truncateProductNames() {
@@ -1887,9 +488,29 @@
             });
         }
 
+        // 회사명 6자로 제한
+        function truncateCompanyNames() {
+            const companyNameSpans = document.querySelectorAll('.company-name');
+            companyNameSpans.forEach(span => {
+                let fullText = span.getAttribute('title') || span.textContent.trim();
+
+                if (!span.getAttribute('title')) {
+                    span.setAttribute('title', fullText);
+                }
+
+                if (fullText.length > 6) {
+                    span.textContent = fullText.substring(0, 6) + '...';
+                } else {
+                    span.textContent = fullText;
+                }
+            });
+        }
+
         // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', function() {
             truncateProductNames();
+            truncateCompanyNames();
+            initializeButtonVisibility();
         });
         /*]]>*/
     </script>

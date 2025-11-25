@@ -77,12 +77,10 @@ th {
     text-align: left;
     font-weight: bold;
     color: #000;
+    line-height: 1.4;
 }
-
 .fund-name a {
-    text-decoration: none;
-    color: #005bac;
-    transition: color 0.2s;
+    font-size: 15px;
 }
 
 .fund-name a:hover {
@@ -93,38 +91,44 @@ th {
 .desc {
     font-size: 13px;
     color: #555;
-    margin-top: 4px;
-    line-height: 1.4;
+    margin-top: 6px;
+    line-height: 1.5;
 }
 
+.tag-wrap {
+    margin: 6px 0;
+}
 .tag {
-    display: inline-block;
-    padding: 2px 6px;
-    background-color: #005bac;
+    background-color: #0a64b0;
     color: #fff;
+    padding: 3px 6px;
     border-radius: 3px;
     font-size: 11px;
     margin-right: 6px;
 }
 
 .btn-join {
-    background-color: #b22222;
-    color: white;
-    padding: 8px 16px;
+    display: block;
+    width: 100px;
+    margin: 0 auto 6px auto;
+    padding: 8px 0;
+    background-color: #c62828;
+    color: #fff;
     border: none;
-    border-radius: 3px;
-    cursor: pointer;
+    border-radius: 4px;
     font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+}
+.sub-btn {
+    font-size: 12px;
+    color: #555;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .btn-join:hover {
     background-color: #8b0000;
 }
 
-.sub-btn {
-    display: block;
-    margin-top: 5px;
-    font-size: 12px;
-    color: #666;
-    text-decoration: underline;
-}
+

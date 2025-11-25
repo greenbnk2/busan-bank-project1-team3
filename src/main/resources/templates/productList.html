@@ -108,16 +108,31 @@
                     </thead>
                     <tbody id="fund-list">
                     <tr th:each="item : ${productList}">
-                        <td class="title">
-                            <a th:href="@{'/fund/productDetail'}"
-                               th:text="${item.fundName}"></a>
+                        <td class="fund-name">
+                            <a th:href="@{'/fund/productDetail/' + ${item.fundcode}}"
+                               th:text="${item.fundNm}"></a>
+
+                            <!-- 태그 영역 -->
+                            <div class="tag-wrap">
+                                <span class="tag" th:text="${item.investgrade}"></span>
+                            </div>
+
+                            <!-- 상세 설명 -->
+                            <div class="desc" th:text="${item.fundfeature}">
+                            </div>
+
+                            <!-- 관심상품 버튼 -->
+                            <button class="sub-btn">관심상품등록</button>
                         </td>
-                        <td th:text="${item.perf1M} + '%'"></td>
-                        <td th:text="${item.perf3M} + '%'"></td>
-                        <td th:text="${item.perf6M} + '%'"></td>
-                        <td th:text="${item.perf12M} + '%'"></td>
+
+                        <td th:text="${item.perf1M}"></td>
+                        <td th:text="${item.perf3M}"></td>
+                        <td th:text="${item.perf6M}"></td>
+                        <td th:text="${item.perf12M}"></td>
+
                         <td>
-                            <a th:href="@{'/fund/detail/' + ${item.fundCode}}" class="join-btn">가입</a>
+                            <button class="btn-join">인터넷가입</button>
+                            <a href="#" class="sub-btn">스마트폰가입</a>
                         </td>
                     </tr>
                     </tbody>

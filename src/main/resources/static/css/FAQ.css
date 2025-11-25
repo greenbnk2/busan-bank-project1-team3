@@ -1,0 +1,379 @@
+/* FAQ Styles */
+.content-header h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.faq-guide {
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border: 1px solid #e0e0e1;
+}
+
+.faq-guide p {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.faq-guide ul {
+    list-style: disc;
+    margin-left: 20px;
+    font-size: 13px;
+    color: #666;
+}
+
+.faq-guide ul li {
+    margin-bottom: 5px;
+}
+
+.faq-guide ul li::marker {
+    font-size: 8px;
+}
+
+/* FAQ 검색 섹션 */
+.faq-search-section {
+    margin-bottom: 50px;
+    padding: 25px 15px;
+    border-top: 1px solid #525252;
+    border-bottom: 1px solid #525252;
+}
+
+.faq-search-box {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.faq-search-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    font-size: 14px;
+    outline: none;
+}
+
+.faq-search-input:focus {
+    outline: none;
+}
+
+.faq-search-btn {
+    padding: 12px 25px;
+    background-color: #666;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.faq-search-btn:hover {
+    background-color: #555;
+}
+
+/* 인기검색어 태그 */
+.faq-popular-tags {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.popular-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #fff;
+    border: none;
+    border-radius: 0;
+    font-size: 15px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.popular-tag:hover {
+    background-color: #f8f8fa;
+}
+
+.popular-tag-label {
+    background-color: #d32f2f;
+    color: #fff;
+    border: 1px solid #d32f2f;
+}
+
+.popular-tag-label:hover {
+    background-color: #b71c1c;
+}
+
+.tag-separator {
+    color: #ccc;
+    font-size: 13px;
+    margin: 0 2px;
+}
+
+/* FAQ 카테고리 그리드 */
+.faq-category-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    border: 1px solid #e0e0e1;
+    margin-bottom: 30px;
+}
+
+.faq-category-item {
+    padding: 8px 15px;
+    text-align: center;
+    border-right: 1px solid #e0e0e1;
+    border-bottom: 1px solid #e0e0e1;
+    font-size: 14px;
+    color: #333;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.faq-category-item:nth-child(6n) {
+    border-right: none;
+}
+
+.faq-category-item:nth-child(n+13) {
+    border-bottom: none;
+}
+
+.faq-category-item:hover {
+    background-color: #f8f8fa;
+}
+
+.faq-category-top10 {
+    background-color: #d32f2f;
+    color: #fff;
+    font-weight: bold;
+    border-top: 2px solid #d32f2f;
+}
+
+.faq-category-grid {
+    border-top: 2px solid #d32f2f;
+}
+
+.faq-category-top10:hover {
+    background-color: #b71c1c;
+}
+
+.faq-category-active {
+    text-decoration: underline;
+}
+
+/* FAQ 목록 섹션 */
+.faq-list-section {
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.faq-list-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.faq-list-count {
+    font-size: 14px;
+    color: #666;
+}
+
+.faq-list-divider {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #d32f2f;
+    margin-top: 25px;
+}
+
+.faq-list {
+    border-top: 2px solid #d32f2f;
+}
+
+.faq-list-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e1;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.faq-list-item:hover {
+    background-color: #f8f8fa;
+}
+
+.faq-q-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    color: #666;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.faq-question-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* FAQ 페이지네이션 */
+.faq-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.faq-page-btn {
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #e0e0e1;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 4px;
+}
+
+.faq-page-btn:hover {
+    background-color: #f8f8fa;
+    border-color: #d32f2f;
+    color: #d32f2f;
+}
+
+.faq-page-active {
+    background-color: #d32f2f;
+    color: #fff;
+    border-color: #d32f2f;
+}
+
+.faq-page-active:hover {
+    background-color: #b71c1c;
+    color: #fff;
+}
+
+/* FAQ 검색 결과 */
+.faq-search-results {
+    margin-bottom: 30px;
+    padding: 15px;
+}
+
+.faq-results-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.faq-results-count {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.faq-results-list {
+    border-top: 1px solid #e0e0e1;
+}
+
+.faq-result-item {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e1;
+    transition: background-color 0.3s;
+}
+
+.faq-result-item:hover {
+    background-color: #f8f8fa;
+}
+
+.faq-result-item h4 {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.faq-result-item p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* TOP 10 섹션 */
+.faq-top10-section {
+    margin-bottom: 30px;
+    padding: 15px;
+}
+
+.faq-top10-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.faq-top10-list {
+    list-style: none;
+    border-top: 1px solid #e0e0e1;
+}
+
+.faq-top10-list li {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e1;
+    transition: background-color 0.3s;
+}
+
+.faq-top10-list li:hover {
+    background-color: #f8f8fa;
+}
+
+.faq-top10-list li a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    display: block;
+}
+
+.faq-top10-list li a:hover {
+    color: #d32f2f;
+}
+
+/* 고객상담 정보 */
+.faq-contact-info {
+    padding: 15px;
+    background-color: #f8f8fa;
+    border: 1px solid #e0e0e1;
+}
+
+.faq-contact-info p {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.faq-contact-info p strong {
+    color: #333;
+}
+

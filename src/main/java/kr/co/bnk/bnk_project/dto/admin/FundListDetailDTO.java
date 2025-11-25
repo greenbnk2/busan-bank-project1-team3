@@ -23,7 +23,7 @@ public class FundListDetailDTO {
      * --------------------------- */
     private String fundCode;         // FUND_MASTER.FUND_CODE
     private String fundName;         // FUND_MASTER.FUND_NAME
-    private Double navPerUnit;       // FUND_DAILY_HISTORY.NAV_PER_UNIT (기준가)
+    private Double initialNav;       // FUND_MASTER.INITIAL_NAV (기준가)
     private Double changeAmount;     // FUND_DAILY_HISTORY.DAILY_CHANGE_RATE (전일대비 금액)
     private Double dailyChangeRate;  // 전일대비 %
     private Double totalNav;         // FUND_DAILY_HISTORY.TOTAL_NAV (순자산총액)
@@ -36,17 +36,16 @@ public class FundListDetailDTO {
     private String investRegion;     // FUND_MASTER.INVEST_REGION 투자지역. 투자지역구분
     private String classifyCode;     // FUND_MASTER.CLASSIFY_CODE 분류코드
     private String setupDate;        // FUND_MASTER.SETUP_DATE 최초설정일
-    private Double initialNav;       // FUND_MASTER.INITIAL_NAV 설정기준가.설정원본
+
     private String publicPrivateType;    // FUND_MASTER.PUBLIC_PRIVATE_TYPE 공모/사모 구분
     private String operStatus;       // FUND_MASTER.OPER_STATUS 운용상태
     private String shortCode;        // FUND_MASTER.FUND_SHORT_CODE 단축코드
     private String isUnitType;       // FUND_MASTER.IS_UNIT.TYPE 추가/단위구분
-    private String OperPeriodType;   // FUND_MASTER.OPER_PERIOD_TYPE 신탁회계기간.신탁기간
+    private String operPeriodType;   // FUND_MASTER.OPER_PERIOD_TYPE 신탁회계기간.신탁기간
     private String className;        // FUND_MASTER.CLASS_NAME 특성분류
 
-    // 추가컬럼
-    private String rgnType;   // 운용실적공시분류
-    private String prfmType;  // 판매지역분류
+    private String rgnType;   // 판매지역분류
+    private String prfmType;  // 운용실적공시분류
 
 
     /* ---------------------------

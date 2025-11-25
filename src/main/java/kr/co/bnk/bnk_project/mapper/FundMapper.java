@@ -7,5 +7,6 @@ import java.util.List;
 
 @Mapper
 public interface FundMapper {
-    List<ProductDTO> findProductList();
+    ProductDTO findProductDetail(String fundcode);
+    List<ProductDTO> find_ProductList();
 }

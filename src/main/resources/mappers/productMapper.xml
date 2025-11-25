@@ -5,15 +5,35 @@
 
 <mapper namespace="kr.co.bnk.bnk_project.mapper.FundMapper">
 
-    <select id="findProductList" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+    <!-- 상세페이지 조회 -->
+    <select id="findProductDetail" parameterType="string"
+            resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
         SELECT
-            fundCode As fundCode,
-            fundName AS fundName,
-            perf1M   AS perf1M,
-            perf3M   AS perf3M,
-            perf6M   AS perf6M,
-            perf12M  AS perf12M
+            fund_code AS fundcode,
+            fund_name AS fundName,
+            fund_short_code AS fundshortcode,
+            overview AS overview,
+            fund_feature AS fundfeature,
+            invest_grade AS investGrade,
+            reg_date AS regdate,
+            admin_company AS admincompany,
+            asset_manager_id as asset,
+            class_name as classname
+        FROM FUND_MASTER
+        WHERE fund_code = #{fundcode}
 
-        FROM test
     </select>
+
+    <!-- 목록 조회 -->
+    <select id="find_ProductList" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+        SELECT
+            fund_code AS fundcode,
+            fund_name AS fundNm,
+            fund_short_code AS fundshortcode,
+            overview,
+            fund_feature AS fundfeature,
+            invest_grade AS investgrade
+        FROM FUND_MASTER
+    </select>
+
 </mapper>

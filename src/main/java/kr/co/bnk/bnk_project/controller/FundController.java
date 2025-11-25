@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -36,8 +37,13 @@ public class FundController {
     }
 
 
-    @GetMapping("/productDetail")
-    public String productDetail() {
+    @GetMapping("/productDetail/{fundCode}")
+    public String productDetail(@PathVariable("fundCode") String fundCode, Model model) {
+
+        ProductDTO detail = productService.getProductDetail(fundCode);
+
+        model.addAttribute("detail", detail);
+
         return "productDetail";
     }
 
