@@ -26,10 +26,17 @@ public class AdminFundMasterDTO {
 
     private String operStatus;      // OPER_STATUS
 
+    private String notice1;
+    private String notice2;
+
+
+
     // 운용사 정보 (조인)
     private String assetManagerId;     // ASSET_MANAGER_ID
     private String assetManagerName;   // OPERATOR_NAME
 
     private String fundTypeName;       // 펀드유형명
+
+
 
 }

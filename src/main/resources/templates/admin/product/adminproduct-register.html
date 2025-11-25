@@ -29,10 +29,13 @@
                             id="searchType"
                             name="searchType"
                             th:value="${pageRequestDTO != null} ? ${pageRequestDTO.searchType} : 'code'">
-                        <option value="code"
-                                th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'code'}">펀드코드</option>
-                        <option value="name"
-                                th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'name'}">펀드명</option>
+                                <option value="name"
+                                        th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'name'}">펀드명
+                                </option>
+                                <option value="code"
+                                        th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'code'}">펀드코드
+                                </option>
+
                     </select>
 
                     <div class="search-input-wrapper-inline" style="position: relative; width: 100%;">
@@ -110,24 +113,28 @@
                             <div class="form-input-wrapper">
                                 <div class="radio-group">
                                     <label class="radio-label">
-                                        <input type="radio" name="investGrade" value="1"
-                                               th:checked="${fund != null and fund.investGrade == '1'}"> 1등급
+                                        <input type="radio" name="investGrade" value="매우 낮은 위험"
+                                               th:checked="${fund != null and fund.investGrade == '매우 낮은 위험'}"> 매우 낮은 위험
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investGrade" value="2"
-                                               th:checked="${fund != null and fund.investGrade == '2'}"> 2등급
+                                        <input type="radio" name="investGrade" value="낮은 위험"
+                                               th:checked="${fund != null and fund.investGrade == '낮은 위험'}"> 낮은 위험
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investGrade" value="3"
-                                               th:checked="${fund != null and fund.investGrade == '3'}"> 3등급
+                                        <input type="radio" name="investGrade" value="보통 위험"
+                                               th:checked="${fund != null and fund.investGrade == '보통 위험'}"> 보통 위험
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investGrade" value="4"
-                                               th:checked="${fund != null and fund.investGrade == '4'}"> 4등급
+                                        <input type="radio" name="investGrade" value="다소 높은 위험"
+                                               th:checked="${fund != null and fund.investGrade == '다소 높은 위험'}"> 다소 높은 위험
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investGrade" value="5"
-                                               th:checked="${fund != null and fund.investGrade == '5'}"> 5등급
+                                        <input type="radio" name="investGrade" value="높은 위험"
+                                               th:checked="${fund != null and fund.investGrade == '높은 위험'}"> 높은 위험
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="investGrade" value="매우 높은 위험"
+                                               th:checked="${fund != null and fund.investGrade == '매우 높은 위험'}"> 매우 높은 위험
                                     </label>
                                 </div>
                             </div>
@@ -145,12 +152,6 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-label">가입대상</div>
-                            <div class="form-input-wrapper">
-                                <input type="text" class="form-input" id="subscriptionTarget" placeholder="가입대상을 입력하세요">
-                            </div>
-                        </div>
 
                         <!-- 상품특징  -->
                         <div class="form-row">
@@ -162,6 +163,34 @@
                                               rows="5"
                                               placeholder="상품특징을 입력하세요"
                                               th:text="${fund != null} ? ${fund.fundFeature} : ''"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 유의사항 -->
+                <div class="form-section">
+                    <h2 class="section-title">유의사항</h2>
+                    <div class="form-table">
+                        <div class="form-row">
+                            <div class="form-label">상품별 주요 투자 위험</div>
+                            <div class="form-input-wrapper">
+                                <textarea class="form-textarea" 
+                                          id="precautions1" 
+                                          name="notice1"
+                                          rows="5" 
+                                          placeholder="유의사항을 입력하세요"
+                                          th:text="${fund != null} ? ${fund.notice1} : ''"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label">이익 및 손실 발행 구조</div>
+                            <div class="form-input-wrapper">
+                                <textarea class="form-textarea" 
+                                          id="precautions2" 
+                                          name="notice2"
+                                          rows="5" 
+                                          placeholder="유의사항을 입력하세요"
+                                          th:text="${fund != null} ? ${fund.notice2} : ''"></textarea>
                             </div>
                         </div>
                     </div>

@@ -359,7 +359,7 @@
 }
 
 .product-table .product-name-link:hover {
-    text-decoration: underline;
+    text-decoration: none;
     color: #333;
 }
 

@@ -1,7 +1,9 @@
 package kr.co.bnk.bnk_project.service.admin;
 
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
+import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
+import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
 import kr.co.bnk.bnk_project.mapper.admin.AdminFundMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class AdminFundService {
 
     }
     public void updateFundAndChangeStatus(AdminFundMasterDTO dto) {
+
         adminFundMapper.updateFundForRegister(dto);
     }
 
@@ -49,18 +52,56 @@ public class AdminFundService {
 
 
 
-    public List<AdminFundMasterDTO> getFundSuggestionsEdit(String searchType, String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return List.of();
+    /* 펀드 등록 검색 */
+    public AdminFundMasterDTO getPendingFundEdit(String fundCode) {
+        if (fundCode == null || fundCode.isBlank()) {
+            return null;
         }
-        if (searchType == null || searchType.isBlank()) {
-            searchType = "code";
-        }
-        return adminFundMapper.selectFundSuggestionsEdit(searchType, keyword);
-
+        return adminFundMapper.selectPendingFundEdit(fundCode);
     }
 
-    public void updateFundAndChangeStatusEdit(AdminFundMasterDTO dto) {
+    public void updateFund(AdminFundMasterDTO dto) {
+
         adminFundMapper.updateFundForEdit(dto);
+    }
+
+
+
+    public void stopFund(String fundCode) {
+
+        adminFundMapper.stopFund(fundCode);
+    }
+
+    public void resumeFund(String fundCode) {
+
+        adminFundMapper.resumeFund(fundCode);
+    }
+
+
+
+
+
+
+
+
+
+    /*--------------------------------------------------*/
+
+    // 펀드 목록 페이지
+    public PageResponseDTO<ProductListDTO> getProductPage(PageRequestDTO pageRequestDTO) {
+
+        // 방어 코드
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        // 목록
+        List<ProductListDTO> list = adminFundMapper.selectProductList(pageRequestDTO);
+
+        // 총 개수
+        int total = adminFundMapper.selectProductTotal(pageRequestDTO);
+
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
+
     }
 }

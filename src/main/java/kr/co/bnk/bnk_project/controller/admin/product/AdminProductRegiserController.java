@@ -1,9 +1,12 @@
 package kr.co.bnk.bnk_project.controller.admin.product;
 
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
+import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
+import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
 import kr.co.bnk.bnk_project.service.admin.AdminFundService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -61,21 +64,68 @@ public class AdminProductRegiserController {
                 .toList();
     }
 
+/*
     @GetMapping("/edit")
     public String productEdit(@RequestParam(required = false) Long id) {
         return "admin/product/adminproduct-edit";
     }
+*/
 
 
 
-/*    @GetMapping("/edit")
-    public String productEdit(@RequestParam(required = false) Long id,PageRequestDTO pageRequestDTO, Model model) {
+    @GetMapping("/edit")
+    public String productEdit(@RequestParam String fundCode, Model model) {
 
-        AdminFundMasterDTO fund = adminFundService.getPendingFund(pageRequestDTO);
+        AdminFundMasterDTO fund = adminFundService.getPendingFundEdit(fundCode);
 
-        model.addAttribute("pageRequestDTO", pageRequestDTO);
         model.addAttribute("fund", fund);
 
         return "admin/product/adminproduct-edit";
-    }*/
+    }
+
+    @PostMapping("/edit")
+    public String updateFund(AdminFundMasterDTO formDto) {
+
+        adminFundService.updateFund(formDto);
+
+        return "redirect:/admin/product/pending";
+    }
+
+
+
+    // 펀드 목록 조회
+    @GetMapping("/pending")
+    public String productList(PageRequestDTO pageRequestDTO , Model model) {
+
+        PageResponseDTO<ProductListDTO> pageResponse = adminFundService.getProductPage(pageRequestDTO);
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+        model.addAttribute("dtoList", pageResponse.getDtoList());
+
+
+
+        return "admin/product/adminproduct-pending";
+    }
+
+
+
+
+    @PostMapping("/stop")
+    public ResponseEntity<Map<String, Object>> stopFund(@RequestParam String fundCode) {
+        adminFundService.stopFund(fundCode);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "운용중단 처리되었습니다."
+        ));
+    }
+
+    @PostMapping("/resume")
+    public ResponseEntity<Map<String, Object>> resumeFund(@RequestParam String fundCode) {
+        adminFundService.resumeFund(fundCode);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "운용재개 처리되었습니다."
+        ));
+    }
+
 }

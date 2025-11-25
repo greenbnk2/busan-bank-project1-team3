@@ -3,6 +3,7 @@ package kr.co.bnk.bnk_project.dto.admin;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -21,6 +22,9 @@ public class ProductListDTO {
 
     // 추가
     private String categoryName; // 카테고리 이름 (한글)
+
+
+    private LocalDateTime lastUpdDate;
 
 
 }
