@@ -1,6 +1,7 @@
 package kr.co.bnk.bnk_project.mapper;
 
 import kr.co.bnk.bnk_project.dto.BnkUserDTO;
+import kr.co.bnk.bnk_project.dto.MemberUpdateDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -40,4 +41,10 @@ public interface MemberMapper {
     void insertAgreement(@Param("custNo") Long custNo,
                          @Param("termId") String termId,
                          @Param("isAgreed") String isAgreed);
+
+    //회원 정보 조회
+    MemberUpdateDTO findDetailByCustNo(Long custNo);
+
+    //회원 정보 수정
+    void updateMemberInfo(MemberUpdateDTO dto);
 }

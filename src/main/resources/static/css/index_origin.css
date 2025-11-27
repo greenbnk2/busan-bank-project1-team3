@@ -1,0 +1,663 @@
+/* ==================== RESET & BASE STYLES ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', '돋움', Dotum, Helvetica, AppleGothic, Sans-serif !important;
+    text-decoration: none;
+    color: #333;
+    line-height: 1.6;
+    min-width: 1200px; /* PC 버전만 구현 */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ==================== CONTAINER STYLES ==================== */
+/* 메인 페이지용 컨테이너 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* 사이드바 레이아웃용 컨테이너 */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ==================== HEADER STYLES ==================== */
+.header {
+    background: #fff;
+}
+
+.header-top {
+    padding: 15px 0;
+    margin-top: 10px;
+}
+
+.header-top .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img {
+    height: 21px;
+}
+
+.header-utils {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.util-link {
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+.util-link:hover {
+    color: #cb2b11;
+}
+
+/* 검색 버튼 */
+.btn-search {
+    width: 90px;
+    height: 32px;
+    padding-left: 30px;
+    padding-right: 10px;
+    background: url(/bnk/images/main/ico_gnb_search.png) no-repeat 10px center;
+    background-size: 16px 16px;
+    border: 1px solid #e0e0e1;
+    border-radius: 4px;
+    color: #666;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-search:hover {
+    background-color: #f5f5f5;
+    border-color: #999;
+}
+
+/* 전체메뉴 버튼 */
+.btn-allmenu {
+    width: 90px;
+    height: 32px;
+    padding-left: 30px;
+    padding-right: 10px;
+    background: url(/bnk/images/main/ico_gnb_allmenu.png) no-repeat 10px center;
+    background-size: 16px 16px;
+    border: 1px solid #e0e0e1;
+    border-radius: 4px;
+    color: #666;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-allmenu:hover {
+    background-color: #f5f5f5;
+    border-color: #999;
+}
+
+/* Navigation */
+.nav {
+    border-bottom: 3px solid #cb2b11;
+}
+
+.nav .container {
+    display: flex;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 40px;
+    padding: 18px 0;
+}
+
+.nav-menu li a {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.nav-menu li a:hover {
+    color: #cb2b11;
+}
+
+/* ==================== MAIN CONTENT STYLES ==================== */
+.main-content {
+    background: #fff;
+}
+
+/* Hero Section */
+.hero-section {
+    background: #fff;
+    padding: 60px 0;
+}
+
+.hero-link {
+    display: block;
+    cursor: pointer;
+}
+
+.hero-link img {
+    width: 100%;
+    height: auto;
+}
+
+.hero-link:hover {
+    opacity: 0.95;
+}
+
+/* Fund Category Section */
+.fund-category-section {
+    padding: 15px 0;
+    background: #fff;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    color: #333;
+    margin-bottom: 50px;
+}
+
+.section-title strong {
+    font-size: 28px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.category-card {
+    text-align: center;
+    cursor: pointer;
+}
+
+.category-card a {
+    display: block;
+    padding: 30px 20px;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.category-card a:hover {
+    background: #f8f8f8;
+    transform: translateY(-5px);
+}
+
+.category-icon {
+    margin-bottom: 20px;
+}
+
+.category-icon img {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.category-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* New Products Section */
+.new-products-section {
+    padding: 60px 0 100px;
+    background: #fff;
+}
+
+.today-list {
+    display: flex;
+    gap: 0;
+    list-style: none;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.today-list li {
+    flex: 1;
+    position: relative;
+    background: #fff;
+    border: none;
+}
+
+.today-list li:last-child {
+    border-right: none;
+}
+
+.today-list li a {
+    display: block;
+    padding: 30px 20px 80px 20px;
+    text-decoration: none;
+    position: relative;
+    min-height: 180px;
+}
+
+.today-list li a:hover {
+    background: #f8f8f8;
+}
+
+.slide-tag {
+    display: inline-block;
+    background: #c9e1ec;
+    color: #2487A9;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+
+.slide-txt {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    min-height: 48px;
+}
+
+.slide-pv {
+    display: block;
+    font-size: 13px;
+    color: #999;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+}
+
+.hd-t {
+    font-size: 12px;
+}
+
+/* 순위 숫자 이미지 (배경) */
+.today-list li:after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 12px;
+    bottom: -1px;
+    width: 58px;
+    height: 64px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+
+.today-list li:nth-child(1):after {
+    width: 40px;
+    background-image: url(/bnk/images/main/ico_num_01.png);
+}
+
+.today-list li:nth-child(2):after {
+    background-image: url(/bnk/images/main/ico_num_02.png);
+}
+
+.today-list li:nth-child(3):after {
+    background-image: url(/bnk/images/main/ico_num_03.png);
+}
+
+.today-list li:nth-child(4):after {
+    background-image: url(/bnk/images/main/ico_num_04.png);
+}
+
+.today-list li:nth-child(5):after {
+    background-image: url(/bnk/images/main/ico_num_05.png);
+}
+
+/* 카드 간 구분선 */
+.today-list li:not(:first-child):before {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    left: 0;
+    top: 40px;
+    width: 1px;
+    height: 120px;
+    background-color: #e5e5e5;
+}
+
+/* ==================== SIDEBAR LAYOUT STYLES ==================== */
+/* 사이드바가 포함된 페이지 레이아웃 */
+
+.content-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 40px;
+}
+
+/* ========== 사이드바 ========== */
+.sidebar {
+    flex: 0 0 170px;
+    width: 170px;
+    background-color: #fff;
+    border-right: 1px solid #e5e5e5;
+    padding-bottom: 30px;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    padding: 12px 16px;
+    border-top: 1px solid #28282b;
+    border-bottom: 1px solid #e0e0e1;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.menu-item {
+    border-bottom: 1px solid #eee;
+}
+
+.menu-btn {
+    width: 100%;
+    background: #fff;
+    border: none;
+    text-align: left;
+    padding: 10px 15px;
+    font-size: 13px;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s;
+}
+.menu-btn.active {
+    background-color: #f8f8fa;
+    color: #b22222;
+}
+
+.menu-btn:hover {
+    background-color: #f8f8fa;
+    color: #b22222;
+}
+
+.menu-btn .arrow {
+    font-size: 11px;
+    transition: 0.2s;
+}
+
+
+.submenu {
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+.submenu li a {
+    display: block;
+    padding: 6px 0;
+    font-size: 12px;
+    color: #444;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.submenu li a:hover {
+    color: #b22222;
+}
+
+.sidebar {
+    position: sticky;
+    top: 120px;
+    align-self: flex-start;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.sidebar.sticky-shadow {
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 사이드바 옆 본문 영역 ========== */
+.content-wrapper .main-content {
+    flex: 1;
+    padding-left: 40px;
+    background: #fff;
+}
+
+.content-header {
+    margin-bottom: 20px;
+}
+
+.content-header h1 {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+/* ==================== FOOTER STYLES ==================== */
+.footer {
+    background: #fff;
+    border-top: 1px solid #333;
+    padding: 30px 0;
+}
+
+.footer-links {
+    margin-bottom: 0px;
+}
+
+.footer-links a {
+    font-size: 14px;
+    color: #666;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.footer-links a:hover {
+    color: #cb2b11;
+    text-decoration: underline;
+}
+
+.footer-links .divider {
+    margin: 0 3px;
+    color: #ddd;
+}
+
+.footer-info {
+    margin: 5px 0;
+}
+
+.footer-info p {
+    font-size: 17px;
+    color: #000;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.footer-copyright p {
+    font-size: 14px;
+    color: #666;
+    font-weight: 400;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.footer-social {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.social-link {
+    display: block;
+    cursor: pointer;
+}
+
+.social-link img {
+    width: 32px;
+    height: 32px;
+}
+
+.social-link:hover {
+    opacity: 0.7;
+}
+
+.footer-dropdowns {
+    display: flex;
+    gap: 10px;
+}
+
+.footer-select {
+    padding: 8px 30px 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3e%3cpath fill='%23666' d='M6 8L0 0h12z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.footer-select:hover {
+    border-color: #999;
+}
+
+/* ==================== 세션 만료 모달 스타일 ==================== */
+.session-modal-overlay {
+    display: none; /* 평상시 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.session-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width: 400px;
+    max-width: 90%;
+    border-top: 5px solid #cb2b11;
+    overflow: hidden;
+}
+
+.session-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.session-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #111;
+}
+
+.session-modal-body {
+    padding: 25px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.session-modal-timer {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: #cb2b11;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.session-modal-footer {
+    padding: 20px 25px;
+    background: #f9f9f9;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.session-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.session-btn-extend {
+    background-color: #cb2b11;
+    color: white;
+}
+
+.session-btn-logout {
+    background-color: #888;
+    color: white;
+}
+
+/* ==================== RESPONSIVE ADJUSTMENTS ==================== */
+@media (max-width: 1024px) {
+    .content-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .content-wrapper .main-content {
+        padding: 20px 10px;
+    }
+}
+

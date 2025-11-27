@@ -49,9 +49,9 @@
             <div class="container">
                 <ul class="nav-menu">
                     <li><a th:href="@{/fund/productList}">펀드상품</a></li>
-                    <li><a href="#">펀드케어</a></li>
-                    <li><a href="#">펀드정보센터</a></li>
-                    <li><a href="#">펀드이용가이드</a></li>
+                    <li><a th:href="@{/fund/fundSihwang}">펀드케어</a></li>
+                    <li><a th:href="@{/fund/fundInformation}">펀드정보센터</a></li>
+                    <li><a th:href="@{/fund/fundGuide}">펀드이용가이드</a></li>
                     <li><a href="#">펀드서비스</a></li>
                 </ul>
             </div>
@@ -61,101 +61,92 @@
     
     <!-- ==================== MAIN CONTENT START ==================== -->
     <main class="main-content">
-        
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="container">
-                <a href="#" class="hero-link">
-                    <img th:src="@{/images/main/fpm_main_fnd.png}" alt="펀드 신규가입">
-                </a>
-            </div>
-        </section>
-        
-        <!-- Fund Category Section -->
-        <section class="fund-category-section">
-            <div class="container">
-                <h2 class="section-title">나의 투자성향에 맞는 <strong>다양한 펀드</strong>를 확인해보세요</h2>
-                <div class="category-grid">
-                    <div class="category-card">
-                        <a th:href="@{/fund/productList}">
-                            <div class="category-icon">
-                                <img th:src="@{/images/main/fnd_prod_1.png}" alt="추천펀드">
-                            </div>
-                            <div class="category-name">추천펀드</div>
-                        </a>
+
+        <section class="kb-hero-section">
+            <div class="container kb-flex-container">
+                <div class="kb-text-box">
+                    <h2 class="kb-title-lg">
+                        복잡한 펀드,<br>
+                        <span class="highlight">BNK</span>에서 쉽게 시작하세요
+                    </h2>
+                    <p class="kb-desc">
+                        내 성향에 딱 맞는 펀드 찾기부터<br>
+                        천 원으로 시작하는 소액 투자까지
+                    </p>
+                    <div class="kb-btn-group">
+                        <a th:href="@{/fund/productList}" class="kb-btn kb-btn-primary">내 펀드 찾기</a>
+                        <a th:href="@{/fund/fundGuide}" class="kb-btn kb-btn-secondary">이용 가이드</a>
                     </div>
-                    <div class="category-card">
-                        <a th:href="@{/fund/productList}">
-                            <div class="category-icon">
-                                <img th:src="@{/images/main/fnd_prod_2.png}" alt="수익률 BEST">
-                            </div>
-                            <div class="category-name">수익률 BEST</div>
-                        </a>
-                    </div>
-                    <div class="category-card">
-                        <a th:href="@{/fund/productList}">
-                            <div class="category-icon">
-                                <img th:src="@{/images/main/fnd_prod_3.png}" alt="판매 BEST">
-                            </div>
-                            <div class="category-name">판매 BEST</div>
-                        </a>
-                    </div>
-                    <div class="category-card">
-                        <a href="#">
-                            <div class="category-icon">
-                                <img th:src="@{/images/main/fnd_prod_4.png}" alt="ELF">
-                            </div>
-                            <div class="category-name">ELF</div>
-                        </a>
-                    </div>
+                </div>
+                <div class="kb-img-box">
+                    <img th:src="@{/images/main/hero_img.png}" alt="메인 일러스트">
                 </div>
             </div>
         </section>
-        
-        <!-- New Products Section -->
-        <section class="new-products-section">
-            <div class="container">
-                <h2 class="section-title">오늘의 인기 TOP 상품</h2>
-                <ul class="today-list">
-                    <li>
-                        <a href="#">
-                            <span class="slide-tag">펀드</span>
-                            <span class="slide-txt">부산 동백전 체크카드</span>
-                            <span class="slide-pv"><span class="hd-t">조회</span> 7,353</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <span class="slide-tag">펀드</span>
-                            <span class="slide-txt">디(The) 레벨업 정기예금</span>
-                            <span class="slide-pv"><span class="hd-t">조회</span> 5,241</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <span class="slide-tag">펀드</span>
-                            <span class="slide-txt">부산 동백전 선불카드</span>
-                            <span class="slide-pv"><span class="hd-t">조회</span> 3,998</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <span class="slide-tag">펀드</span>
-                            <span class="slide-txt">ONE신용대출(가계)</span>
-                            <span class="slide-pv"><span class="hd-t">조회</span> 2,855</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <span class="slide-tag">펀드</span>
-                            <span class="slide-txt">디(The) 특판 정기예금</span>
-                            <span class="slide-pv"><span class="hd-t">조회</span> 2,404</span>
-                        </a>
-                    </li>
-                </ul>
+
+        <section class="kb-feature-section">
+            <div class="container kb-flex-container">
+                <div class="kb-text-box">
+                    <span class="kb-badge">추천 펀드</span>
+                    <h3 class="kb-title-md">
+                        어떤 펀드가 좋을지<br>
+                        고민되시나요?
+                    </h3>
+                    <p class="kb-desc">
+                        투자 성향 분석을 통해<br>
+                        고객님에게 딱 맞는 상품을<br>
+                        AI가 똑똑하게 골라드립니다.
+                    </p>
+                </div>
+                <div class="kb-img-box">
+                    <img th:src="@{/images/main/recommend_img.png}" alt="추천 펀드 일러스트">
+                </div>
             </div>
         </section>
-        
+
+        <section class="kb-feature-section bg-gray">
+            <div class="container kb-flex-container reverse">
+                <div class="kb-img-box">
+                    <img th:src="@{/images/main/recommend_img2.png}" alt="소액 투자 일러스트">
+                </div>
+                <div class="kb-text-box">
+                    <span class="kb-badge orange">소액 투자</span>
+                    <h3 class="kb-title-md">
+                        커피 한 잔 값으로<br>
+                        시작하는 투자
+                    </h3>
+                    <p class="kb-desc">
+                        큰 돈이 필요 없어요.<br>
+                        천 원만 있어도 전 세계 우량 기업에<br>
+                        투자할 수 있습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="kb-card-section">
+            <div class="container">
+                <h3 class="kb-title-center">지금 가장 인기 있는 펀드</h3>
+                <div class="kb-card-grid">
+                    <a href="#" class="kb-card">
+                        <div class="kb-card-icon">🔥</div>
+                        <div class="kb-card-title">수익률 BEST</div>
+                        <div class="kb-card-desc">지난달 가장 높은 수익을<br>기록한 상품들을 모았어요.</div>
+                    </a>
+                    <a href="#" class="kb-card">
+                        <div class="kb-card-icon">👍</div>
+                        <div class="kb-card-title">판매 BEST</div>
+                        <div class="kb-card-desc">많은 고객님이 선택한<br>믿을 수 있는 상품입니다.</div>
+                    </a>
+                    <a href="#" class="kb-card">
+                        <div class="kb-card-icon">🌏</div>
+                        <div class="kb-card-title">해외 주식형</div>
+                        <div class="kb-card-desc">글로벌 시장의 성장에<br>함께 투자해보세요.</div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
     </main>
     <!-- ==================== MAIN CONTENT END ==================== -->
     

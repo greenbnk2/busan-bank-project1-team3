@@ -6,12 +6,13 @@
 
     <select id="findByCustId" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.BnkUserDTO">
         SELECT
-            cust_id     AS userId,  -- BnkUserDTO의 'userId' 필드와 매칭
-            password,               -- BnkUserDTO의 'password' 필드와 매칭
-            cust_name   AS name,    -- BnkUserDTO의 'name' 필드와 매칭
-            cust_hp     AS phone,   -- BnkUserDTO의 'phone' 필드와 매칭
-            cust_email,             -- BnkUserDTO의 'custEmail' (이 필드가 DTO에 있다면)
-            status_code             -- BnkUserDTO의 'statusCode' (이 필드가 DTO에 있다면)
+            cust_no     AS custNo,
+            cust_id     AS userId,
+            password,
+            cust_name   AS name,
+            cust_hp     AS phone,
+            cust_email,
+            status_code
         FROM
             bnk_user
         WHERE
@@ -158,5 +159,35 @@
                      SYSDATE
                  )
     </insert>
+
+    <!-- 회원 정보 조회 -->
+    <select id="findDetailByCustNo" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.MemberUpdateDTO">
+        SELECT
+            cust_no     AS custNo,
+            cust_name   AS name,
+            cust_id     AS userId,
+            cust_hp     AS phone,
+            cust_email  AS email,
+            ZIP_CODE    AS zipcode,
+            ADDR1       AS address1,
+            ADDR2       AS address2,
+            (SELECT TO_CHAR(BIRTH, 'YYYY-MM-DD') FROM BNK_USER_INFO WHERE CUST_NO = BU.CUST_NO) AS birthdate
+        FROM
+            BNK_USER BU
+        WHERE
+            cust_no = #{custNo}
+    </select>
+
+    <!-- 회원 정보 수정 -->
+    <update id="updateMemberInfo" parameterType="kr.co.bnk.bnk_project.dto.MemberUpdateDTO">
+        UPDATE BNK_USER
+        SET
+            CUST_HP = #{phone},
+            ZIP_CODE = #{zipcode},
+            ADDR1 = #{address1},
+            ADDR2 = #{address2}
+        WHERE
+            CUST_NO = #{custNo}
+    </update>
 
 </mapper>

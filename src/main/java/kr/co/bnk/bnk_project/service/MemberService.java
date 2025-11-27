@@ -1,5 +1,6 @@
 package kr.co.bnk.bnk_project.service;
 
+import kr.co.bnk.bnk_project.dto.MemberUpdateDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import kr.co.bnk.bnk_project.dto.BnkUserDTO;
@@ -84,5 +85,15 @@ public class MemberService {
 
         // 2. count가 0이면 사용 가능 (true), 0보다 크면 중복 (false)
         return count == 0;
+    }
+
+    // 수정 화면 진입 시 정보 조회
+    public MemberUpdateDTO getMemberInfo(Long custNo) {
+        return memberMapper.findDetailByCustNo(custNo);
+    }
+
+    // 정보 수정 실행
+    public void updateMemberInfo(MemberUpdateDTO dto) {
+        memberMapper.updateMemberInfo(dto);
     }
 }

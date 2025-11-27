@@ -11,12 +11,88 @@
                     <h1>마이 대시보드</h1>
                 </div>
 
-                <div style="padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-                    <h3><span th:text="${#authentication.principal.displayName}">사용자</span>님, 환영합니다.</h3>
-                    <p>이곳에 보유 펀드 요약, 수익률 현황 등을 표시할 수 있습니다.</p>
+                <div class="dashboard-user-box">
+                    <div class="user-welcome">
+                        <strong class="user-name" th:text="${#authentication.principal.displayName}">홍길동</strong>님,
+                        오늘도 성공적인 투자를 응원합니다.
+                    </div>
+                    <a th:href="@{/my/info}" class="btn-white-border" style="border-radius: 4px;">회원정보수정</a>
                 </div>
-            </div>
-        </div>
+
+                <div class="dashboard-summary-row">
+                    <div class="summary-card total-asset">
+                        <h4>총 평가금액</h4>
+                        <div class="amount-wrap">
+                            <span class="amount">12,500,000</span> <span class="unit">원</span>
+                        </div>
+                    </div>
+                    <div class="summary-card total-yield">
+                        <h4>총 수익률 (평가손익)</h4>
+                        <div class="amount-wrap plus"> <span class="rate">+ 5.2%</span>
+                            <span class="diff">(+ 650,000원)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-section" style="margin-top: 40px;">
+                    <h3>보유 펀드 현황</h3>
+
+                    <table class="list-table">
+                        <colgroup>
+                            <col style="width: 35%;">
+                            <col style="width: 20%;">
+                            <col style="width: 15%;">
+                            <col style="width: 15%;">
+                            <col style="width: 15%;">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>펀드명 / 계좌번호</th>
+                            <th>투자원금</th>
+                            <th>평가금액</th>
+                            <th>수익률</th>
+                            <th>상태</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td style="text-align: left; padding-left: 20px;">
+                                <strong style="font-size: 14px; color: #333;">BNK 튼튼 배당주 증권 자투자신탁 1호</strong><br>
+                                <span style="font-size: 12px; color: #888;">123-45-67890</span>
+                            </td>
+                            <td style="text-align: right; padding-right: 20px;">10,000,000원</td>
+                            <td style="text-align: right; padding-right: 20px; font-weight: bold;">10,650,000원</td>
+                            <td style="color: #cb2b11; font-weight: bold;">+ 6.50%</td>
+                            <td><span class="status-badge normal">정상</span></td>
+                        </tr>
+
+                        <tr>
+                            <td style="text-align: left; padding-left: 20px;">
+                                <strong style="font-size: 14px; color: #333;">BNK 미국 인덱스 증권 투자신탁</strong><br>
+                                <span style="font-size: 12px; color: #888;">123-45-11111</span>
+                            </td>
+                            <td style="text-align: right; padding-right: 20px;">2,000,000원</td>
+                            <td style="text-align: right; padding-right: 20px; font-weight: bold;">1,850,000원</td>
+                            <td style="color: #004890; font-weight: bold;">- 7.50%</td>
+                            <td><span class="status-badge normal">정상</span></td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+
+                    <div class="btn-area-center">
+                        <a th:href="@{/my/account}" class="btn-search-submit" style="padding: 10px 30px; font-size: 14px;">전체 계좌 조회하기</a>
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 40px;">
+                    <ul>
+                        <li>보유 펀드의 평가금액 및 수익률은 기준가 적용일에 따라 실제 환매 시 금액과 다를 수 있습니다.</li>
+                        <li>자세한 거래내역 및 수익률 보고서는 [나의 펀드 > 펀드계좌조회] 메뉴를 이용해 주시기 바랍니다.</li>
+                    </ul>
+                </div>
+
+            </div> </div>
     </div>
 </main>
 

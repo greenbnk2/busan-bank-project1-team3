@@ -661,3 +661,235 @@ img {
     }
 }
 
+
+/* ==================== 카카오뱅크 스타일 리뉴얼 CSS ==================== */
+
+/* 공통 설정 */
+.main-content {
+    width: 100%;
+    overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+/* 섹션 공통 */
+section {
+    width: 100%;
+    position: relative;
+    padding: 100px 0; /* 위아래 여백을 넉넉하게 줌 (핵심) */
+}
+
+/* 컨테이너 내부 flex 설정 (텍스트 + 이미지 가로 배치) */
+.kb-flex-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 50px;
+}
+
+/* 이미지와 텍스트 위치 바꾸기용 */
+.kb-flex-container.reverse {
+    flex-direction: row-reverse;
+}
+
+/* 텍스트 박스 */
+.kb-text-box {
+    flex: 1;
+    word-break: keep-all; /* 단어 단위 줄바꿈 */
+}
+
+/* 이미지 박스 */
+.kb-img-box {
+    flex: 1;
+    text-align: center;
+    /* height: 320px; 이미지가 들어갈 공간의 높이를 고정하고 싶다면 주석을 해제 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 이미지 스타일: 크기 통일 및 비율 유지 */
+.kb-img-box img {
+    height: 320px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.kb-img-box img:hover {
+    transform: translateY(-10px);
+}
+
+/* Hero Section 스타일 */
+.kb-hero-section {
+    background-color: #ffe812;
+    /* BNK 느낌을 살리려면 아주 연한 회색(#f9f9f9)이나 연한 빨강 계열 추천 */
+    background-color: #fcfcfc;
+    padding: 120px 0;
+}
+
+.kb-title-lg {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.3;
+    margin-bottom: 24px;
+    color: #111;
+}
+
+.kb-title-lg .highlight {
+    color: #cb2b11; /* BNK 레드 포인트 */
+}
+
+.kb-desc {
+    font-size: 18px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+/* 버튼 스타일 */
+.kb-btn-group {
+    display: flex;
+    gap: 15px;
+}
+
+.kb-btn {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.kb-btn-primary {
+    background-color: #cb2b11; /* BNK 레드 */
+    color: #fff;
+}
+
+.kb-btn-primary:hover {
+    background-color: #a61e08;
+}
+
+.kb-btn-secondary {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.kb-btn-secondary:hover {
+    background-color: #e5e5e5;
+}
+
+/* 2. Feature Section 스타일 */
+.kb-feature-section {
+    background-color: #fff;
+}
+
+.kb-feature-section.bg-gray {
+    background-color: #f7f7f8; /* 구분감을 주는 연회색 배경 */
+}
+
+.kb-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #e8f4fd;
+    color: #2487A9;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.kb-badge.orange {
+    background-color: #fff5e6;
+    color: #ff8a3d;
+}
+
+.kb-title-md {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 20px;
+    color: #222;
+}
+
+/* 3. Card Section 스타일 */
+.kb-card-section {
+    background-color: #fff;
+    padding-bottom: 150px;
+}
+
+.kb-title-center {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 60px;
+}
+
+.kb-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.kb-card {
+    display: block;
+    background: #fff;
+    padding: 40px 30px;
+    border-radius: 24px;
+    border: 1px solid #eee;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: all 0.3s;
+    text-align: left;
+}
+
+.kb-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    border-color: #cb2b11;
+}
+
+.kb-card-icon {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+.kb-card-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 15px;
+}
+
+.kb-card-desc {
+    font-size: 16px;
+    color: #777;
+    line-height: 1.5;
+}
+
+/* 반응형 (모바일 대응) */
+/* 기존 CSS가 1200px 고정이라 충돌이 날 수 있지만, 창을 줄였을 때 깨지지 않도록 설정 */
+@media (max-width: 1200px) {
+    .kb-flex-container {
+        flex-direction: column; /* 세로로 쌓기 */
+        text-align: center;
+    }
+
+    .kb-flex-container.reverse {
+        flex-direction: column;
+    }
+
+    .kb-text-box, .kb-img-box {
+        width: 100%;
+        margin-bottom: 40px;
+    }
+
+    .kb-card-grid {
+        grid-template-columns: 1fr; /* 카드 한 줄로 */
+    }
+
+    .kb-title-lg { font-size: 36px; }
+    .kb-title-md { font-size: 28px; }
+}
+
