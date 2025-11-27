@@ -186,7 +186,7 @@
     </select>
 
     <!-- 약관, 투자설명서, 간이설명서 -->
-    <select id="selectFundDocuments" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundListDetailDTO">
+    <select id="selectFundDocuments" parameterType="String" resultType="kr.co.bnk.bnk_project.dto.admin.FundListDetailDTO">
         SELECT
             fund_code           AS fundCode,
             doc_type            AS docType,
@@ -196,8 +196,45 @@
         WHERE fund_code = #{fundCode}
     </select>
 
+    <!-- 수익률 추이차트 -->
+    <select id="selectFundReturnHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundReturnHistoryDTO">
+        SELECT
+            TO_CHAR(fp.calc_date, 'YYYY-MM-DD')   AS calcDate,
+            fp.setup_amount                     AS setupAmount,
+            fp.fund_return                      AS fundReturn,
+            fdh.bm_kospi                        AS bmKospi,
+            fdh.bm_kosdaq                       AS bmKosdaq,
+            fdh.bm_gov_bond                     AS bmGovBond,
+            fdh.bm_corp_bond                    AS bmCorpBond
+        FROM
+            fund_performance fp
+        LEFT JOIN fund_daily_history fdh
+        ON fp.fund_code = fdh.fund_code
+        WHERE fp.fund_code = #{fundCode}
+        ORDER BY fp.calc_date ASC
+    </select>
+
+    <!-- 가격변동 추이 -->
+    <select id="selectFundPriceHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundPriceHistoryDTO">
+        SELECT
+            TO_CHAR(trade_date, 'YYYY-MM-DD')     AS tradeDate,
+            nav_per_unit                        AS navPerUnit,
+            daily_change_rate                   AS dailyChangeRate,
+            tax_base_nav                        AS taxBaseNav,
+            setup_origin_amount                 AS setupOriginAmount,
+            bm_kospi                            AS bmKospi,
+            bm_kospi200                         AS bmKospi200,
+            bm_kosdaq                           AS bmKosdaq,
+            bm_gov_bond                         AS bmGovBond,
+            bm_corp_bond                        AS bmCorpBond
+        FROM
+            fund_daily_history
+        WHERE fund_code = #{fundCode}
+        ORDER BY trade_date ASC
+    </select>
+
     <!-- 결산 및 상환 -->
-    <select id="selectFundSettlementHistory" parameterType="String" resultType="kr.co.bnk.bnk_project.dto.admin.FundSettlementHistoryDTO">
+    <select id="selectFundSettlementHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundSettlementHistoryDTO">
         SELECT
             fund_code           AS fundCode,
             settle_start_date   AS settleStartDate,

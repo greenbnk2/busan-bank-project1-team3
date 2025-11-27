@@ -3,9 +3,7 @@ package kr.co.bnk.bnk_project.service.admin;
 import kr.co.bnk.bnk_project.dto.CsDTO;
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.PageResponseDTO;
-import kr.co.bnk.bnk_project.dto.admin.FundListDetailDTO;
-import kr.co.bnk.bnk_project.dto.admin.FundSettlementHistoryDTO;
-import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
+import kr.co.bnk.bnk_project.dto.admin.*;
 import kr.co.bnk.bnk_project.mapper.admin.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -74,9 +72,16 @@ public class ProductService {
         dto.setInvestUrl(investUrl);
         dto.setSummaryUrl(summaryUrl);
 
+        // 수익률 추이
+        List<FundPriceHistoryDTO> priceHistoryList = productMapper.selectFundPriceHistory(fundCode);
+        dto.setPriceHistoryList(priceHistoryList);
+
+        // 가격변동 추이
+        List<FundReturnHistoryDTO> returnHistoryList = productMapper.selectFundReturnHistory(fundCode);
+        dto.setReturnHistoryList(returnHistoryList);
+
         // 결산 및 상환
         List<FundSettlementHistoryDTO> settlementList = productMapper.selectFundSettlementHistory(fundCode);
-
         dto.setSettlementList(settlementList);
 
         return dto;

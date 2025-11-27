@@ -253,6 +253,7 @@
         fetch(`/bnk/admin/product/detail?fundCode=${fundCode}`)
             .then(response => response.json())
             .then(product => {
+                window.currentProduct = product;
 
                 if (!product) {
                     alert("상세 데이터를 찾을 수 없습니다.");
@@ -267,6 +268,9 @@
                 document.getElementById("termsBtn").href = product.termsUrl;
                 document.getElementById("investBtn").href = product.investUrl;
                 document.getElementById("summaryBtn").href = product.summaryUrl;
+
+
+
 
                 const modalBody = document.getElementById('modalBody');
                 modalBody.innerHTML = `
@@ -565,9 +569,9 @@
                                 <div class="form-input-wrapper">
                                     <div style="display: flex; align-items: center; gap: 15px;">
                                         <div class="date-input-group">
-                                            <input type="date" class="form-input date-input" value="2025-10-11">
+                                            <input type="date" class="form-input date-input" value="2025-10-11" id="returnStartDate">
                                             <span class="date-separator">~</span>
-                                            <input type="date" class="form-input date-input" value="2025-11-11">
+                                            <input type="date" class="form-input date-input" value="2025-11-11" id="returnEndDate">
                                         </div>
                                         <div class="radio-group">
                                             <label class="radio-label">
@@ -577,7 +581,7 @@
                                                 <input type="radio" name="chartBasis" value="monthly"> 월말기준
                                             </label>
                                         </div>
-                                        <button class="btn btn-search">검색</button>
+                                        <button id="returnSearchBtn" class="btn btn-search">검색</button>
                                     </div>
                                 </div>
                             </div>
@@ -660,61 +664,7 @@
                                             <th>회사채</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>20251020</td>
-                                            <td>2,370.0</td>
-                                            <td>0</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                            <td>0.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251021</td>
-                                            <td>2,386.0</td>
-                                            <td>1.08</td>
-                                            <td>0.24</td>
-                                            <td>-0.37</td>
-                                            <td>1.21</td>
-                                            <td>0.85</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251022</td>
-                                            <td>2,400.0</td>
-                                            <td>1.44</td>
-                                            <td>1.81</td>
-                                            <td>0.39</td>
-                                            <td>0.12</td>
-                                            <td>0.25</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251023</td>
-                                            <td>2,413.0</td>
-                                            <td>2.47</td>
-                                            <td>0.81</td>
-                                            <td>-0.43</td>
-                                            <td>1.40</td>
-                                            <td>0.92</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251024</td>
-                                            <td>2,438.0</td>
-                                            <td>1.79</td>
-                                            <td>3.33</td>
-                                            <td>0.83</td>
-                                            <td>0.86</td>
-                                            <td>0.55</td>
-                                        </tr>
-                                        <tr>
-                                            <td>20251027</td>
-                                            <td>2,585.0</td>
-                                            <td>4.05</td>
-                                            <td>5.98</td>
-                                            <td>3.08</td>
-                                            <td>1.99</td>
-                                            <td>1.45</td>
-                                        </tr>
+                                    <tbody id="returnTableBody">
                                     </tbody>
                                 </table>
                             </div>
@@ -751,9 +701,9 @@
                                 <div class="form-input-wrapper">
                                     <div style="display: flex; align-items: center; gap: 15px;">
                                         <div class="date-input-group">
-                                            <input type="date" class="form-input date-input" value="2025-10-11">
+                                            <input type="date" class="form-input date-input" value="2025-10-11" id="priceStartDate">
                                             <span class="date-separator">~</span>
-                                            <input type="date" class="form-input date-input" value="2025-11-11">
+                                            <input type="date" class="form-input date-input" value="2025-11-11" id="priceEndDate">
                                         </div>
                                         <div class="radio-group">
                                             <label class="radio-label">
@@ -763,7 +713,7 @@
                                                 <input type="radio" name="priceBasis" value="monthly" checked> 월말기준
                                             </label>
                                         </div>
-                                        <button class="btn btn-search">검색</button>
+                                        <button id="priceSearchBtn" class="btn btn-search">검색</button>
                                     </div>
                                 </div>
                             </div>
@@ -813,79 +763,7 @@
                                             <th>회사채(3년만기)</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>2025/11/18</td>
-                                            <td>1,881.60</td>
-                                            <td>30.07</td>
-                                            <td>1,257.73</td>
-                                            <td>3,232</td>
-                                            <td>3,953.62</td>
-                                            <td>556.45</td>
-                                            <td>878.70</td>
-                                            <td>0.000</td>
-                                            <td>0.000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/17</td>
-                                            <td>1,851.53</td>
-                                            <td>-61.11</td>
-                                            <td>1,261.59</td>
-                                            <td>3,205</td>
-                                            <td>4,089.25</td>
-                                            <td>576.65</td>
-                                            <td>902.67</td>
-                                            <td>2.914</td>
-                                            <td>4.020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/14</td>
-                                            <td>1,912.64</td>
-                                            <td>14.19</td>
-                                            <td>1,267.70</td>
-                                            <td>3,179</td>
-                                            <td>4,011.57</td>
-                                            <td>563.43</td>
-                                            <td>897.90</td>
-                                            <td>2.944</td>
-                                            <td>4.056</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/13</td>
-                                            <td>1,898.45</td>
-                                            <td>21.03</td>
-                                            <td>1,267.75</td>
-                                            <td>3,166</td>
-                                            <td>4,170.63</td>
-                                            <td>588.65</td>
-                                            <td>918.37</td>
-                                            <td>2.932</td>
-                                            <td>4.024</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/12</td>
-                                            <td>1,877.42</td>
-                                            <td>15.89</td>
-                                            <td>1,260.73</td>
-                                            <td>3,159</td>
-                                            <td>4,150.39</td>
-                                            <td>586.73</td>
-                                            <td>906.51</td>
-                                            <td>2.923</td>
-                                            <td>4.007</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025/11/11</td>
-                                            <td>1,861.53</td>
-                                            <td>33.23</td>
-                                            <td>1,254.87</td>
-                                            <td>3,083</td>
-                                            <td>4,106.39</td>
-                                            <td>581.41</td>
-                                            <td>884.27</td>
-                                            <td>2.831</td>
-                                            <td>3.919</td>
-                                        </tr>
+                                    <tbody id="priceTableBody">
                                     </tbody>
                                 </table>
                             </div>
@@ -1137,6 +1015,77 @@
                     </div>
                 </div>
             `;
+
+                // 조회기간 검색(수익률차트추이,가격변동추이)
+                document.getElementById("returnSearchBtn").addEventListener("click", filterReturnData);
+                document.getElementById("priceSearchBtn").addEventListener("click", filterPriceList);
+
+
+                /* ===============================
+                    ■ 수익률 테이블 렌더링
+                ================================*/
+                function renderReturnTable(product) {
+                    const tbody = document.getElementById("returnTableBody");
+                    tbody.innerHTML = "";
+
+                    if (!product.returnHistoryList || product.returnHistoryList.length === 0) {
+                        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center; padding:15px;">
+                    수익률 데이터가 없습니다.
+                </td>
+            </tr>`;
+                        return;
+                    }
+
+                    product.returnHistoryList.forEach(item => {
+                        tbody.innerHTML += `
+            <tr>
+                <td>${item.calcDate || '-'}</td>
+                <td>${item.setupAmount?.toLocaleString() ?? '-'}</td>
+                <td>${item.fundReturn ?? '-'}</td>
+                <td>${item.bmKospi ?? '-'}</td>
+                <td>${item.bmKosdaq ?? '-'}</td>
+                <td>${item.bmGovBond ?? '-'}</td>
+                <td>${item.bmCorpBond ?? '-'}</td>
+            </tr>
+            `;
+                    });
+                }
+                /* ===============================
+                    ■  가격변동 추이
+                ================================*/
+                function renderPriceTable(product) {
+                    const tbody = document.getElementById("priceTableBody");
+                    tbody.innerHTML = "";
+
+                    if (!product.priceHistoryList || product.priceHistoryList.length === 0) {
+                        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" style="text-align:center; padding:15px;">
+                    가격변동 데이터가 없습니다.
+                </td>
+            </tr>`;
+                        return;
+                    }
+
+                    product.priceHistoryList.forEach(item => {
+                        tbody.innerHTML += `
+        <tr>
+            <td>${item.tradeDate || '-'}</td>
+            <td>${item.navPerUnit?.toLocaleString() ?? '-'}</td>
+            <td>${item.dailyChangeRate ?? '-'}</td>
+            <td>${item.taxBaseNav ?? '-'}</td>
+            <td>${item.setupOriginAmount?.toLocaleString() ?? '-'}</td>
+            <td>${item.bmKospi ?? '-'}</td>
+            <td>${item.bmKospi200 ?? '-'}</td>
+            <td>${item.bmKosdaq ?? '-'}</td>
+            <td>${item.bmGovBond ?? '-'}</td>
+            <td>${item.bmCorpBond ?? '-'}</td>
+        </tr>
+        `;
+                    });
+                }
                 /* ===============================
                     ■ 결산 및 상환 테이블 렌더링
                 ================================*/
@@ -1173,8 +1122,131 @@
                     });
                 }
 
+                // 수익률 차트 조회기간
+                function filterReturnData() {
+
+                    if (!product || !product.returnHistoryList) return;
+
+                    const start = document.getElementById("returnStartDate").value; // ex: 2025-10-11
+                    const end = document.getElementById("returnEndDate").value;
+
+                    if (!start || !end) {
+                        alert("조회기간을 선택해주세요.");
+                        return;
+                    }
+
+                    // 날짜 비교를 위해 문자열 → 숫자로 변환
+                    const startNum = Number(start.replace(/-/g, ""));
+                    const endNum = Number(end.replace(/-/g, ""));
+
+                    // 조건에 맞는 데이터 필터
+                    const filtered = product.returnHistoryList.filter(item => {
+                        const dateNum = Number(item.calcDate.replace(/-/g, ""));
+                        return dateNum >= startNum && dateNum <= endNum;
+                    });
+
+                    // 테이블 갱신
+                    renderReturnTable({ returnHistoryList: filtered });
+
+                    // 차트 갱신 (사용하던 그대로)
+                    updateReturnChartByFiltered(filtered);
+                }
+
+                // 가격변동 추이 조회기간
+                function filterPriceList() {
+
+                    if (!product || !product.priceHistoryList) return;
+
+                    // ★ 문제 원인 해결: ID로 정확히 가져오기
+                    const start = document.getElementById("priceStartDate").value;
+                    const end   = document.getElementById("priceEndDate").value;
+
+                    if (!start || !end) {
+                        alert("조회기간을 선택해주세요.");
+                        return;
+                    }
+
+                    const startNum = Number(start.replace(/-/g, ""));
+                    const endNum = Number(end.replace(/-/g, ""));
+
+                    let list = product.priceHistoryList;
+
+                    // 1) 기간 필터
+                    let filtered = list.filter(item => {
+                        const d = Number(item.tradeDate.replace(/-/g, ""));
+                        return d >= startNum && d <= endNum;
+                    });
+
+                    // 2) 월말 기준
+                    const basis = document.querySelector('input[name="priceBasis"]:checked').value;
+
+                    if (basis === 'monthly') {
+                        const monthly = [];
+
+                        filtered.forEach(item => {
+                            const month = item.tradeDate.substring(0, 7);
+                            const last  = monthly[monthly.length - 1];
+
+                            if (!last || last.tradeDate.substring(0, 7) !== month) {
+                                monthly.push(item);
+                            } else {
+                                if (item.tradeDate > last.tradeDate) {
+                                    monthly[monthly.length - 1] = item;
+                                }
+                            }
+                        });
+
+                        filtered = monthly;
+                    }
+
+                    // 3) 테이블 갱신
+                    renderPriceTable({ priceHistoryList: filtered });
+
+                    // 4) 차트 갱신
+                    window.currentProduct.priceHistoryList = filtered;
+                    initPriceChart();
+                }
+
+
+
+
+
+                function updateReturnChartByFiltered(list) {
+
+                    if (!list || list.length === 0) {
+                        // 데이터 없을 때 차트만 초기화
+                        returnChart.data.labels = [];
+                        returnChart.data.datasets.forEach(ds => ds.data = []);
+                        returnChart.update();
+                        return;
+                    }
+
+                    const labels = list.map(i => i.calcDate);
+                    const fundReturns = list.map(i => i.fundReturn ?? 0);
+                    const setupAmounts = list.map(i => i.setupAmount ?? 0);
+
+                    returnChart.data.labels = labels;
+
+                    // 기본 두 개(운용수익률, 설정원본) 갱신
+                    returnChart.data.datasets[0].data = fundReturns;
+                    returnChart.data.datasets[1].data = setupAmounts;
+
+                    // 벤치마크 재계산
+                    updateChart(); // ← 기존 함수 그대로 호출하면 됨
+
+                    returnChart.update();
+                }
+
+
+
+                // 수익률 추이차트
+                renderReturnTable(product);
+                // 가격변동 추이차트
+                renderPriceTable(product);
                 // 결산 및 상환 테이블 실행
                 renderSettlementTable(product);
+
+
 
                 // 모달 열기
                 document.getElementById("productDetailModal").classList.add("active");
@@ -1309,7 +1381,10 @@
         }
 
         // 날짜 라벨 (샘플 데이터 - 이미지 기준)
-        const labels = ['20251020', '20251024', '20251030', '20251105', '20251111', '20251117'];
+        const list = window.currentProduct.returnHistoryList || [];
+        const labels = list.map(item => item.calcDate);
+        const fundReturns = list.map(item => item.fundReturn);
+        const setupAmounts = list.map(item => item.setupAmount);
 
         returnChart = new Chart(ctx, {
             type: 'bar',
@@ -1319,7 +1394,7 @@
                     {
                         label: '운용수익률',
                         type: 'line',
-                        data: [0, 2, 4, 11, 5.5, 8],
+                        data: fundReturns,
                         borderColor: '#ffc107',
                         backgroundColor: 'transparent',
                         borderWidth: 2,
@@ -1335,7 +1410,7 @@
                     {
                         label: '설정원본',
                         type: 'bar',
-                        data: [2370, 2450, 2580, 2770, 2960, 3150],
+                        data: setupAmounts,
                         backgroundColor: '#2196F3',
                         borderColor: '#2196F3',
                         borderWidth: 0,
@@ -1396,8 +1471,8 @@
                     y1: {
                         type: 'linear',
                         position: 'right',
-                        min: 2200,
-                        max: 3340,
+                        min: 1000,
+                        max: 5000,
                         ticks: {
                             stepSize: 190,
                             color: '#666',
@@ -1436,7 +1511,10 @@
         }
 
         // 날짜 라벨 (샘플 데이터)
-        const labels = ['20251011', '20251021', '20251031', '20251110', '20251120'];
+        const list = window.currentProduct.priceHistoryList || [];
+        const labels = list.map(item => item.tradeDate);
+        const navList = list.map(item => item.navPerUnit);
+        const setupList = list.map(item => item.setupOriginAmount);
 
         priceChart = new Chart(ctx, {
             type: 'bar',
@@ -1446,7 +1524,7 @@
                     {
                         label: '기준가격',
                         type: 'line',
-                        data: [9900, 9950, 10000, 10050, 10100],
+                        data: navList,
                         borderColor: '#ff9800',
                         backgroundColor: 'transparent',
                         borderWidth: 2,
@@ -1464,7 +1542,7 @@
                     {
                         label: '설정원본',
                         type: 'bar',
-                        data: [8900, 8950, 9000, 9050, 9100],
+                        data: setupList,
                         backgroundColor: '#2196F3',
                         borderColor: '#2196F3',
                         borderWidth: 0,
