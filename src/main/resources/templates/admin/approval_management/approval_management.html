@@ -20,6 +20,9 @@
         <div class="container">
             <header class="page-header">
                 <h1>결재(승인) 관리</h1>
+                <div class="header-actions">
+                    <a th:href="@{/admin/approval/history}" class="btn btn-secondary">결재이력</a>
+                </div>
             </header>
             
             <section class="section-block approval-filter">
@@ -35,7 +38,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="search-label">상태</td>
+                                    <td class="search-label">결재상태</td>
                                     <td class="search-inputs">
                                         <select class="form-select search-select-medium" id="filterStatus" name="status">
                                             <option value="" th:selected="${pageRequestDTO == null || #strings.isEmpty(pageRequestDTO.status)}">전체</option>
@@ -62,8 +65,8 @@
                             </tbody>
                         </table>
                         <div class="search-actions">
-                            <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/approval}'|">초기화</button>
                             <button type="submit" class="btn btn-search">조회</button>
+                            <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/approval}'|">초기화</button>
                         </div>
                     </form>
                 </div>
@@ -141,47 +144,6 @@
                 </div>
             </section>
 
-            <section class="section-block approval-history">
-                    <h2 class="section-title">최근 결재 이력</h2>
-                    <div class="history-table">
-                        <div class="table-info">
-                            <span>총 <strong th:text="${recentHistory != null ? #lists.size(recentHistory) : 0}">0</strong>건</span>
-                        </div>
-                        <table class="fund-table" id="historyTable">
-                            <thead>
-                            <tr>
-                                <th>결재 ID</th>
-                                <th>상품명</th>
-                                <th>결재 유형</th>
-                                <th>최종 처리자</th>
-                                <th>처리 일시</th>
-                                <th>결과</th>
-                                <th>비고</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:if="${recentHistory == null || #lists.isEmpty(recentHistory)}">
-                                <td colspan="7" class="empty-row">최근 승인/반려 이력이 없습니다.</td>
-                            </tr>
-                            <tr th:each="history : ${recentHistory}"
-                                th:attr="data-status-key=${history.status == '승인' ? 'approved' : (history.status == '반려' ? 'rejected' : '')}">
-                                <td class="table-ellipsis" th:text="${history.apprNo}">APR-2024-013</td>
-                                <td class="table-ellipsis" th:text="${history.fundName}">BNK 더드림 펀드</td>
-                                <td class="table-ellipsis emphasis" th:text="${history.apprType}">상품 신규 등록</td>
-                                <td class="table-ellipsis" th:text="${history.approver}">홍관리</td>
-                                <td class="table-ellipsis"
-                                    th:text="${history.approvalTime != null ? #temporals.format(history.approvalTime, 'yyyy-MM-dd HH:mm') : '-'}">2024-04-20 14:05</td>
-                                <td class="table-ellipsis">
-                                    <span class="status-badge"
-                                          th:text="${history.status}"
-                                          th:classappend="${history.status == '승인' ? ' status-approved' : ' status-rejected'}">승인</span>
-                                </td>
-                                <td class="remark" th:text="${history.remarks}">상품 신규 등록 승인</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
 
     <!-- 결재 상세 모달 -->
     <div id="approvalDetailModal" class="modal">
@@ -330,12 +292,6 @@
 
             document.querySelectorAll('#pendingTable tbody tr').forEach((row) => {
                 const key = row.dataset.statusKey || 'pending';
-                counts.total += 1;
-                if (counts[key] !== undefined) counts[key] += 1;
-            });
-
-            document.querySelectorAll('#historyTable tbody tr').forEach((row) => {
-                const key = row.dataset.statusKey;
                 counts.total += 1;
                 if (counts[key] !== undefined) counts[key] += 1;
             });

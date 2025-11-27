@@ -17,5 +17,8 @@ public interface ApprovalMapper {
 
     List<ApprovalDTO> selectRecentApprovalHistory();
 
+    List<ApprovalDTO> selectApprovalHistory(@Param("pageRequestDTO") PageRequestDTO pageRequestDTO);
+    int selectApprovalHistoryTotal(@Param("pageRequestDTO") PageRequestDTO pageRequestDTO);
+
     void approvalFund(ApprovalDTO approvalDTO);
 }

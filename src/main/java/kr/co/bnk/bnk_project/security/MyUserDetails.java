@@ -36,7 +36,11 @@ public class MyUserDetails implements UserDetails {
         return userDTO.getName(); // DTO에서 실제 이름 반환
     }
 
-    // --- 계정 상태 관련 (BnkUserDTO에 statusCode 필드가 있다면 활용 가능) ---
+    public BnkUserDTO getUserDTO() {
+        return userDTO;
+    }
+
+    // --- 계정 상태 관련 ---
 
     @Override
     public boolean isAccountNonExpired() {

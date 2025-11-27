@@ -21,9 +21,8 @@ public class ApprovalService {
     public void insertApproval(ApprovalDTO approvalDTO) {
         approvalMapper.insertApproval(approvalDTO);
 
-        if (approvalDTO.getApprType() != null && approvalDTO.getApprType().equals("등록")) {
             adminFundService.updateOperStatus(approvalDTO.getFundCode());
-        }
+
     }
 
 
@@ -42,6 +41,18 @@ public class ApprovalService {
 
     public List<ApprovalDTO> selectRecentApprovalHistory() {
         return approvalMapper.selectRecentApprovalHistory();
+    }
+
+    /** 결재 이력 목록 **/
+    public PageResponseDTO<ApprovalDTO> selectApprovalHistory(PageRequestDTO pageRequestDTO) {
+
+        if (pageRequestDTO.getPg() <= 0) pageRequestDTO.setPg(1);
+        if (pageRequestDTO.getSize() <= 0) pageRequestDTO.setSize(10);
+
+        List<ApprovalDTO> list = approvalMapper.selectApprovalHistory(pageRequestDTO);
+        int total = approvalMapper.selectApprovalHistoryTotal(pageRequestDTO);
+
+        return PageResponseDTO.of(pageRequestDTO, list, total);
     }
 
     @Transactional

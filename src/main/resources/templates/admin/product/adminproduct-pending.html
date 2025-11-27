@@ -178,7 +178,7 @@
                     </thead>
                     <tbody id="pendingTableBody">
                         <tr th:each="dto, stat : ${dtoList}" 
-                            th:attr="data-product-id=${dto.fundCode},data-update-stat=${dto.updateStat}">
+                            th:attr="data-product-id=${dto.fundCode},data-fund-code=${dto.fundCode},data-update-stat=${dto.updateStat}">
                             <td th:text="${dto.fundCode}"></td>
                             <td>
                                 <span class="product-name-link"
@@ -193,9 +193,24 @@
                             <td>
                                 <span class="status-text" th:text="${dto.operStatus}"></span>
                             </td>
-                            <td th:text="${dto.lastUpdDate}"></td>
                             <td>
-                                <button class="action-btn edit" th:attr="data-fund-code=${dto.fundCode}"
+                                <span th:text="${dto.lastUpdDate}"></span>
+                                <!-- 잠금 상태일 때 수정중 표시 -->
+                                <span th:if="${lockStatusMap != null and lockStatusMap[dto.fundCode] == true}" 
+                                      data-lock-status="true"
+                                      style="margin-left: 10px; color: #cd1317; font-weight: 600;">
+                                    [수정중]
+                                </span>
+                                <!-- 잠금 상태가 아닐 때 기존 updateStat 표시 -->
+                                <span th:if="${(lockStatusMap == null or lockStatusMap[dto.fundCode] != true) and (dto.updateStat != null and dto.updateStat != '')}" 
+                                      style="margin-left: 10px; color: #666;">
+                                    [<span th:text="${dto.updateStat}"></span>]
+                                </span>
+                            </td>
+                            <td>
+                                <button class="action-btn edit" 
+                                        th:attr="data-fund-code=${dto.fundCode}"
+                                        th:disabled="${lockStatusMap != null and lockStatusMap[dto.fundCode] == true}"
                                         onclick="editProduct(this.dataset.fundCode)">수정</button>
                             </td>
                             <td>
@@ -321,7 +336,7 @@
                                 <th>요청자</th>
                                 <td>
                                     <input type="text" class="form-input" name="requester" id="approvalRequester" 
-                                           th:value="${#authentication.principal.displayName}" readonly>
+                                           th:value="${#authentication.principal.displayName}">
                                 </td>
                             </tr>
                             <tr>
@@ -402,10 +417,20 @@
         const editUrl = /*[[@{/admin/product/edit}]]*/ '';
         const stopUrl = /*[[@{/admin/product/stop}]]*/ '';
         const resumeUrl = /*[[@{/admin/product/resume}]]*/ '';
+        const checkLocksUrl = /*[[@{/admin/product/pending/check-locks}]]*/ '';
         const csrfToken = /*[[${_csrf.token}]]*/ '';
         const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
 
         function editProduct(fundCode) {
+            // 잠금 상태 확인
+            const row = document.querySelector(`tr[data-fund-code="${fundCode}"]`);
+            const editBtn = row?.querySelector('.action-btn.edit');
+            
+            if (editBtn && editBtn.disabled) {
+                alert('다른 사용자가 수정 중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+            
             location.href = editUrl + '?fundCode=' + fundCode;
         }
 
@@ -611,34 +636,39 @@
         }
 
         // 승인요청 함수
+        // 승인요청 함수
         function requestApproval(button) {
             // 비활성화된 버튼이면 동작하지 않음
             if (button.disabled) {
                 return;
             }
-            
+
             const fundCode = button.dataset.fundCode;
             const fundName = button.dataset.fundName;
-            
+
             // 행에서 추가 정보 가져오기
             const row = button.closest('tr');
             const productCode = row.querySelector('td:first-child')?.textContent?.trim() || fundCode;
-            const productName = row.querySelector('.product-name-link')?.getAttribute('title') || 
-                               row.querySelector('.product-name-link')?.textContent?.trim() || fundName;
+            const productName = row.querySelector('.product-name-link')?.getAttribute('title') ||
+                row.querySelector('.product-name-link')?.textContent?.trim() || fundName;
             const status = row.querySelector('.status-text')?.textContent?.trim() || '';
-            
+
+            // updateStat 값 가져오기
+            const updateStat = row.getAttribute('data-update-stat') || '';
+
             // 모달에 데이터 채우기
             document.getElementById('approvalProductCode').value = productCode;
             document.getElementById('approvalProductName').value = productName;
-            document.getElementById('approvalStatus').value = status;
-            
+
+            // updateStat이 '수정'이면 '수정'으로, 아니면 기존 status(operStatus)로 표시
+            document.getElementById('approvalStatus').value = (updateStat === '수정') ? '수정' : status;
+
             // 요청사유 필드 초기화
             document.getElementById('approvalReason').value = '';
-            
+
             // 모달 표시
             document.getElementById('approvalRequestModal').classList.add('active');
         }
-
         // 승인요청 모달 닫기
         function closeApprovalModal() {
             document.getElementById('approvalRequestModal').classList.remove('active');
@@ -854,11 +884,147 @@
             });
         }
 
+        // 잠금 상태 업데이트 함수
+        function updateLockStatus(lockStatusMap) {
+            if (!lockStatusMap || Object.keys(lockStatusMap).length === 0) {
+                return; // 잠금 상태 정보가 없으면 업데이트하지 않음
+            }
+            
+            const rows = document.querySelectorAll('.product-table tbody tr');
+            rows.forEach(row => {
+                const fundCode = row.getAttribute('data-fund-code') || 
+                                row.querySelector('.action-btn.edit')?.getAttribute('data-fund-code');
+                
+                if (!fundCode) return;
+                
+                const isLocked = lockStatusMap[fundCode] === true;
+                const editBtn = row.querySelector('.action-btn.edit');
+                const statusCell = row.querySelector('td:nth-child(5)'); // 최근수정일시 컬럼 (5번째)
+                
+                // 수정 버튼 비활성화/활성화 (관리 페이지에서만)
+                if (editBtn) {
+                    editBtn.disabled = isLocked;
+                }
+                
+                // 수정상태 표시 업데이트
+                if (statusCell) {
+                    // 기존 수정중 표시 제거
+                    const existingLockStatus = statusCell.querySelector('span[data-lock-status]');
+                    if (existingLockStatus) {
+                        existingLockStatus.remove();
+                    }
+                    
+                    // 잠금 상태일 때 수정중 표시 추가
+                    if (isLocked) {
+                        const lockStatusSpan = document.createElement('span');
+                        lockStatusSpan.setAttribute('data-lock-status', 'true');
+                        lockStatusSpan.style.marginLeft = '10px';
+                        lockStatusSpan.style.color = '#cd1317';
+                        lockStatusSpan.style.fontWeight = '600';
+                        lockStatusSpan.textContent = '[수정중]';
+                        statusCell.appendChild(lockStatusSpan);
+                    }
+                }
+            });
+        }
+        
+        // 잠금 상태 확인 함수
+        function checkLockStatus() {
+            const rows = document.querySelectorAll('.product-table tbody tr');
+            const fundCodes = [];
+            
+            rows.forEach(row => {
+                const fundCode = row.getAttribute('data-fund-code') || 
+                                row.querySelector('.action-btn.edit')?.getAttribute('data-fund-code');
+                if (fundCode) {
+                    fundCodes.push(fundCode);
+                }
+            });
+            
+            if (fundCodes.length === 0) return;
+            
+            const formData = new FormData();
+            fundCodes.forEach(code => {
+                formData.append('fundCodes', code);
+            });
+            
+            fetch(checkLocksUrl, {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(lockStatusMap => {
+                if (lockStatusMap) {
+                    updateLockStatus(lockStatusMap);
+                }
+            })
+            .catch(error => {
+                console.error('잠금 상태 확인 실패:', error);
+            });
+        }
+        
         // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', function() {
             truncateProductNames();
             truncateCompanyNames();
             initializeButtonVisibility();
+            
+            // 초기 잠금 상태 적용 (서버에서 전달된 lockStatusMap 사용)
+            const initialLockStatusMap = /*[[${lockStatusMap}]]*/ {};
+            if (initialLockStatusMap && initialLockStatusMap !== null && Object.keys(initialLockStatusMap).length > 0) {
+                updateLockStatus(initialLockStatusMap);
+            }
+            
+            // 즉시 잠금 상태 확인 (뒤로가기로 돌아왔을 때를 대비)
+            checkLockStatus();
+            
+            // 5초마다 잠금 상태 확인 (페이지가 보일 때만)
+            let lockCheckInterval = setInterval(function() {
+                // 페이지가 보일 때만 체크
+                if (!document.hidden) {
+                    checkLockStatus();
+                }
+            }, 10000);
+            
+            // 페이지가 숨겨지면 체크 중지, 보이면 다시 시작
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    // 페이지가 숨겨지면 체크 중지
+                    if (lockCheckInterval) {
+                        clearInterval(lockCheckInterval);
+                        lockCheckInterval = null;
+                    }
+                } else {
+                    // 페이지가 보이면 즉시 체크하고 다시 시작
+                    checkLockStatus();
+                    if (!lockCheckInterval) {
+                        lockCheckInterval = setInterval(function() {
+                            if (!document.hidden) {
+                                checkLockStatus();
+                            }
+                        }, 5000);
+                    }
+                }
+            });
+        });
+        
+        // 뒤로가기로 돌아왔을 때 즉시 잠금 상태 확인
+        window.addEventListener('pageshow', function(e) {
+            // 뒤로가기로 돌아왔을 때 (persisted가 true)
+            if (e.persisted) {
+                console.log('뒤로가기로 돌아옴 - 잠금 상태 즉시 확인');
+                setTimeout(function() {
+                    checkLockStatus();
+                }, 100);
+            }
         });
         /*]]>*/
     </script>

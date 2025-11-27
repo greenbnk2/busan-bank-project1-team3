@@ -1,88 +1,88 @@
-// ===== 샘플 데이터 생성 =====
-const funds = [];
-for (let i = 1; i <= 50; i++) {
-    funds.push({
-        no: i,
-        title: `미래에셋글로벌코어테크EMP증권투자신탁(${i})종류A`,
-        file: "#",
-        view: "#"
-    });
-}
+/* ================================================================
+   🔥 API 없이: 이미 HTML에 있는 <tr>들로 페이지네이션 구현
+   ================================================================ */
 
-const rowsPerPage = 10;
+let rows = [];         // HTML에 이미 렌더링된 <tr>들
 let currentPage = 1;
+const itemsPerPage = 10;
 
-const tbody = document.getElementById("fund-list");
-const pagination = document.getElementById("pagination");
 
-// ===== 테이블 렌더링 =====
-function renderTable(page) {
-    currentPage = page;
-    tbody.innerHTML = "";
+/* ================================================================
+   1) 초기 데이터 로딩 (DOM에서 tr 수집)
+   ================================================================ */
+function initFundInfo() {
+    const tbody = document.getElementById("fund-list");
+    rows = Array.from(tbody.querySelectorAll("tr"));
 
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    const pageData = funds.slice(start, end);
+    console.log("총 데이터 개수:", rows.length);
 
-    pageData.forEach(f => {
-        tbody.innerHTML += `
-      <tr>
-        <td>${f.no}</td>
-        <td class="title"><a href="#">${f.title}</a></td>
-        <td><button class="btn-download">📄 다운로드</button></td>
-        <td><button class="btn-view">변경사항보기</button></td>
-      </tr>`;
-    });
-
+    renderList();
     renderPagination();
 }
 
-// ===== 페이지네이션 =====
-function renderPagination() {
-    pagination.innerHTML = "";
-    const totalPages = Math.ceil(funds.length / rowsPerPage);
 
-    pagination.innerHTML += `<button ${currentPage===1?"disabled":""} onclick="changePage(1)">&laquo;</button>`;
-    pagination.innerHTML += `<button ${currentPage===1?"disabled":""} onclick="changePage(${currentPage-1})">&lt;</button>`;
+/* ================================================================
+   2) 현재 페이지에 맞게 tr 보여주기/숨기기
+   ================================================================ */
+function renderList() {
+    const tbody = document.getElementById("fund-list");
+
+    // 전체 tr 숨기기
+    rows.forEach(row => row.style.display = "none");
+
+    // 필요한 페이지만 보여주기
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+
+    const pageRows = rows.slice(startIdx, endIdx);
+    pageRows.forEach(row => row.style.display = "");
+}
+
+
+/* ================================================================
+   3) 페이지네이션 버튼 생성
+   ================================================================ */
+function renderPagination() {
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    const totalPages = Math.ceil(rows.length / itemsPerPage);
+    if (totalPages <= 1) return;
 
     for (let i = 1; i <= totalPages; i++) {
-        if (i === currentPage)
-            pagination.innerHTML += `<button class="active">${i}</button>`;
-        else
-            pagination.innerHTML += `<button onclick="changePage(${i})">${i}</button>`;
-    }
+        const btn = document.createElement("button");
+        btn.textContent = i;
 
-    pagination.innerHTML += `<button ${currentPage===totalPages?"disabled":""} onclick="changePage(${currentPage+1})">&gt;</button>`;
-    pagination.innerHTML += `<button ${currentPage===totalPages?"disabled":""} onclick="changePage(${totalPages})">&raquo;</button>`;
+        if (i === currentPage) btn.classList.add("active");
+
+        btn.addEventListener("click", () => {
+            currentPage = i;
+            renderList();
+            renderPagination();
+        });
+
+        pagination.appendChild(btn);
+    }
 }
 
-function changePage(p) {
-    renderTable(p);
+
+/* ================================================================
+   4) 거래조건 변경 모달
+   ================================================================ */
+function openChangeModal(text) {
+    const overlay = document.getElementById("modal-overlay");
+    const content = document.getElementById("modal-content");
+
+    content.innerHTML = text || "변경 내역이 없습니다.";
+    overlay.style.display = "flex";
 }
 
-renderTable(1);
-
-// ===== 모달 제어 =====
-const modalOverlay = document.getElementById('modal-overlay');
-const modalClose = document.getElementById('modal-close');
-const modalContent = document.getElementById('modal-content');
-
-// “변경사항보기” 클릭 시 모달 표시
-document.addEventListener('click', e => {
-    if (e.target.classList.contains('btn-view')) {
-        e.preventDefault();
-        const fundTitle = e.target.closest('tr').querySelector('.title a').textContent;
-        modalContent.innerHTML = `<b>${fundTitle}</b><br>DB 쿼리 추가 후 작성하기.`;
-        modalOverlay.style.display = 'flex';
-    }
+document.getElementById("modal-close").addEventListener("click", () => {
+    document.getElementById("modal-overlay").style.display = "none";
 });
 
-// 닫기 버튼
-modalClose.addEventListener('click', () => {
-    modalOverlay.style.display = 'none';
-});
 
-// 배경 클릭 시 닫기
-modalOverlay.addEventListener('click', e => {
-    if (e.target === modalOverlay) modalOverlay.style.display = 'none';
-});
+/* ================================================================
+   5) 페이지 로드 시 실행
+   ================================================================ */
+document.addEventListener("DOMContentLoaded", initFundInfo);

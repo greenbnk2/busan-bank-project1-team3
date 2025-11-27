@@ -131,4 +131,26 @@ th {
     background-color: #8b0000;
 }
 
+.pagination {
+    display: flex;
+    gap: 6px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.pagination button {
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.pagination button.active {
+    background: #b22222;
+    color: white;
+    border-color: #b22222;
+}
+
 

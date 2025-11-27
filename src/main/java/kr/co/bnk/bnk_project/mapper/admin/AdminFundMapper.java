@@ -28,6 +28,7 @@ public interface AdminFundMapper {
     AdminFundMasterDTO selectPendingFundEdit(@Param("fundCode") String fundCode);
 
     void updateFundForEdit(AdminFundMasterDTO dto);
+    void updateStatus(AdminFundMasterDTO dto);
 
 
     void stopFund(@Param("fundCode") String fundCode);

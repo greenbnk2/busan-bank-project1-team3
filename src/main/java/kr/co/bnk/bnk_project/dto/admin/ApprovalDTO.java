@@ -22,4 +22,6 @@ public class ApprovalDTO {
     private LocalDateTime approvalTime;
     private String requestReason;  // 요청 사유
     private String remarks;        // 비고
+    private String updateStat;     // 추가: UPDATE_STAT
+
 }

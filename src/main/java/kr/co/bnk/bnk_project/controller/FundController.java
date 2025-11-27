@@ -19,6 +19,7 @@ public class FundController {
 
     private final FundService productService;
 
+
     @GetMapping("/depositGuide")
     public String depositGuide() {
         return "fund/depositGuide";
@@ -63,7 +64,12 @@ public class FundController {
     }
 
     @GetMapping("/fundInformation")
-    public String fundInfromation() {
+    public String fundInformation(Model model) {
+
+        List<ProductDTO> docs = productService.getFundDocuments();
+
+        model.addAttribute("documents", docs);
+
         return "fundInformation";
     }
 
@@ -76,6 +82,7 @@ public class FundController {
     public String dopisitGuide() {
         return "dopisitGuide";
     }
+
     @GetMapping("/admin/info")
     public String InfoAndDisclosure() {
         return "admin/info&disclosures/disclosures";
@@ -86,3 +93,4 @@ public class FundController {
         return "investTest";
     }
 }
+

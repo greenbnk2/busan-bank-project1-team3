@@ -50,6 +50,18 @@
     background: #cd1317;
 }
 
+.btn-red:disabled {
+    background: #666666;  /* 진한 회색 */
+    color: #ffffff;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.btn-red:disabled:hover {
+    background: #666666;  /* 호버 시에도 진한 회색 유지 */
+    color: #ffffff;
+}
+
 .btn-secondary {
     background: #f0f0f0;
     color: #333;
@@ -496,6 +508,18 @@
     color: #333;
 }
 
+.action-btn.edit:disabled {
+    background: #d0d0d0;
+    color: #ffffff;
+    cursor: not-allowed;
+    border-color: #d0d0d0;
+}
+
+.action-btn.edit:disabled:hover {
+    background: #d0d0d0;
+    color: #ffffff;
+}
+
 .action-btn.approval {
     background: #cd1317;
     color: white;
@@ -521,25 +545,26 @@
 }
 
 .action-btn.reserve {
-    background: #f0f0f0;
-    color: #333;
-    border-color: #f0f0f0;
+    background: #cd1317;  /* 빨간색으로 변경 */
+    color: white;         /* 텍스트 흰색 */
+    border-color: #cd1317; /* 테두리 빨간색 */
 }
 
 .action-btn.reserve:hover {
-    background: #e0e0e0;
-    color: #333;
+    background: #b01013;  /* 호버 시 더 어두운 빨간색 */
+    color: white;
 }
 
 .action-btn.reserve:disabled {
-    background: #d0d0d0;
+    background: #d0d0d0;  /* 비활성화 시 회색 유지 */
     color: #666;
     border-color: #d0d0d0;
     cursor: not-allowed;
 }
 
 .action-btn.reserve:disabled:hover {
-    background: #d0d0d0;
+    background: #d0d0d0;  /* 비활성화 시 호버도 회색 유지 */
+    color: #666;
     color: #666;
     border-color: #d0d0d0;
 }

@@ -27,9 +27,20 @@ public class AdminApprovalController {
 
         model.addAttribute("pageRequestDTO", pageRequestDTO);
         model.addAttribute("pageResponse", pageResponse);
-        model.addAttribute("recentHistory", approvalService.selectRecentApprovalHistory());
 
         return "admin/approval_management/approval_management";
+    }
+
+    @GetMapping("/history")
+    public String approvalHistory(PageRequestDTO pageRequestDTO, Model model) {
+
+        // 결재 이력 목록 + 페이징 정보
+        PageResponseDTO<ApprovalDTO> pageResponse = approvalService.selectApprovalHistory(pageRequestDTO);
+
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+
+        return "admin/approval_management/approval_history";
     }
 
     @PostMapping("/approve")

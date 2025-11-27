@@ -17,7 +17,7 @@ h1 {
 h2 {
     font-size: 20px;
     color: #b22222;
-    margin-top: 50px;
+    margin-top: 32px;
     border-bottom: 2px solid #b22222;
     padding-bottom: 6px;
 }
@@ -68,6 +68,7 @@ th:last-child, td:last-child {
 }
 
 .term-title {
+    margin-top: 10px;
     font-weight: bold;
     font-size: 15px;
     color: #111;
@@ -81,6 +82,7 @@ th:last-child, td:last-child {
 }
 
 .term-bullet::before {
+
     content: "▪ ";
     color: #b22222;
 }

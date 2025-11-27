@@ -27,4 +27,9 @@ public class ProductDTO {
     private Date regdate;
     private String admincompany;
 
+    private String doctype;
+    private String docurl;
+    private String docfile;
+
+
 }

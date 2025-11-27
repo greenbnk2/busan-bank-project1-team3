@@ -82,9 +82,15 @@
                                th:classappend="${activeMenu == 'dev-logs' ? 'active' : ''}">개발 관리</a></li>
                     </ul>
                 </li>
-                <li class="menu-item">
-                    <a th:href="@{/admin/approval}" 
-                       th:classappend="${activeMenu == 'approval' ? 'active' : ''}">결재</a>
+                <li class="menu-item has-submenu"
+                    th:classappend="${activeMenu != null && (activeMenu == 'approval' || activeMenu == 'approval-history') ? 'open' : ''}">
+                    <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">결재</a>
+                    <ul class="submenu">
+                        <li><a th:href="@{/admin/approval}" 
+                               th:classappend="${activeMenu == 'approval' ? 'active' : ''}">결재대기</a></li>
+                        <li><a th:href="@{/admin/approval/history}" 
+                               th:classappend="${activeMenu == 'approval-history' ? 'active' : ''}">결재이력</a></li>
+                    </ul>
                 </li>
             </ul>
         </nav>

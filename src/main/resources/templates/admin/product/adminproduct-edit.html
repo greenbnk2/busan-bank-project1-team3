@@ -24,6 +24,8 @@
                 <!-- 펀드 수정 폼 -->
                 <form th:action="@{/admin/product/edit}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" id="fundCode" th:value="${fund != null ? fund.fundCode : ''}"/>
+                    <input type="hidden" id="sessionId" th:value="${sessionId != null ? sessionId : ''}"/>
 
                 <!-- 필수정보 -->
                 <div class="form-section">
@@ -80,8 +82,8 @@
                                                th:checked="${fund != null and fund.investGrade == '낮은 위험'}"> 낮은 위험
                                     </label>
                                     <label class="radio-label">
-                                        <input type="radio" name="investGrade" value="보통 위험"
-                                               th:checked="${fund != null and fund.investGrade == '보통 위험'}"> 보통 위험
+                                        <input type="radio" name="investGrade" value="중간 위험"
+                                               th:checked="${fund != null and fund.investGrade == '중간 위험'}"> 중간 위험
                                     </label>
                                     <label class="radio-label">
                                         <input type="radio" name="investGrade" value="다소 높은 위험"
@@ -254,7 +256,7 @@
 
                 <!-- 폼 액션 버튼 -->
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-red">수정</button>
+                    <button type="submit" class="btn btn-red" th:disabled="${lockError == true}">수정</button>
                     <a th:href="@{/admin/product/pending}" class="btn btn-secondary">취소</a>
                 </div>
                 </form>
@@ -425,7 +427,203 @@
                 simpleExistingFiles.querySelectorAll('.file-item').length > 0) {
                 document.getElementById('simpleInvestmentDocUpload').style.display = 'none';
             }
+
+            // 잠금 관리 초기화 (잠금 오류가 아닐 때만)
+            const lockError = /*[[${lockError}]]*/ false;
+            if (!lockError) {
+                initEditLock();
+            }
+            
+            // 잠금 상태일 때 폼 제출 방지
+            if (lockError) {
+                const form = document.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        alert('다른 사용자가 수정 중입니다. 수정이 완료될 때까지 기다려주세요.');
+                        return false;
+                    });
+                }
+            }
         });
+
+        // ==================== 잠금 관리 기능 ====================
+        let keepLockInterval = null;
+        let fundCode = null;
+        let sessionId = null;
+
+        function initEditLock() {
+            // DOM에서 값 가져오기
+            const fundCodeElement = document.getElementById('fundCode');
+            const sessionIdElement = document.getElementById('sessionId');
+            
+            if (!fundCodeElement || !sessionIdElement) {
+                return; // 잠금 오류 페이지이거나 필요한 정보가 없음
+            }
+            
+            fundCode = fundCodeElement.value;
+            sessionId = sessionIdElement.value;
+            
+            if (!fundCode || !sessionId) {
+                return; // 값이 없으면 종료
+            }
+
+            // 30초마다 잠금 갱신
+            keepLockInterval = setInterval(function() {
+                keepLock();
+            }, 30000); // 30초
+
+            // 페이지 이탈 시 잠금 해제
+            window.addEventListener('beforeunload', function(e) {
+                console.log('beforeunload 이벤트 발생 - 잠금 해제');
+                unlock();
+            });
+            
+            // 뒤로가기 감지
+            window.addEventListener('popstate', function(e) {
+                console.log('popstate 이벤트 발생 (뒤로가기) - 잠금 해제');
+                unlock();
+            });
+            
+            // 페이지 숨김 시 잠금 해제 (뒤로가기 등)
+            window.addEventListener('pagehide', function(e) {
+                console.log('pagehide 이벤트 발생 - 잠금 해제');
+                // pagehide는 페이지가 완전히 숨겨지기 전에 발생하므로 확실하게 잠금 해제
+                unlock();
+            });
+            
+            // unload 이벤트도 추가 (더 확실하게)
+            window.addEventListener('unload', function(e) {
+                console.log('unload 이벤트 발생 - 잠금 해제');
+                unlock();
+            });
+            
+            // 페이지 숨김 시 잠금 해제 (탭 전환, 브라우저 최소화 등)
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    console.log('visibilitychange 이벤트 발생 (탭 전환) - 잠금 해제');
+                    unlock();
+                }
+            });
+
+            // 폼 제출 시 잠금 해제 (성공적으로 제출되면)
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    console.log('폼 제출 - 잠금 갱신 중지');
+                    // 폼 제출 후 잠금 해제는 서버에서 처리
+                    clearInterval(keepLockInterval);
+                });
+            }
+            
+            // 취소 버튼 클릭 시 잠금 해제
+            const cancelBtn = document.querySelector('a.btn-secondary[href*="/admin/product/pending"]');
+            if (cancelBtn) {
+                console.log('취소 버튼 찾음');
+                cancelBtn.addEventListener('click', function(e) {
+                    console.log('취소 버튼 클릭 - 잠금 해제');
+                    unlock();
+                    // 약간의 지연을 주어 잠금 해제 요청이 전송되도록 함
+                    setTimeout(function() {
+                        // 기본 동작은 그대로 진행
+                    }, 200);
+                }, true); // capture phase에서 실행
+            } else {
+                console.log('취소 버튼을 찾을 수 없습니다');
+            }
+            
+            // 모든 링크 클릭 시 잠금 해제 (다른 페이지로 이동하는 경우)
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a[href]');
+                if (target) {
+                    const href = target.getAttribute('href');
+                    // pending 페이지로 가는 경우 잠금 해제
+                    if (href && (href.includes('/admin/product/pending') || (href.includes('/admin/product') && !href.includes('/edit')))) {
+                        console.log('링크 클릭으로 페이지 이동:', href, '- 잠금 해제');
+                        unlock();
+                        // 약간의 지연을 주어 잠금 해제 요청이 전송되도록 함
+                        setTimeout(function() {
+                            // 기본 동작은 그대로 진행
+                        }, 200);
+                    }
+                }
+            }, true); // capture phase에서 실행
+        }
+
+        // 잠금 갱신
+        function keepLock() {
+            if (!fundCode || !sessionId) return;
+
+            const token = document.querySelector('input[name="_csrf"]')?.value;
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+
+            const formData = new FormData();
+            formData.append('fundCode', fundCode);
+
+            fetch('/bnk/admin/product/edit/keep-lock', {
+                method: 'POST',
+                headers: {
+                    [header]: token
+                },
+                body: formData
+            }).catch(function(error) {
+                console.error('잠금 갱신 실패:', error);
+            });
+        }
+
+        // 잠금 해제
+        function unlock() {
+            // fundCode와 sessionId를 DOM에서 가져오기
+            const fundCodeElement = document.getElementById('fundCode');
+            const sessionIdElement = document.getElementById('sessionId');
+            
+            if (!fundCodeElement || !sessionIdElement) {
+                console.log('잠금 해제 실패: fundCode 또는 sessionId 요소를 찾을 수 없습니다.');
+                return;
+            }
+            
+            const currentFundCode = fundCodeElement.value;
+            const currentSessionId = sessionIdElement.value;
+            
+            if (!currentFundCode || !currentSessionId) {
+                console.log('잠금 해제 실패: fundCode 또는 sessionId 값이 없습니다.');
+                return;
+            }
+
+            const token = document.querySelector('input[name="_csrf"]')?.value;
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+
+            console.log('잠금 해제 시도:', currentFundCode);
+
+            // navigator.sendBeacon을 사용하여 페이지 이탈 시에도 요청 전송
+            if (navigator.sendBeacon) {
+                const formData = new FormData();
+                formData.append('fundCode', currentFundCode);
+                
+                // sendBeacon은 Content-Type을 자동으로 설정하므로 헤더를 직접 설정할 수 없음
+                // CSRF 토큰은 쿼리 파라미터로 전송
+                const url = '/bnk/admin/product/edit/unlock?fundCode=' + encodeURIComponent(currentFundCode);
+                const blob = new Blob([], { type: 'application/x-www-form-urlencoded' });
+                navigator.sendBeacon(url, blob);
+            } else {
+                // sendBeacon을 지원하지 않는 경우 fetch 사용
+                const formData = new FormData();
+                formData.append('fundCode', currentFundCode);
+                
+                fetch('/bnk/admin/product/edit/unlock', {
+                    method: 'POST',
+                    headers: {
+                        [header]: token
+                    },
+                    body: formData,
+                    keepalive: true
+                }).then(function(response) {
+                    console.log('잠금 해제 응답:', response.status);
+                }).catch(function(error) {
+                    console.error('잠금 해제 실패:', error);
+                });
+            }
+        }
         /*]]>*/
     </script>
     <!-- 사이드바 스크립트 -->

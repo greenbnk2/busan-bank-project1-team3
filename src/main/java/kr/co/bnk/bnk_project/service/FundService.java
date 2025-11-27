@@ -20,4 +20,9 @@ public class FundService {
     public ProductDTO getProductDetail(String fundcode) {
         return productMapper.findProductDetail(fundcode);
     }
+
+    public List<ProductDTO> getFundDocuments() {
+        return productMapper.findFundDocuments();
+    }
+
 }

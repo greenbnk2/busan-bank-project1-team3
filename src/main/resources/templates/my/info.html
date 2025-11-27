@@ -1,0 +1,99 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('info')}"></div>
+
+            <div class="main-content">
+                <div class="content-header">
+                    <h1>회원정보 변경</h1>
+                </div>
+
+                <div class="info-box">
+                    <ul>
+                        <li>고객님의 소중한 정보를 안전하게 관리하고 있습니다.</li>
+                        <li>성명, 아이디, 이메일 등 중요 정보 변경은 영업점을 방문해주시기 바랍니다.</li>
+                    </ul>
+                </div>
+
+                <form id="updateForm" class="my-info-form" th:action="@{/my/info}" th:object="${dto}" method="post">
+
+                    <div class="form-section">
+                        <h3 class="section-header">기본정보 (수정불가)</h3>
+                        <table class="form-table">
+                            <colgroup>
+                                <col style="width: 20%;">
+                                <col style="width: 80%;">
+                            </colgroup>
+                            <tr>
+                                <th>성명</th>
+                                <td><input type="text" th:field="*{name}" class="input-text readonly-field" readonly></td>
+                            </tr>
+                            <tr>
+                                <th>아이디</th>
+                                <td><input type="text" th:field="*{userId}" class="input-text readonly-field" readonly></td>
+                            </tr>
+                            <tr>
+                                <th>이메일</th>
+                                <td><input type="text" th:field="*{email}" class="input-text readonly-field" readonly style="width: 300px;"></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="form-section" style="margin-top: 50px;"> <h3 class="section-header editable-header">연락처 정보 변경</h3>
+                        <table class="form-table">
+                            <colgroup>
+                                <col style="width: 20%;">
+                                <col style="width: 80%;">
+                            </colgroup>
+
+                            <tr>
+                                <th><label>핸드폰 번호 <span class="required">*</span></label></th>
+                                <td>
+                                    <input type="text" th:field="*{phone}" class="input-text input-medium" placeholder="010-0000-0000">
+                                    <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error-message"></div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th><label>주소 <span class="required">*</span></label></th>
+                                <td class="address-cell"> <div class="address-group">
+                                    <input type="text" th:field="*{zipcode}" id="mem_zip" class="input-text input-short readonly-field" readonly>
+                                    <button type="button" class="btn-secondary" onclick="postCode()">우편번호찾기</button>
+                                </div>
+                                    <input type="text" th:field="*{address1}" id="mem_addr1" class="input-text input-full readonly-field address-line" readonly>
+                                    <input type="text" th:field="*{address2}" id="mem_addr2" class="input-text input-full address-line" placeholder="상세주소를 입력하세요">
+
+                                    <div th:if="${#fields.hasErrors('address2')}" th:errors="*{address2}" class="error-message"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="btn-area-center">
+                        <button type="submit" class="btn-search-submit">정보 수정하기</button>
+                        <a th:href="@{/my/dashboard}" class="btn-white-border" style="padding: 12px 40px; margin-left: 10px; !important;">취소</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const phoneInput = document.querySelector('input[name="phone"]');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function () {
+                this.value = this.value
+                    .replace(/[^0-9]/g, '')
+                    .replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/(\-{1,2})$/g, "");
+            });
+        }
+    });
+</script>

@@ -16,6 +16,7 @@
         <result property="approver" column="APPROVER"/>
         <result property="approvalTime" column="APPROVAL_TIME"/>
         <result property="remarks" column="REMARKS"/>
+        <result property="updateStat" column="UPDATE_STAT"/>
     </resultMap>
 
     <sql id="pendingApprovalWhere">
@@ -86,7 +87,8 @@
                     NVL(ah.STATUS, '대기') AS STATUS,
                     ah.APPROVER,
                     ah.APPROVAL_TIME,
-                    ah.REMARKS
+                    ah.REMARKS,
+                    fm.UPDATE_STAT
                 FROM APPROVAL_HISTORY ah
                 JOIN FUND_MASTER fm
                     ON fm.FUND_CODE = ah.FUND_CODE
@@ -130,6 +132,74 @@
             ORDER BY ah.APPROVAL_TIME DESC NULLS LAST
         )
         WHERE ROWNUM &lt;= 10
+    </select>
+
+    <sql id="approvalHistoryWhere">
+        <where>
+            AND ah.STATUS IN ('승인', '반려')
+
+            <if test="pageRequestDTO.status != null and pageRequestDTO.status != ''">
+                AND ah.STATUS = #{pageRequestDTO.status}
+            </if>
+
+            <if test="pageRequestDTO.keyword != null and pageRequestDTO.keyword != ''">
+                AND (
+                        ah.APPR_NO LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                        OR fm.FUND_NAME LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                        OR ah.FUND_CODE LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                    )
+            </if>
+
+            <if test="pageRequestDTO.requester != null and pageRequestDTO.requester != ''">
+                AND ah.REQUESTER LIKE '%' || #{pageRequestDTO.requester} || '%'
+            </if>
+
+            <if test="pageRequestDTO.dateFrom != null and pageRequestDTO.dateFrom != ''">
+                AND ah.APPROVAL_TIME &gt;= TO_DATE(#{pageRequestDTO.dateFrom}, 'YYYY-MM-DD')
+            </if>
+
+            <if test="pageRequestDTO.dateTo != null and pageRequestDTO.dateTo != ''">
+                AND ah.APPROVAL_TIME &lt; TO_DATE(#{pageRequestDTO.dateTo}, 'YYYY-MM-DD') + 1
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectApprovalHistory"
+            resultMap="approvalResultMap">
+        SELECT *
+        FROM (
+            SELECT inner_q.*, ROWNUM rn
+            FROM (
+                SELECT
+                    ah.APPR_NO,
+                    ah.APPR_TYPE,
+                    ah.FUND_CODE,
+                    fm.FUND_NAME,
+                    ah.REQUESTER,
+                    ah.REQUEST_REASON,
+                    ah.REQUEST_TIME,
+                    ah.STATUS,
+                    ah.APPROVER,
+                    ah.APPROVAL_TIME,
+                    ah.REMARKS
+                FROM APPROVAL_HISTORY ah
+                JOIN FUND_MASTER fm
+                    ON fm.FUND_CODE = ah.FUND_CODE
+                <include refid="approvalHistoryWhere"/>
+                ORDER BY ah.APPROVAL_TIME DESC NULLS LAST
+            ) inner_q
+            WHERE ROWNUM &lt;= #{pageRequestDTO.offset} + #{pageRequestDTO.size}
+        )
+        WHERE rn &gt; #{pageRequestDTO.offset}
+    </select>
+
+    <select id="selectApprovalHistoryTotal"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM APPROVAL_HISTORY ah
+        JOIN FUND_MASTER fm
+            ON fm.FUND_CODE = ah.FUND_CODE
+        <include refid="approvalHistoryWhere"/>
     </select>
 
 

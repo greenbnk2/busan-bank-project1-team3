@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결재 이력 - 은행 펀드 상품 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/admin/admin_styles.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/adminproduct.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/approval_styles.css}">
+</head>
+<body>
+    <!-- 사이드바 Fragment -->
+    <div th:replace="~{admin/_sidebar :: sidebar('approval-history')}"></div>
+
+    <div class="main-content">
+        <!-- 헤더 Fragment -->
+        <div th:replace="~{admin/_header :: header}"></div>
+
+    <div class="main-content-body">
+        <div class="container">
+            <header class="page-header">
+                <h1>결재 이력</h1>
+                <div class="header-actions">
+                    <a th:href="@{/admin/approval}" class="btn btn-secondary">결재대기</a>
+                </div>
+            </header>
+            
+            <section class="section-block approval-filter">
+                <h2 class="section-title">결재 이력 검색</h2>
+                <div class="search-section">
+                    <form th:action="@{/admin/approval/history}" method="get" style="margin: 0;">
+                        <table class="search-table">
+                            <tbody>
+                                <tr>
+                                    <td class="search-label">검색어</td>
+                                    <td class="search-inputs">
+                                        <input type="text" class="form-input search-input-large" id="filterKeyword" name="keyword" placeholder="결재 ID, 상품코드 또는 상품명을 입력하세요" th:value="${pageRequestDTO != null ? pageRequestDTO.keyword : ''}">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="search-label">결재상태</td>
+                                    <td class="search-inputs">
+                                        <select class="form-select search-select-medium" id="filterStatus" name="status">
+                                            <option value="" th:selected="${pageRequestDTO == null || #strings.isEmpty(pageRequestDTO.status)}">전체</option>
+                                            <option value="승인" th:selected="${pageRequestDTO != null && pageRequestDTO.status == '승인'}">승인</option>
+                                            <option value="반려" th:selected="${pageRequestDTO != null && pageRequestDTO.status == '반려'}">반려</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="search-label">요청자</td>
+                                    <td class="search-inputs">
+                                        <input type="text" class="form-input search-input-large" id="filterRequester" name="requester" placeholder="요청자 이름을 입력하세요" th:value="${pageRequestDTO != null ? pageRequestDTO.requester : ''}">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="search-label">기간</td>
+                                    <td class="search-inputs">
+                                        <input type="date" class="form-input search-select-medium" id="filterDateFrom" name="dateFrom" th:value="${pageRequestDTO != null ? pageRequestDTO.dateFrom : ''}">
+                                        <span style="margin: 0 10px;">~</span>
+                                        <input type="date" class="form-input search-select-medium" id="filterDateTo" name="dateTo" th:value="${pageRequestDTO != null ? pageRequestDTO.dateTo : ''}">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="search-actions">
+                            <button type="submit" class="btn btn-search">조회</button>
+                            <button type="button" class="btn btn-secondary" th:onclick="|location.href='@{/admin/approval/history}'|">초기화</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="section-block">
+                <h2 class="section-title">결재 이력 목록</h2>
+                <div class="history-table"
+                     th:with="pageSize=${pageRequestDTO != null && pageRequestDTO.size > 0 ? pageRequestDTO.size : 10},
+                              currentPage=${pageRequestDTO != null && pageRequestDTO.pg > 0 ? pageRequestDTO.pg : 1},
+                              totalPages=${pageResponse != null && pageResponse.total > 0 ? T(java.lang.Math).floorDiv(pageResponse.total + pageSize - 1, pageSize) : 1}">
+                    <div class="table-info">
+                        <span>총 <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건</span>
+                        <span class="pagination-info"
+                              th:text="|${currentPage} / ${totalPages} page|">1 / 1 page</span>
+                    </div>
+                    <table class="fund-table" id="historyTable">
+                        <thead>
+                        <tr>
+                            <th>결재 ID</th>
+                            <th>상품코드</th>
+                            <th>상품명</th>
+                            <th>결재 유형</th>
+                            <th>요청자</th>
+                            <th>최종 처리자</th>
+                            <th>처리 일시</th>
+                            <th>결과</th>
+                            <th>비고</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${pageResponse == null || #lists.isEmpty(pageResponse.dtoList)}">
+                            <td colspan="9" class="empty-row">조회된 결재 이력이 없습니다.</td>
+                        </tr>
+                        <tr th:each="dto : ${pageResponse.dtoList}">
+                            <td class="table-ellipsis" th:text="${dto.apprNo}">APR-2024-013</td>
+                            <td class="table-ellipsis" th:text="${dto.fundCode}">K55223C05531</td>
+                            <td class="table-ellipsis" th:text="${dto.fundName}">BNK 더드림 펀드</td>
+                            <td class="table-ellipsis emphasis" th:text="${dto.apprType}">상품 신규 등록</td>
+                            <td class="table-ellipsis" th:text="${dto.requester}">김운용</td>
+                            <td class="table-ellipsis" th:text="${dto.approver}">홍관리</td>
+                            <td class="table-ellipsis"
+                                th:text="${dto.approvalTime != null ? #temporals.format(dto.approvalTime, 'yyyy-MM-dd HH:mm') : '-'}">2024-04-20 14:05</td>
+                            <td class="table-ellipsis">
+                                <span class="status-badge"
+                                      th:text="${dto.status}"
+                                      th:classappend="${dto.status == '승인' ? ' status-approved' : ' status-rejected'}">승인</span>
+                            </td>
+                            <td class="remark" th:text="${dto.remarks}">상품 신규 등록 승인</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination"
+                         th:if="${pageResponse != null && pageResponse.total > 0}">
+                        <button class="page-btn prev"
+                                th:disabled="${!pageResponse.prev}"
+                                th:attr="onclick=${pageResponse.prev} ? 'location.href=\'' + @{/admin/approval/history(pg=${pageResponse.start - 1}, size=${pageRequestDTO.size}, keyword=${pageRequestDTO.keyword}, status=${pageRequestDTO.status}, requester=${pageRequestDTO.requester}, dateFrom=${pageRequestDTO.dateFrom}, dateTo=${pageRequestDTO.dateTo})} + '\'' : null">&lt;</button>
+                        <div class="page-numbers">
+                            <button class="page-number"
+                                    th:each="pageNum : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                                    th:text="${pageNum}"
+                                    th:classappend="${pageNum == (pageRequestDTO != null ? pageRequestDTO.pg : 1) ? ' active' : ''}"
+                                    th:attr="onclick='location.href=\'' + @{/admin/approval/history(pg=${pageNum}, size=${pageRequestDTO.size}, keyword=${pageRequestDTO.keyword}, status=${pageRequestDTO.status}, requester=${pageRequestDTO.requester}, dateFrom=${pageRequestDTO.dateFrom}, dateTo=${pageRequestDTO.dateTo})} + '\''">
+                                1
+                            </button>
+                        </div>
+                        <button class="page-btn next"
+                                th:disabled="${!pageResponse.next}"
+                                th:attr="onclick=${pageResponse.next} ? 'location.href=\'' + @{/admin/approval/history(pg=${pageResponse.end + 1}, size=${pageRequestDTO.size}, keyword=${pageRequestDTO.keyword}, status=${pageRequestDTO.status}, requester=${pageRequestDTO.requester}, dateFrom=${pageRequestDTO.dateFrom}, dateTo=${pageRequestDTO.dateTo})} + '\'' : null">&gt;</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 푸터 영역 -->
+            <footer class="admin-footer"></footer>
+        </div>
+    </div>
+</div>
+
+    <!-- 사이드바 스크립트 -->
+    <div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
+</body>
+</html>
+

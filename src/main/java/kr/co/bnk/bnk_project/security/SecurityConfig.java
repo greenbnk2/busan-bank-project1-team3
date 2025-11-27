@@ -17,7 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // @Qualifier를 사용하여 Bean 이름을 기준으로 정확히 주입.
+    private final LoginSuccessHandler loginSuccessHandler;
+
+    // @Qualifier를 사용하여 Bean 이름을 기준으로 정확히 주입. - UserDetailsService
     @Qualifier("adminSecurityService")
     private final UserDetailsService adminSecurityService;
 
@@ -106,7 +108,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("userid")
                         .passwordParameter("userpw")
-                        .defaultSuccessUrl("/")
+                        .successHandler(loginSuccessHandler)
                         .failureUrl("/member/login?error=true")
                 )
 

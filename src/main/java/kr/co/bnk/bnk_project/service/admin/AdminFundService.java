@@ -66,7 +66,7 @@ public class AdminFundService {
     }
 
 
-
+    /*중지 재개*/
     public void stopFund(String fundCode) {
 
         adminFundMapper.stopFund(fundCode);
@@ -79,7 +79,33 @@ public class AdminFundService {
 
 
     public void updateOperStatus(String fundCode) {
-        adminFundMapper.updateOperStatus(fundCode);
+
+        // 메서드 진입 확인 로그 (가장 먼저)
+        System.out.println(">>> updateOperStatus 메서드 호출됨 - fundCode: [" + fundCode + "]");
+
+        if(fundCode == null || fundCode.isBlank()) {
+            System.out.println(">>> fundCode가 null이거나 비어있음 - return");
+            return;
+        }
+
+        // 데이터베이스에서 현재 펀드 상태 조회
+        AdminFundMasterDTO currentFund = adminFundMapper.selectPendingFundEdit(fundCode);
+
+        if(currentFund == null) {
+            System.out.println(">>> 펀드를 찾을 수 없습니다: " + fundCode);
+            return;
+        }
+
+        String operStatus = currentFund.getOperStatus() != null ? currentFund.getOperStatus().trim() : "";
+        String updateStat = currentFund.getUpdateStat() != null ? currentFund.getUpdateStat().trim() : null;
+
+        if("등록".equals(operStatus) && (updateStat == null || updateStat.isEmpty())){
+            adminFundMapper.updateOperStatus(fundCode);
+        }else if("운용중".equals(operStatus) && "수정".equals(updateStat)){
+            adminFundMapper.updateStatus(currentFund);
+        } else {
+            System.out.println("조건 불일치 - operStatus: [" + operStatus + "], updateStat: [" + updateStat + "]");
+        }
     }
 
     public void updateStatusAfterApproval(String fundCode, String status) {

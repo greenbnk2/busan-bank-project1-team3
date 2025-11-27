@@ -154,6 +154,7 @@
         fm.INVEST_GRADE,
         fm.FUND_FEATURE,
         fm.OPER_STATUS,
+        fm.UPDATE_STAT,
         fm.ASSET_MANAGER_ID,
         am.OPERATOR_NAME,
         fc.CATEGORY_NAME AS FUND_TYPE_NAME,
@@ -172,13 +173,13 @@
 
         UPDATE BNK.FUND_MASTER
         SET
-            INVEST_GRADE  = #{investGrade},
-            FUND_FEATURE  = #{fundFeature},
-            NOTICE_1      =#{notice1},
-            NOTICE_2      =#{notice2},
+            INVEST_GRADE  = #{investGrade,jdbcType=VARCHAR},
+            FUND_FEATURE  = #{fundFeature,jdbcType=CLOB},
+            NOTICE_1      = #{notice1,jdbcType=CLOB},
+            NOTICE_2      = #{notice2,jdbcType=CLOB},
             UPDATE_STAT   = '수정',            -- 상태 변경
             LAST_UPD_DATE = SYSDATE
-        WHERE FUND_CODE = #{fundCode}
+        WHERE FUND_CODE = #{fundCode,jdbcType=VARCHAR}
     </update>
 
 
@@ -236,7 +237,19 @@
 
             <!-- 3) 상태 -->
             <if test="pageRequestDTO.status != null and pageRequestDTO.status != ''">
-                AND fm.oper_status = #{pageRequestDTO.status}
+                <choose>
+                    <!-- updateStat 관련 상태는 UPDATE_STAT으로 검색 -->
+                    <when test="pageRequestDTO.status == '수정' or 
+                                pageRequestDTO.status == '수정대기' or 
+                                pageRequestDTO.status == '수정완료' or 
+                                pageRequestDTO.status == '수정반려'">
+                        AND fm.UPDATE_STAT = #{pageRequestDTO.status}
+                    </when>
+                    <!-- 나머지는 oper_status로 검색 -->
+                    <otherwise>
+                        AND fm.oper_status = #{pageRequestDTO.status}
+                    </otherwise>
+                </choose>
             </if>
             AND fm.oper_status != '대기'
 
@@ -284,8 +297,15 @@
     <update id="updateOperStatus">
         UPDATE BNK.FUND_MASTER
         SET
-            OPER_STATUS   = '등록대기',
-            LAST_UPD_DATE = SYSDATE
+            OPER_STATUS   = '등록대기'
+        WHERE FUND_CODE = #{fundCode}
+    </update>
+
+
+    <update id="updateStatus">
+        UPDATE BNK.FUND_MASTER
+        SET
+            UPDATE_STAT   = '수정대기'
         WHERE FUND_CODE = #{fundCode}
     </update>
 

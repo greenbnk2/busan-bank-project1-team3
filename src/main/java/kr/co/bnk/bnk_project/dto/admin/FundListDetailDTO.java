@@ -19,16 +19,6 @@ public class FundListDetailDTO {
         내용 : 펀드목록 돋보기
      */
 
-    // 약관, 투자설명서, 간이투자설명서
-    private String termsUrl;
-    private String investUrl;
-    private String summaryUrl;
-    // 펀드 문서 컬럼 추가
-    private String docType; // 문서종류 (terms, invest, summary)
-    private String docUrl;  // 문서 URL
-    private String docFileName; // 파일명
-
-
     /* ---------------------------
      * 1) 요약 정보 (상단 Summary)
      * --------------------------- */
@@ -96,7 +86,7 @@ public class FundListDetailDTO {
     private Double equityCapital;        // 자기자본
     private String homepageUrl;          // 홈페이지. 홈페이지주소
     private String logo;                 // 회사 로고
-    private String netIncome;            // 당기순이익
+    private Double netIncome;            // 당기순이익
     private LocalDate lastModifiedDate;  // 기준일. 마지막수정일자
     private Double operatingCapital;    // 영업용순자본 = 총자산 - 총부채 (컬럼추가 x)
 
@@ -109,18 +99,23 @@ public class FundListDetailDTO {
     /* ---------------------------
      * 8) 문서 정보 (FUND_DOCUMENTS)
      * --------------------------- */
-    //private List<FundDocumentDTO> documents;
+    // 약관, 투자설명서, 간이투자설명서
+    private String termsUrl;
+    private String investUrl;
+    private String summaryUrl;
+    // 펀드 문서 컬럼 추가
+    private String docType; // 문서종류 (terms, invest, summary)
+    private String docUrl;  // 문서 URL
+    private String docFileName; // 파일명
 
     /* ---------------------------
-     * 9) 수익률 정보 (FUND_PERFORMANCE)
+     * 9) 가격변동 추이
      * --------------------------- */
-//    private Double perf1m;
-//    private Double perf3m;
-//    private Double perf6m;
-//    private Double perfYtd;
-//    private Double perfSinceSetup;
-//    private Double perf12m;
-//    private Double sharpeRatio;
-//    private Double betaCoefficient;
+    private List<FundPriceHistoryDTO> priceHistoryList;
+    /* ---------------------------
+     * 10) 수익률 추이
+     * --------------------------- */
+    private List<FundReturnHistoryDTO> returnHistoryList;
+
 
 }

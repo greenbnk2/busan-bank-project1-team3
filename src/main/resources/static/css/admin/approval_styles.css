@@ -420,8 +420,8 @@
 }
 
 .history-table .fund-table tbody tr td:first-child {
-    color: #cd1317;
-    font-weight: 600;
+    color: #333;
+    font-weight: 500;
 }
 
 .history-table .fund-table tbody tr {
@@ -636,12 +636,13 @@
 }
 
 .btn-secondary {
-    background: #333;
-    color: white;
+    background: #e0e0e0;
+    color: #666;
 }
 
 .btn-secondary:hover {
-    background: #222;
+    background: #d0d0d0;
+    color: #666;
 }
 
 .btn-search {

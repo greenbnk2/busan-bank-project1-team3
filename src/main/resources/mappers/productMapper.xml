@@ -36,4 +36,19 @@
         FROM FUND_MASTER
     </select>
 
+    <select id="findFundDocuments" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+            SELECT
+                fund_code AS fundcode,
+                doc_type AS doctype,
+                doc_url AS docurl,
+                doc_file_name AS docfile,
+                reg_date AS regdate
+            FROM FUND_DOCUMENTS
+            ORDER BY fund_code DESC
+
+
+
+    </select>
+
+
 </mapper>
