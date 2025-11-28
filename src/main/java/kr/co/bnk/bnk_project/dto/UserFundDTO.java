@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class UserFundDTO {
+    private String fundCode;
     private String fundName;        // 펀드명
     private String acctNo;          // 계좌번호
     private long purchaseAmount;    // 투자원금

@@ -50,5 +50,4 @@ public interface MemberMapper {
     //회원 정보 수정
     void updateMemberInfo(MemberUpdateDTO dto);
 
-    List<UserFundDTO> selectMyFundList(Long custNo);
 }

@@ -45,9 +45,65 @@
                 reg_date AS regdate
             FROM FUND_DOCUMENTS
             ORDER BY fund_code DESC
+    </select>
 
+    <!-- 마이페이지 - 회원별 펀드 정보 -->
+    <select id="selectMyFundList" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.UserFundDTO">
+        SELECT
+            H.FUND_CODE             AS fundCode,
+            M.FUND_NAME             AS fundName,
+            H.ACCT_NO               AS acctNo,
+            H.PURCHASE_AMOUNT       AS purchaseAmount,
+            H.CURRENT_EVAL_AMT      AS currentEvalAmount,
+            -- 수익률 계산: (평가 - 원금) / 원금 * 100
+            ROUND((H.CURRENT_EVAL_AMT - H.PURCHASE_AMOUNT) / H.PURCHASE_AMOUNT * 100, 2) AS yieldPct,
+            -- 상태 판별
+            CASE
+                WHEN H.CURRENT_EVAL_AMT > H.PURCHASE_AMOUNT THEN '수익'
+                WHEN H.CURRENT_EVAL_AMT <![CDATA[ < ]]>  H.PURCHASE_AMOUNT THEN '손실'
+                ELSE '보합'
+                END                     AS status
+        FROM
+            USER_FUND_HOLDINGS H
+                JOIN
+            FUND_MASTER M ON H.FUND_CODE = M.FUND_CODE
+                JOIN
+            BNK_ACCOUNT A ON H.ACCT_NO = A.ACCT_NO -- 회원번호 연결을 위해 조인
+        WHERE
+            A.CUST_NO = #{custNo}  -- 로그인한 회원의 PK
+        ORDER BY
+            H.CURRENT_EVAL_AMT DESC
+    </select>
 
+    <!-- 마이페이지 - 기준가격조회 -->
+    <select id="selectFundPriceHistory" resultType="kr.co.bnk.bnk_project.dto.FundPriceDTO">
+        SELECT
+            TRADE_DATE          AS tradeDate,
+            NAV_PER_UNIT        AS navPerUnit,
+            TAX_BASE_NAV        AS taxBaseNav,
+            SETUP_ORIGIN_AMOUNT AS setupOriginAmount,
+            -- (오늘 기준가 - 어제 기준가)로 등락폭 계산 (LAG 함수 사용) 조회 기간의 첫날은 어제 데이터가 없으므로 0으로 나올 수 있음
+            NAV_PER_UNIT - LAG(NAV_PER_UNIT, 1, NAV_PER_UNIT) OVER (ORDER BY TRADE_DATE) AS changeAmount
+        FROM
+            FUND_DAILY_HISTORY
+        WHERE
+            FUND_CODE = #{fundCode}
+        AND TRADE_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+        ORDER BY
+            TRADE_DATE DESC
+    </select>
 
+    <!--모든 펀드 목록-->
+    <select id="selectAllFundList" resultType="kr.co.bnk.bnk_project.dto.FundMasterDTO">
+        SELECT
+            FUND_CODE   AS fundCode,
+            FUND_NAME   AS fundName,
+            FUND_TYPE   AS fundType
+        FROM
+            FUND_MASTER
+        ORDER BY
+            FUND_NAME ASC
     </select>
 
 

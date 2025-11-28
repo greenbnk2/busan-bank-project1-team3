@@ -190,31 +190,4 @@
             CUST_NO = #{custNo}
     </update>
 
-    <!-- 마이페이지 - 회원별 펀드 정보 -->
-    <select id="selectMyFundList" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.UserFundDTO">
-        SELECT
-        M.FUND_NAME             AS fundName,
-        H.ACCT_NO               AS acctNo,
-        H.PURCHASE_AMOUNT       AS purchaseAmount,
-        H.CURRENT_EVAL_AMT      AS currentEvalAmount,
-        -- 수익률 계산: (평가 - 원금) / 원금 * 100
-        ROUND((H.CURRENT_EVAL_AMT - H.PURCHASE_AMOUNT) / H.PURCHASE_AMOUNT * 100, 2) AS yieldPct,
-        -- 상태 판별
-        CASE
-        WHEN H.CURRENT_EVAL_AMT > H.PURCHASE_AMOUNT THEN '수익'
-        WHEN H.CURRENT_EVAL_AMT <![CDATA[ < ]]>  H.PURCHASE_AMOUNT THEN '손실'
-        ELSE '보합'
-        END                     AS status
-        FROM
-        USER_FUND_HOLDINGS H
-        JOIN
-        FUND_MASTER M ON H.FUND_CODE = M.FUND_CODE
-        JOIN
-        BNK_ACCOUNT A ON H.ACCT_NO = A.ACCT_NO -- 회원번호 연결을 위해 조인
-        WHERE
-        A.CUST_NO = #{custNo}  -- 로그인한 회원의 PK
-        ORDER BY
-        H.CURRENT_EVAL_AMT DESC
-    </select>
-
 </mapper>

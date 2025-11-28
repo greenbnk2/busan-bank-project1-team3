@@ -613,120 +613,188 @@
     font-size: 13px;
 }
 
+/* =========================================================
+   펀드 계좌 조회 페이지 전용 스타일
+   ========================================================= */
+
+/* 1. 레이아웃: 사이드바와 본문 사이 간격 벌리기 */
+/* .main-container나 .content-wrapper가 flex가 아닐 경우를 대비 */
+.content-wrapper {
+    display: flex;       /* 사이드바와 본문을 가로로 배치 */
+    width: 100%;
+}
+
+.main-content {
+    flex: 1;             /* 남은 공간 꽉 채우기 */
+    padding: 40px 50px;  /* ★핵심★ 본문 안쪽에 여백을 줘서 사이드바와 떨어뜨림 */
+    min-width: 0;        /* 컨텐츠 넘침 방지 */
+    background-color: #fff;
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+}
+
+/* 2. 테이블 디자인: 부산은행 레드 헤더 + 격자 테두리 */
+.fund-result-table {
+    width: 100%;
+    border-bottom: 1px solid #ccc; /* 하단 마무리 선 */
+    border-collapse: collapse;     /* 테두리 겹치기 (격자 모양) */
+    table-layout: fixed;           /* 컬럼 너비 고정 */
+    margin-bottom: 50px;
+    margin-top: 10px;
+}
+
+.fund-result-table th {
+    background-color: #cb2b11;     /* [요청] 헤더 배경 붉은색 */
+    color: #fff;                   /* 글자 흰색 */
+    padding: 15px 0;
+    font-size: 14px;
+    font-weight: 500;
+    border-right: 1px solid #e57e72; /* 헤더끼리 구분선 (연한 붉은색) */
+    border-bottom: 1px solid #a61e08;
+    text-align: center;
+}
+.fund-result-table th:last-child { border-right: none; }
+
+.fund-result-table td {
+    padding: 15px 10px;
+    font-size: 14px;
+    color: #444;
+    vertical-align: middle;
+    border-right: 1px solid #e5e5e5;  /* 세로 격자선 */
+    border-bottom: 1px solid #e5e5e5; /* 가로 격자선 */
+}
+.fund-result-table td:last-child { border-right: none; }
+
+/* 3. 유틸리티 (정렬 및 색상) */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.fc-red { color: #d63031 !important; font-weight: bold; }
+.fc-blue { color: #0984e3 !important; font-weight: bold; }
+.fc-black { color: #333 !important; font-weight: bold; }
+
+/* 4. 조회 버튼 (붉은색) */
+.btn-red {
+    display: inline-block;
+    padding: 10px 40px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #cb2b11;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-red:hover {
+    background-color: #a61f0a;
+}
+
 /* ==========================================================================
-   1:1 문의 아코디언(List + Detail) 스타일
+   [격리됨] 기준가격조회 (basicPriceInquiry) 페이지 전용 스타일
+   주의: #priceInquiryArea ID 하위 요소에만 적용됩니다. (다른 페이지 영향 X)
    ========================================================================== */
 
-/* 1. 요약 행 (클릭 가능한 영역) */
-.qna-summary-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.qna-summary-row:hover {
-    background-color: #f9f9f9;
-}
-/* 활성화(펼쳐짐) 되었을 때 */
-.qna-summary-row.active {
-    background-color: #fff8f8; /* 아주 연한 붉은색 틴트 */
-    font-weight: bold;
-}
-.qna-summary-row.active .qna-title {
-    color: #cb2b11;
+/* 1. 검색 박스 스타일 (이미지처럼 변경) */
+#priceInquiryArea .price-search-box {
+    background-color: #ffffff;     /* 흰색 배경 */
+    border: 1px solid #dcdcdc;     /* 연한 테두리 */
+    border-top: 3px solid #cb2b11; /* 상단 굵은 붉은 선 */
+    padding: 30px 40px;            /* 넉넉한 여백 */
+    margin-bottom: 50px;           /* 아래 테이블과 간격 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03); /* 고급스러운 그림자 */
+    border-radius: 4px;
 }
 
-/* 2. 상세 내용 행 (숨겨진 영역) */
-.qna-detail-content {
-    background-color: #fcfcfc;
-    padding: 30px 40px;
-    text-align: left; /* 중앙 정렬 해제 */
+/* 검색 박스 내부 레이아웃 */
+#priceInquiryArea .search-layout { width: 100%; }
+#priceInquiryArea .search-layout th {
+    text-align: left;
+    width: 120px;
+    font-weight: 700;
+    color: #222;
+    padding: 12px 0; /* 간격 조정 */
+}
+#priceInquiryArea .search-layout td { padding: 12px 0; }
+
+/* 조회 버튼 영역 */
+#priceInquiryArea .btn-area {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #eee; /* 버튼 위 구분선 */
+    text-align: center;
 }
 
-/* 질문 박스 (Q) */
-.qna-detail-content .q-box {
-    margin-bottom: 25px;
-    position: relative;
-    padding-left: 30px;
+/* 2. 결과 테이블 스타일 (현재 스타일 유지: 붉은 헤더) */
+#priceInquiryArea .grid-table {
+    width: 100%;
+    border-bottom: 1px solid #ccc;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-bottom: 30px;
 }
-.qna-detail-content .q-box .mark.q {
-    position: absolute;
-    left: 0;
-    top: 0;
-    font-weight: 900;
-    color: #cb2b11; /* Q는 빨간색 */
-    font-size: 18px;
-}
-.qna-detail-content .text {
-    font-family: 'Noto Sans KR', sans-serif;
+
+#priceInquiryArea .grid-table th {
+    background-color: #cb2b11; /* ★헤더: 부산은행 레드 유지 */
+    color: #fff;               /* 글자: 흰색 유지 */
+    padding: 15px 0;
     font-size: 14px;
-    line-height: 1.6;
-    color: #333;
-    word-break: break-all;
+    font-weight: 500;
+    border-right: 1px solid #e57e72; /* 헤더 구분선 */
+    border-bottom: 1px solid #a61e08;
+    text-align: center;
 }
+#priceInquiryArea .grid-table th:last-child { border-right: none; }
 
-/* 답변 박스 (A) */
-.qna-detail-content .a-box {
-    background-color: #f0f0f0; /* 회색 박스 배경 */
-    border-radius: 8px;
-    padding: 20px;
-    position: relative;
+#priceInquiryArea .grid-table td {
+    padding: 12px 10px;
+    font-size: 14px;
+    color: #444;
+    vertical-align: middle;
+    border-right: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
 }
-.qna-detail-content .a-box .a-header {
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ddd;
+#priceInquiryArea .grid-table td:last-child { border-right: none; }
+
+/* 3. 타이틀 꾸미기 */
+#priceInquiryArea .price-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
-    gap: 10px;
 }
-.qna-detail-content .a-box .mark.a {
-    font-weight: 900;
-    color: #004890; /* A는 파란색 (신뢰감) */
-    font-size: 18px;
+#priceInquiryArea .price-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 19px;
+    background-color: #cb2b11;
+    margin-right: 12px;
+    border-radius: 2px;
 }
-.qna-detail-content .a-box .manager-name {
-    font-weight: bold;
-    color: #333;
-}
-.qna-detail-content .a-box .date {
-    font-size: 12px;
-    color: #777;
-    margin-left: auto; /* 우측 정렬 */
+/* 라디오 버튼 & 텍스트 스타일 */
+#priceInquiryArea .radio-item {
+    margin-right: 25px;
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+
+    /* [추가] 폰트 강제 적용 (시스템 폰트 무시) */
+    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif !important;
+    font-weight: 500;
 }
 
-/* 답변 대기 안내 문구 */
-.qna-detail-content .waiting-msg {
-    background-color: #fff;
-    border: 1px dashed #ddd;
-    padding: 20px;
-    text-align: center;
-    color: #888;
-    border-radius: 6px;
-    font-size: 13px;
+#priceInquiryArea .radio-item input {
+    margin-right: 5px;
+    transform: scale(1.1);
+    vertical-align: middle;
 }
 
-/* 화살표 아이콘 */
-.arrow-icon {
-    font-size: 10px;
-    color: #999;
-}
-
-/* 수익 (빨강 - BNK 레드 계열) */
-.status-badge.profit {
-    background-color: #fff5f5;
-    color: #cb2b11;
-    border: 1px solid #ffcccc;
-}
-
-/* 손실 (파랑 - BNK 블루 계열) */
-.status-badge.loss {
-    background-color: #eef6fc;
-    color: #004890;
-    border: 1px solid #cce4f7;
-}
-
-/* 보합 (회색) */
-.status-badge.flat {
-    background-color: #f5f5f5;
-    color: #555;
-    border: 1px solid #ddd;
-}
+/* 색상 유틸리티 */
+#priceInquiryArea .fc-red { color: #d63031 !important; font-weight: bold; }
+#priceInquiryArea .fc-blue { color: #0984e3 !important; font-weight: bold; }
+#priceInquiryArea .fc-black { color: #333 !important; font-weight: bold; }

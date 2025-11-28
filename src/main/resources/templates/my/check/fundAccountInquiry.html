@@ -1,118 +1,106 @@
-<th:block th:replace="~{my/_head.html}"></th:block>
+<div th:replace="~{my/_head.html}"></div>
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
 
-<div class="wrap">
+            <div th:replace="~{my/sidebar :: sidebar('account')}"></div>
 
-    <th:block th:replace="~{my/sidebar.html}" th:with="activeMenu='account'"></th:block>
+            <div class="main-content">
+                <div class="content-header">
+                    <h1>펀드계좌조회</h1>
+                </div>
 
-    <main class="content">
-        <div class="content-header">
-            <div class="breadcrumb">홈 > 조회 > 펀드계좌조회</div>
-            <h2 class="page-title">펀드계좌조회</h2>
-        </div>
+                <div style="font-size: 13px; color: #666; line-height: 1.7; padding: 15px; border: 1px solid #eee; margin-bottom: 20px;">
+                    <p>대출가능금액은 해당 계좌의 순수 대출가능금액으로 인터넷 대출 신청시 대출가능금액이 달라질 수 있습니다.</p>
+                    <p>펀드의 경우 현재잔액란의 표기된 금액은 기준일 현재 고시기준가격을 적용한 평가금액으로 실제지급시 차감금액과 상이할 수 있습니다.</p>
+                    <p>펀드계좌의 대출가능금액 조회는 토요일, 일요일(공휴일포함) 조회 불가하며 평일 09:30 ~ 23:00 가능합니다.</p>
+                    <p>조회기준선택대상의 조구구분은 로보어드바이저(포트폴리오) 펀드를 제외한 일반 펀드만을 대상으로 합니다.</p>
+                    <p>로보어드바이저(포트폴리오) 펀드의 상세 정보를 원하시면 포트폴리오 조회 화면을 이용바랍니다.</p>
+                </div>
 
-        <div class="search-section" style="margin-bottom: 20px;">
-            <div style="background-color: #f8f9fa; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
-                <strong style="margin-right: 20px; font-size: 14px;">조회 기준</strong>
+                <div style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; background:#f9f9f9; margin-bottom: 30px;">
+                    <div style="display: flex; align-items: center; padding: 20px;">
+                        <label style="font-weight: bold; margin-right: 30px;">조회구분</label>
+                        <div style="display: flex; gap: 20px; font-size: 14px;">
+                            <label style="cursor:pointer;"><input type="radio" name="queryType" value="total" checked onclick="changeViewType()"> 전액기준(세금지분포함)</label>
+                            <label style="cursor:pointer;"><input type="radio" name="queryType" value="net" onclick="changeViewType()"> 불안액기준(순수익)</label>
+                            <label style="cursor:pointer;"><input type="radio" name="queryType" value="method" onclick="changeViewType()"> 불안액기준(금액방식)</label>
+                        </div>
+                    </div>
+                </div>
 
-                <label style="margin-right: 20px; cursor: pointer;">
-                    <input type="radio" name="viewType" value="gross" checked onclick="changeViewType()">
-                    <span style="font-size: 14px;">전액기준 (세전)</span>
-                </label>
+                <div class="table-list-wrap" th:if="${not #lists.isEmpty(accountList)}">
+                    <table class="fund-result-table">
+                        <colgroup>
+                            <col style="width: 35%;">
+                            <col style="width: 25%;">
+                            <col style="width: 25%;">
+                            <col style="width: 15%;">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>펀드명</th>
+                            <th>계좌번호</th>
+                            <th id="amountHeader">평가금액 (전액)</th>
+                            <th>수익률</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="fund : ${accountList}">
+                            <td class="text-left" style="padding-left:20px;">
+                                <strong th:text="${fund.fundName}">펀드명</strong>
+                            </td>
+                            <td class="text-center" th:text="${fund.acctNo}">계좌번호</td>
 
-                <label style="margin-right: 20px; cursor: pointer;">
-                    <input type="radio" name="viewType" value="net" onclick="changeViewType()">
-                    <span style="font-size: 14px;">불안액기준 (세후 실수령)</span>
-                </label>
+                            <td class="display-amount text-right" style="padding-right:20px; font-weight:bold;"
+                                th:data-total="${fund.currentEvalAmount}"
+                                th:data-net="${fund.afterTaxAmount}"
+                                th:data-method="${fund.profitAmount}">
+                                <span th:text="${#numbers.formatInteger(fund.currentEvalAmount, 0, 'COMMA')} + '원'">0원</span>
+                            </td>
 
-                <label style="cursor: pointer;">
-                    <input type="radio" name="viewType" value="amount" onclick="changeViewType()">
-                    <span style="font-size: 14px;">금액방식 (평가손익)</span>
-                </label>
-            </div>
-        </div>
+                            <td class="text-center"
+                                th:style="${fund.yieldPct > 0} ? 'color:#d63031; font-weight:bold;' : (${fund.yieldPct < 0} ? 'color:#0984e3; font-weight:bold;' : 'color:#333; font-weight:bold;')">
+                                <span th:text="${(fund.yieldPct > 0 ? '+' : '') + fund.yieldPct + '%'}">0.0%</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-        <table class="search-table">
-            <colgroup>
-                <col style="width: 40%;">
-                <col style="width: 20%;">
-                <col style="width: 25%;">
-                <col style="width: 15%;">
-            </colgroup>
-            <thead>
-            <tr>
-                <th>펀드명</th>
-                <th>계좌번호</th>
-                <th id="amountHeader">평가금액</th>
-                <th>수익률</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="fund : ${accountList}">
-                <td style="text-align: left; padding-left: 15px;">
-                    <strong th:text="${fund.fundName}" style="color: #333;">펀드명</strong>
-                </td>
+                <div th:if="${#lists.isEmpty(accountList)}" style="text-align: center; padding: 50px 0; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;">
+                    <img th:src="@{/images/main/ico_gnb_search.png}" alt="경고" style="width: 48px; height: 48px; margin-bottom: 20px; opacity: 0.5;">
+                    <p style="font-size: 16px; font-weight: bold; color: #333;">조회하실 내역이 없습니다.</p>
+                    <p style="font-size: 13px; color: #888;" th:text="|조회기준일시: ${#dates.format(#dates.createNow(), 'yyyy-MM-dd HH:mm:ss')}|">조회기준일시</p>
+                </div>
 
-                <td th:text="${fund.acctNo}" style="text-align: center;">123-45-67890</td>
-
-                <td class="display-amount"
-                    style="text-align: right; padding-right: 15px; font-weight: bold;"
-                    th:data-gross="${fund.currentEvalAmount}"
-                    th:data-net="${fund.afterTaxAmount}"
-                    th:data-amount="${fund.profitAmount}">
-                    <span th:text="${#numbers.formatInteger(fund.currentEvalAmount, 0, 'COMMA')} + '원'">0원</span>
-                </td>
-
-                <td style="text-align: center;"
-                    th:classappend="${fund.yieldPct > 0} ? 'plus-text' : (${fund.yieldPct < 0} ? 'minus-text' : '')"
-                    th:style="${fund.yieldPct > 0} ? 'color:#cb2b11; font-weight:bold;' : (${fund.yieldPct < 0} ? 'color:#004890; font-weight:bold;' : '')">
-                    <span th:text="${(fund.yieldPct > 0 ? '+' : '') + fund.yieldPct + '%'}">0.0%</span>
-                </td>
-            </tr>
-
-            <tr th:if="${#lists.isEmpty(accountList)}">
-                <td colspan="4" class="no-data-msg" style="padding: 50px; text-align: center;">
-                    보유 중인 펀드 계좌가 없습니다.
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <div class="info-box" style="margin-top: 30px;">
-            <ul>
-                <li><strong>전액기준:</strong> 세금 공제 전 현재 평가금액입니다.</li>
-                <li><strong>불안액기준:</strong> 수익 발생 시 예상 세금(15.4%)을 공제한 실수령 예상액입니다.</li>
-                <li><strong>금액방식:</strong> 투자 원금을 제외한 순수 평가 손익 금액입니다.</li>
-            </ul>
-        </div>
-
-    </main>
-</div>
-
-<th:block th:replace="~{my/_tail.html}"></th:block>
+            </div> </div>
+    </div>
+</main>
+<div th:replace="~{my/_tail.html}"></div>
 
 <script>
     function changeViewType() {
-        const type = document.querySelector('input[name="viewType"]:checked').value;
+        const type = document.querySelector('input[name="queryType"]:checked').value;
         const header = document.getElementById('amountHeader');
 
-        if(type === 'gross') header.innerText = '평가금액 (세전)';
-        else if(type === 'net') header.innerText = '예상 실수령액 (세후)';
-        else if(type === 'amount') header.innerText = '평가 손익';
+        if(type === 'total') header.innerText = '평가금액 (전액)';
+        else if(type === 'net') header.innerText = '실수령액 (불안액)';
+        else if(type === 'method') header.innerText = '평가손익 (금액방식)';
 
         const cells = document.querySelectorAll('.display-amount');
-
         cells.forEach(cell => {
             let value = 0;
-            if (type === 'gross') value = cell.dataset.gross;
+            if (type === 'total') value = cell.dataset.total;
             else if (type === 'net') value = cell.dataset.net;
-            else if (type === 'amount') value = cell.dataset.amount;
+            else if (type === 'method') value = cell.dataset.method;
 
             const formatted = new Intl.NumberFormat('ko-KR').format(value);
-            cell.innerText = formatted + "원";
+            cell.querySelector('span').innerText = formatted;
 
-            if(type === 'amount') {
-                if(value > 0) cell.style.color = '#cb2b11';
-                else if(value < 0) cell.style.color = '#004890';
+            if(type === 'method') {
+                if(value > 0) cell.style.color = '#d63031';
+                else if(value < 0) cell.style.color = '#0984e3';
                 else cell.style.color = '#333';
             } else {
                 cell.style.color = '#333';
