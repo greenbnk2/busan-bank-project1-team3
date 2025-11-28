@@ -5,6 +5,8 @@ logging:
     root: info
 mybatis:
   mapper-locations: classpath:mappers/**/*.xml
+  configuration:
+    jdbc-type-for-null: NULL
 server:
   port: 8080
   servlet:
@@ -31,6 +33,12 @@ spring:
       max-lifetime: 600000
       leak-detection-threshold: 15000
       auto-commit: true
+  batch:
+    jdbc:
+      initialize-schema: never
+    job:
+      enabled: false
+
 
 
   devtools:

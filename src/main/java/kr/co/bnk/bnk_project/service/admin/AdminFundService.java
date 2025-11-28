@@ -3,11 +3,17 @@ package kr.co.bnk.bnk_project.service.admin;
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
+import kr.co.bnk.bnk_project.dto.admin.ApprovalDTO;
+import kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO;
 import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
 import kr.co.bnk.bnk_project.mapper.admin.AdminFundMapper;
+import kr.co.bnk.bnk_project.mapper.admin.FundMasterRevisionMapper;
+import kr.co.bnk.bnk_project.mapper.admin.ApprovalMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,6 +21,8 @@ import java.util.List;
 public class AdminFundService {
 
     private final AdminFundMapper adminFundMapper;
+    private final FundMasterRevisionMapper fundMasterRevisionMapper;
+    private final ApprovalMapper approvalMapper;
 
     /* 펀드 등록 검색 */
     public AdminFundMasterDTO getPendingFund(PageRequestDTO pageRequestDTO) {
@@ -43,13 +51,13 @@ public class AdminFundService {
         return adminFundMapper.selectFundSuggestions(searchType, keyword);
 
     }
+
     public void updateFundAndChangeStatus(AdminFundMasterDTO dto) {
 
         adminFundMapper.updateFundForRegister(dto);
     }
 
     /*---------------------수정-----------------------------*/
-
 
 
     /* 펀드 등록 검색 */
@@ -60,9 +68,43 @@ public class AdminFundService {
         return adminFundMapper.selectPendingFundEdit(fundCode);
     }
 
-    public void updateFund(AdminFundMasterDTO dto) {
+    @Transactional
+    public void updateFund(AdminFundMasterDTO dto, String createdBy) {
+        // 1. FUND_MASTER의 현재 전체 데이터 조회
+        FundMasterRevisionDTO revision = fundMasterRevisionMapper.selectFundMasterForRevision(dto.getFundCode());
 
-        adminFundMapper.updateFundForEdit(dto);
+        if (revision == null) {
+            throw new IllegalArgumentException("펀드를 찾을 수 없습니다: " + dto.getFundCode());
+        }
+
+        // 2. 수정된 필드만 반영
+        if (dto.getInvestGrade() != null) {
+            revision.setInvestGrade(dto.getInvestGrade());
+        }
+        if (dto.getFundFeature() != null) {
+            revision.setFundFeature(dto.getFundFeature());
+        }
+        if (dto.getNotice1() != null) {
+            revision.setNotice1(dto.getNotice1());
+        }
+        if (dto.getNotice2() != null) {
+            revision.setNotice2(dto.getNotice2());
+        }
+
+        // 3. revision 정보 설정
+        revision.setCreatedBy(createdBy);
+
+        // 4. FUND_MASTER_REVISION에 INSERT
+        fundMasterRevisionMapper.insertRevision(revision);
+
+        // 5. APPROVAL_HISTORY에 INSERT (승인 요청)
+        ApprovalDTO approvalDTO = ApprovalDTO.builder()
+                .apprType("수정")
+                .fundCode(dto.getFundCode())
+                .requester(createdBy)
+                .requestReason("펀드 정보 수정 요청")
+                .build();
+        approvalMapper.insertApproval(approvalDTO);
     }
 
 
@@ -79,32 +121,23 @@ public class AdminFundService {
 
 
     public void updateOperStatus(String fundCode) {
-
-        // 메서드 진입 확인 로그 (가장 먼저)
-        System.out.println(">>> updateOperStatus 메서드 호출됨 - fundCode: [" + fundCode + "]");
-
-        if(fundCode == null || fundCode.isBlank()) {
-            System.out.println(">>> fundCode가 null이거나 비어있음 - return");
+        if (fundCode == null || fundCode.isBlank()) {
             return;
         }
 
-        // 데이터베이스에서 현재 펀드 상태 조회
         AdminFundMasterDTO currentFund = adminFundMapper.selectPendingFundEdit(fundCode);
 
-        if(currentFund == null) {
-            System.out.println(">>> 펀드를 찾을 수 없습니다: " + fundCode);
+        if (currentFund == null) {
             return;
         }
 
         String operStatus = currentFund.getOperStatus() != null ? currentFund.getOperStatus().trim() : "";
         String updateStat = currentFund.getUpdateStat() != null ? currentFund.getUpdateStat().trim() : null;
 
-        if("등록".equals(operStatus) && (updateStat == null || updateStat.isEmpty())){
+        if ("등록".equals(operStatus) && (updateStat == null || updateStat.isEmpty())) {
             adminFundMapper.updateOperStatus(fundCode);
-        }else if("운용중".equals(operStatus) && "수정".equals(updateStat)){
+        } else if ("운용중".equals(operStatus) && "수정".equals(updateStat)) {
             adminFundMapper.updateStatus(currentFund);
-        } else {
-            System.out.println("조건 불일치 - operStatus: [" + operStatus + "], updateStat: [" + updateStat + "]");
         }
     }
 
@@ -136,5 +169,26 @@ public class AdminFundService {
         return PageResponseDTO.of(pageRequestDTO, list, total);
 
 
+    }
+
+    //예약시간 넣기 및 상태 변경
+    public void setFundReserveTime(String fundCode, LocalDateTime date) {
+        AdminFundMasterDTO currentFund = adminFundMapper.selectPendingFundEdit(fundCode);
+        if (currentFund == null) {
+            throw new IllegalArgumentException("펀드를 찾을 수 없습니다: " + fundCode);
+        }
+        
+        adminFundMapper.setFundReserveTime(fundCode, date);
+        
+        FundMasterRevisionDTO completedRevision = fundMasterRevisionMapper.selectCompletedRevision(fundCode);
+        
+        if (date.isBefore(LocalDateTime.now()) || date.isEqual(LocalDateTime.now())) {
+            if (completedRevision != null) {
+                fundMasterRevisionMapper.applyRevisionToMaster(completedRevision.getRevId());
+                fundMasterRevisionMapper.updateRevisionStatusToApplied(completedRevision.getRevId());
+            } else {
+                adminFundMapper.updateStatusToPending(fundCode);
+            }
+        }
     }
 }

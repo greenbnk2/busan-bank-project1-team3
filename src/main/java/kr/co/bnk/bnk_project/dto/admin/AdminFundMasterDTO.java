@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * FUND_MASTER + 운용사명 조인 결과를 담는 DTO
  */
@@ -39,5 +41,6 @@ public class AdminFundMasterDTO {
     private String fundTypeName;       // 펀드유형명
 
 
-
+    private LocalDateTime operStartAt;  // 운용 시작(예약) 일시
+    private String reserveYn;
 }
