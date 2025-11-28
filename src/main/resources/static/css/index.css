@@ -889,6 +889,10 @@ section {
         grid-template-columns: 1fr; /* 카드 한 줄로 */
     }
 
+    .kb-btn-group {
+        justify-content: center;
+    }
+
     .kb-title-lg { font-size: 36px; }
     .kb-title-md { font-size: 28px; }
 }

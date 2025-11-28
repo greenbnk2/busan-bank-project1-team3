@@ -56,10 +56,6 @@ public class CsService {
     }
 
 
-
-
-
-
     /**---------------- QNA---------------------- **/
     /** QNA 목록 **/
     public PageResponseDTO<CsDTO> getQnaPage(PageRequestDTO pageRequestDTO) {
@@ -99,5 +95,9 @@ public class CsService {
     public void deleteQna(Long csId) {
         csMapper.deleteQna(csId);
     }
+
+
+    /* QNA 등록 (사용자 1:1 문의 작성) */
+    public void registerInquiry(CsDTO csDTO) {csMapper.insertQna(csDTO);}
 
 }

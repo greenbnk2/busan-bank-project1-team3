@@ -1,0 +1,122 @@
+<th:block th:replace="~{my/_head.html}"></th:block>
+
+<div class="wrap">
+
+    <th:block th:replace="~{my/sidebar.html}" th:with="activeMenu='account'"></th:block>
+
+    <main class="content">
+        <div class="content-header">
+            <div class="breadcrumb">홈 > 조회 > 펀드계좌조회</div>
+            <h2 class="page-title">펀드계좌조회</h2>
+        </div>
+
+        <div class="search-section" style="margin-bottom: 20px;">
+            <div style="background-color: #f8f9fa; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
+                <strong style="margin-right: 20px; font-size: 14px;">조회 기준</strong>
+
+                <label style="margin-right: 20px; cursor: pointer;">
+                    <input type="radio" name="viewType" value="gross" checked onclick="changeViewType()">
+                    <span style="font-size: 14px;">전액기준 (세전)</span>
+                </label>
+
+                <label style="margin-right: 20px; cursor: pointer;">
+                    <input type="radio" name="viewType" value="net" onclick="changeViewType()">
+                    <span style="font-size: 14px;">불안액기준 (세후 실수령)</span>
+                </label>
+
+                <label style="cursor: pointer;">
+                    <input type="radio" name="viewType" value="amount" onclick="changeViewType()">
+                    <span style="font-size: 14px;">금액방식 (평가손익)</span>
+                </label>
+            </div>
+        </div>
+
+        <table class="search-table">
+            <colgroup>
+                <col style="width: 40%;">
+                <col style="width: 20%;">
+                <col style="width: 25%;">
+                <col style="width: 15%;">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>펀드명</th>
+                <th>계좌번호</th>
+                <th id="amountHeader">평가금액</th>
+                <th>수익률</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="fund : ${accountList}">
+                <td style="text-align: left; padding-left: 15px;">
+                    <strong th:text="${fund.fundName}" style="color: #333;">펀드명</strong>
+                </td>
+
+                <td th:text="${fund.acctNo}" style="text-align: center;">123-45-67890</td>
+
+                <td class="display-amount"
+                    style="text-align: right; padding-right: 15px; font-weight: bold;"
+                    th:data-gross="${fund.currentEvalAmount}"
+                    th:data-net="${fund.afterTaxAmount}"
+                    th:data-amount="${fund.profitAmount}">
+                    <span th:text="${#numbers.formatInteger(fund.currentEvalAmount, 0, 'COMMA')} + '원'">0원</span>
+                </td>
+
+                <td style="text-align: center;"
+                    th:classappend="${fund.yieldPct > 0} ? 'plus-text' : (${fund.yieldPct < 0} ? 'minus-text' : '')"
+                    th:style="${fund.yieldPct > 0} ? 'color:#cb2b11; font-weight:bold;' : (${fund.yieldPct < 0} ? 'color:#004890; font-weight:bold;' : '')">
+                    <span th:text="${(fund.yieldPct > 0 ? '+' : '') + fund.yieldPct + '%'}">0.0%</span>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(accountList)}">
+                <td colspan="4" class="no-data-msg" style="padding: 50px; text-align: center;">
+                    보유 중인 펀드 계좌가 없습니다.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="info-box" style="margin-top: 30px;">
+            <ul>
+                <li><strong>전액기준:</strong> 세금 공제 전 현재 평가금액입니다.</li>
+                <li><strong>불안액기준:</strong> 수익 발생 시 예상 세금(15.4%)을 공제한 실수령 예상액입니다.</li>
+                <li><strong>금액방식:</strong> 투자 원금을 제외한 순수 평가 손익 금액입니다.</li>
+            </ul>
+        </div>
+
+    </main>
+</div>
+
+<th:block th:replace="~{my/_tail.html}"></th:block>
+
+<script>
+    function changeViewType() {
+        const type = document.querySelector('input[name="viewType"]:checked').value;
+        const header = document.getElementById('amountHeader');
+
+        if(type === 'gross') header.innerText = '평가금액 (세전)';
+        else if(type === 'net') header.innerText = '예상 실수령액 (세후)';
+        else if(type === 'amount') header.innerText = '평가 손익';
+
+        const cells = document.querySelectorAll('.display-amount');
+
+        cells.forEach(cell => {
+            let value = 0;
+            if (type === 'gross') value = cell.dataset.gross;
+            else if (type === 'net') value = cell.dataset.net;
+            else if (type === 'amount') value = cell.dataset.amount;
+
+            const formatted = new Intl.NumberFormat('ko-KR').format(value);
+            cell.innerText = formatted + "원";
+
+            if(type === 'amount') {
+                if(value > 0) cell.style.color = '#cb2b11';
+                else if(value < 0) cell.style.color = '#004890';
+                else cell.style.color = '#333';
+            } else {
+                cell.style.color = '#333';
+            }
+        });
+    }
+</script>

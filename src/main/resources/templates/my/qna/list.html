@@ -1,0 +1,136 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+
+            <div th:replace="~{my/sidebar :: sidebar('qna')}"></div>
+
+            <div class="main-content">
+                <div class="content-header">
+                    <h1>나의 문의내역</h1>
+                </div>
+
+                <div class="info-box">
+                    <ul>
+                        <li>고객님께서 문의하신 내역을 클릭하시면 답변 내용을 바로 확인하실 수 있습니다.</li>
+                        <li>처리 상태가 <strong>[답변완료]</strong>일 경우 관리자의 답변이 표시됩니다.</li>
+                    </ul>
+                </div>
+
+                <table class="list-table qna-accordion-table">
+                    <colgroup>
+                        <col style="width: 10%;">
+                        <col style="width: 55%;">
+                        <col style="width: 15%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>제목</th>
+                        <th>작성일</th>
+                        <th>상태</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="dto : ${responseDTO.dtoList}">
+
+                        <tr class="qna-summary-row" th:onclick="'toggleQna(' + ${dto.csId} + ')'">
+                            <td th:text="${dto.csId}">1</td>
+                            <td style="text-align: left; padding-left: 20px;">
+                                <span class="qna-title" th:text="${dto.title}">문의합니다.</span>
+                            </td>
+                            <td th:text="${#temporals.format(dto.createdAt, 'yyyy-MM-dd')}">2025-11-27</td>
+                            <td>
+                                    <span class="status-badge"
+                                          th:classappend="${dto.status == '답변완료'} ? 'normal' : ''"
+                                          th:text="${dto.status}">답변대기</span>
+                            </td>
+                            <td>
+                                <span class="arrow-icon" th:id="'arrow-' + ${dto.csId}">▼</span>
+                            </td>
+                        </tr>
+
+                        <tr class="qna-detail-row" th:id="'detail-' + ${dto.csId}" style="display: none;">
+                            <td colspan="5" style="padding: 0; border-bottom: 1px solid #ccc;">
+                                <div class="qna-detail-content">
+
+                                    <div class="q-box">
+                                        <span class="mark q">Q</span>
+                                        <div class="qna-text" style="white-space: pre-wrap;" th:text="${dto.question}"></div>
+                                    </div>
+
+                                    <div class="a-box" th:if="${dto.status == '답변완료'}">
+                                        <div class="a-header">
+                                            <span class="mark a">A</span>
+                                            <span class="manager-name">담당자 답변</span>
+                                            <span class="date" th:if="${dto.answeredAt != null}"
+                                                  th:text="${#temporals.format(dto.answeredAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                        </div>
+                                        <div class="qna-text" style="white-space: pre-wrap;" th:text="${dto.answer}"></div>
+                                    </div>
+
+                                    <div class="waiting-msg" th:unless="${dto.status == '답변완료'}">
+                                        <p>담당자가 내용을 확인하고 있습니다. 잠시만 기다려주세요.</p>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+                    </th:block>
+
+                    <tr th:if="${responseDTO.dtoList == null or responseDTO.dtoList.size() == 0}">
+                        <td colspan="5" class="no-data-msg">등록된 문의 내역이 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="btn-area-center" style="margin-top: 20px;">
+                    <div class="pagination" th:if="${responseDTO.total > 0}">
+                        <a th:if="${responseDTO.prev}" th:href="@{/my/qna/list(pg=${responseDTO.start - 1})}" class="btn-white-border">&lt;</a>
+                        <th:block th:each="num : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                            <a th:href="@{/my/qna/list(pg=${num})}" th:text="${num}" class="btn-white-border"
+                               th:style="${responseDTO.pg == num} ? 'background-color: #cb2b11; color: white; border-color: #cb2b11;' : ''">1</a>
+                        </th:block>
+                        <a th:if="${responseDTO.next}" th:href="@{/my/qna/list(pg=${responseDTO.end + 1})}" class="btn-white-border">&gt;</a>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top: -40px;">
+                    <a th:href="@{/my/qna/write}" class="btn-search-submit" style="padding: 10px 20px; font-size: 14px;">문의하기</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{my/_tail.html}"></div>
+
+<script>
+    function toggleQna(id) {
+        const detailRow = document.getElementById('detail-' + id);
+        const arrow = document.getElementById('arrow-' + id);
+
+        // 현재 상태 확인
+        const isHidden = (detailRow.style.display === 'none');
+
+        // 다른 열린 아코디언 모두 닫기
+        document.querySelectorAll('.qna-detail-row').forEach(row => row.style.display = 'none');
+        document.querySelectorAll('.arrow-icon').forEach(icon => icon.innerText = '▼');
+        document.querySelectorAll('.qna-summary-row').forEach(row => row.classList.remove('active'));
+
+        if (isHidden) {
+            detailRow.style.display = 'table-row'; // 펼치기
+            arrow.innerText = '▲';
+            arrow.closest('tr').classList.add('active'); // 활성 스타일 적용
+        } else {
+            detailRow.style.display = 'none'; // 접기
+            arrow.innerText = '▼';
+            arrow.closest('tr').classList.remove('active');
+        }
+    }
+</script>
