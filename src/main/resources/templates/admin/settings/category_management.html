@@ -22,35 +22,11 @@
             <header class="page-header">
                 <div>
                     <h1>상품 카테고리 관리</h1>
-                    <p>은행 표준 분류를 자체 운영합니다. 사용 수가 0일 때만 삭제할 수 있습니다.</p>
                 </div>
                 <div class="header-actions">
-                    <button id="openModalBtn" class="btn btn-primary">신규 등록</button>
+                    <button type="button" id="openModalBtn" class="btn btn-primary">신규 등록</button>
                 </div>
             </header>
-
-            <section class="summary-cards">
-                <article class="summary-card">
-                    <span>총 카테고리</span>
-                    <strong id="summaryTotal">0</strong>
-                </article>
-                <article class="summary-card">
-                    <span>노출(ON)</span>
-                    <strong id="summaryActive">0</strong>
-                </article>
-                <article class="summary-card">
-                    <span>숨김(OFF)</span>
-                    <strong id="summaryInactive">0</strong>
-                </article>
-                <article class="summary-card">
-                    <span>펀드 매핑 수</span>
-                    <strong id="summaryUsage">0</strong>
-                </article>
-                <article class="summary-card">
-                    <span>최근 갱신</span>
-                    <strong id="summaryUpdated">-</strong>
-                </article>
-            </section>
 
             <!-- 검색 섹션 -->
             <div class="search-section">
@@ -60,23 +36,13 @@
                             <tr>
                                 <td class="search-label">검색</td>
                                 <td class="search-inputs">
-                                    <input type="text" class="form-input search-input-large" id="filterKeyword" name="keyword" placeholder="예: 주식형 / CAT-010 / equity" th:value="${pageRequestDTO != null ? pageRequestDTO.keyword : ''}">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="search-label">유형</td>
-                                <td class="search-inputs">
-                                    <select class="form-select search-select-medium" id="filterType" name="type">
-                                        <option value="">전체</option>
+                                    <select name="searchType" class="form-select search-select-small">
+                                        <option value="" th:selected="${pageRequestDTO == null or pageRequestDTO.searchType == null or pageRequestDTO.searchType == ''}">자동</option>
+                                        <option value="code" th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'code'}">코드</option>
+                                        <option value="name" th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'name'}">이름</option>
+                                        <option value="type" th:selected="${pageRequestDTO != null and pageRequestDTO.searchType == 'type'}">유형</option>
                                     </select>
-                                    <label style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
-                                        <input type="checkbox" id="filterActiveOnly" name="activeOnly" style="width: auto; margin: 0;" th:checked="${pageRequestDTO != null and pageRequestDTO.activeOnly}">
-                                        노출만 보기
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
-                                        <input type="checkbox" id="filterUsageZero" name="usageZero" style="width: auto; margin: 0;" th:checked="${pageRequestDTO != null and pageRequestDTO.usageZero}">
-                                        사용 수 0만 보기
-                                    </label>
+                                    <input type="text" class="form-input search-input-large" id="filterKeyword" name="keyword" placeholder="예: 주식형 " th:value="${pageRequestDTO != null ? pageRequestDTO.keyword : ''}">
                                 </td>
                             </tr>
                         </tbody>
@@ -90,32 +56,95 @@
 
             <section class="category-table-wrap">
                 <header>
-                    <div>카테고리 목록 (<strong id="rowCount">0</strong>건)</div>
-                    <div class="note">삭제는 사용 수 0일 때만 가능 · 숨김은 프론트 및 검색에서 제외됩니다.</div>
+                    <div>
+                        카테고리 목록
+                        (<strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건)
+                    </div>
                 </header>
-                <table class="category-table">
+                <table class="category-table center">
                     <thead>
                     <tr>
                         <th class="code-col">코드</th>
                         <th>이름</th>
                         <th>유형</th>
-                        <th>상위</th>
                         <th>Slug</th>
-                        <th class="num-col">사용수</th>
-                        <th class="status-col">노출</th>
+                        <th class="status-col">상태</th>
                         <th class="action-col">관리</th>
                     </tr>
                     </thead>
-                    <tbody id="categoryRows">
-                    <tr><td colspan="8" class="empty-row">조건에 맞는 항목이 없습니다.</td></tr>
+                    <tbody>
+                    <tr th:if="${pageResponse == null or #lists.isEmpty(pageResponse.dtoList)}">
+                        <td colspan="6" class="empty-row">조건에 맞는 항목이 없습니다.</td>
+                    </tr>
+                    <tr th:each="dto : ${pageResponse.dtoList}">
+                        <td th:text="${dto.categoryCode}">CAT-001</td>
+                        <td th:text="${dto.categoryName}">카테고리명</td>
+                        <td th:text="${dto.categoryType}">TYPE</td>
+                        <td th:text="${dto.slug}">slug</td>
+                        <td>
+                            <span th:text="${dto.status == 'on' ? 'ON' : 'OFF'}"
+                                  th:classappend="${dto.status == 'on'} ? ' status-on' : ' status-off'">ON</span>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button type="button"
+                                        class="action-btn edit"
+                                        data-action="edit"
+                                        th:attr="data-code=${dto.categoryCode},
+                                                 data-name=${dto.categoryName},
+                                                 data-type=${dto.categoryType},
+                                                 data-slug=${dto.slug},
+                                                 data-status=${dto.status},
+                                                 data-desc=${dto.cateDesc}">
+                                    수정
+                                </button>
+                                <form th:action="@{/admin/settings/category/status}" method="post" class="inline-form">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="categoryCode" th:value="${dto.categoryCode}">
+                                    <input type="hidden" name="status" th:value="${dto.status == 'on' ? 'off' : 'on'}">
+                                    <input type="hidden" name="pg"
+                                           th:value="${pageResponse != null ? pageResponse.pg : 1}">
+                                    <input type="hidden" name="keyword"
+                                           th:value="${pageRequestDTO != null ? pageRequestDTO.keyword : ''}">
+                                    <button type="submit"
+                                            class="action-btn reserve"
+                                            th:text="${dto.status == 'on' ? '노출 OFF' : '노출 ON'}">
+                                        노출 OFF
+                                    </button>
+                                </form>
+                                <form th:action="@{/admin/settings/category/delete}" method="post" class="inline-form"
+                                      onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <input type="hidden" name="categoryCode" th:value="${dto.categoryCode}">
+                                    <button type="submit" class="action-btn stop">삭제</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
-                <div class="pagination">
-                    <button class="page-btn prev" disabled>&lt;</button>
+                <div class="pagination" th:if="${pageResponse != null and pageResponse.total > 0}">
+                    <a class="page-btn prev"
+                       th:href="@{/admin/settings/category(pg=${pageResponse.pg - 1}, keyword=${pageRequestDTO.keyword})}"
+                       th:classappend="${!pageResponse.prev} ? ' disabled'"
+                       th:attr="aria-disabled=${!pageResponse.prev}">
+                        &lt;
+                    </a>
                     <div class="page-numbers">
-                        <button class="page-number active">1</button>
+                        <a class="page-number"
+                           th:each="num : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                           th:href="@{/admin/settings/category(pg=${num}, keyword=${pageRequestDTO.keyword})}"
+                           th:text="${num}"
+                           th:classappend="${num == pageResponse.pg} ? ' active'">
+                            1
+                        </a>
                     </div>
-                    <button class="page-btn next" disabled>&gt;</button>
+                    <a class="page-btn next"
+                       th:href="@{/admin/settings/category(pg=${pageResponse.pg + 1}, keyword=${pageRequestDTO.keyword})}"
+                       th:classappend="${!pageResponse.next} ? ' disabled'"
+                       th:attr="aria-disabled=${!pageResponse.next}">
+                        &gt;
+                    </a>
                 </div>
             </section>
             <!-- 푸터 영역 -->
@@ -124,40 +153,42 @@
     </div>
 </div>
 
-<div id="categoryModal" class="modal-overlay">
+<div id="categoryModal" class="modal-overlay" style="display: none;">
     <div class="modal-card category-modal">
-        <h3 id="modalTitle">카테고리 등록</h3>
-        <form id="modalForm" class="modal-form">
+        <h3>카테고리 등록</h3>
+        <form id="modalForm" class="modal-form" th:action="@{/admin/settings/category/register}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="form-grid">
                 <label>
-                    상위
-                    <select id="modalParent">
-                        <option value="">(없음)</option>
-                    </select>
+                    카테고리 코드
+                    <input name="categoryCode" type="text" required minlength="2" maxlength="20" placeholder="예: CAT001">
                 </label>
                 <label>
                     유형(Type)
-                    <select id="modalType" required></select>
+                    <input name="categoryType" type="text" required minlength="2" maxlength="20" placeholder="예: ASSET">
                 </label>
                 <label class="full">
                     이름(한글)
-                    <input id="modalName" type="text" minlength="2" required>
+                    <input name="categoryName" type="text" required minlength="2">
                 </label>
                 <label class="full">
                     Slug
                     <div class="slug-field">
-                        <input id="modalSlug" type="text" pattern="^[a-z0-9-]+$" required>
+                        <input id="modalSlug" name="slug" type="text" pattern="^[a-z0-9-]+$" required placeholder="예: equity">
                         <button type="button" id="slugAutoBtn" class="btn btn-secondary">자동</button>
                     </div>
                     <small>소문자/숫자/하이픈만 사용 · 다른 카테고리와 중복 불가</small>
                 </label>
                 <label>
-                    정렬값
-                    <input id="modalSort" type="number" min="0" step="10" value="10">
+                    상태
+                    <select name="status">
+                        <option value="on" selected>ON</option>
+                        <option value="off">OFF</option>
+                    </select>
                 </label>
-                <label>
-                    노출
-                    <button type="button" id="modalActive" class="toggle-pill on" data-value="true">ON</button>
+                <label class="full">
+                    설명
+                    <textarea name="cateDesc" rows="3" placeholder="분류 설명을 입력하세요."></textarea>
                 </label>
             </div>
             <div class="modal-actions">
@@ -168,7 +199,85 @@
     </div>
 </div>
 
-<script th:src="@{/js/admin/category_management.js}"></script>
+<script th:inline="javascript">
+    (function() {
+        const registerUrl = /*[[@{/admin/settings/category/register}]]*/ '';
+        const updateUrl = /*[[@{/admin/settings/category/update}]]*/ '';
+        const openBtn = document.getElementById('openModalBtn');
+        const modal = document.getElementById('categoryModal');
+        const modalTitle = modal.querySelector('h3');
+        const cancelBtn = document.getElementById('modalCancel');
+        const slugInput = document.getElementById('modalSlug');
+        const nameInput = document.querySelector('input[name="categoryName"]');
+        const slugAutoBtn = document.getElementById('slugAutoBtn');
+        const modalForm = document.getElementById('modalForm');
+        const statusSelect = modal.querySelector('select[name="status"]');
+        const typeInput = modal.querySelector('input[name="categoryType"]');
+        const codeInput = modal.querySelector('input[name="categoryCode"]');
+        const descInput = modal.querySelector('textarea[name="cateDesc"]');
+
+        function openModal(editData) {
+            modal.style.display = 'flex';
+            if (editData) {
+                modalTitle.textContent = '카테고리 수정';
+                codeInput.readOnly = true;
+                codeInput.value = editData.code;
+                nameInput.value = editData.name;
+                typeInput.value = editData.type;
+                slugInput.value = editData.slug;
+                statusSelect.value = editData.status;
+                descInput.value = editData.desc || '';
+                modalForm.action = updateUrl;
+            } else {
+                modalTitle.textContent = '카테고리 등록';
+                codeInput.readOnly = false;
+                modalForm.reset();
+                modalForm.action = registerUrl;
+            }
+            nameInput.focus();
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            modalForm.reset();
+            modalTitle.textContent = '카테고리 등록';
+            modalForm.action = registerUrl;
+            codeInput.readOnly = false;
+        }
+
+        function autoSlug() {
+            const base = (nameInput.value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '');
+            slugInput.value = base || 'category';
+        }
+
+        document.querySelectorAll('button[data-action="edit"]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const data = {
+                    code: btn.getAttribute('data-code'),
+                    name: btn.getAttribute('data-name'),
+                    type: btn.getAttribute('data-type'),
+                    slug: btn.getAttribute('data-slug'),
+                    status: btn.getAttribute('data-status'),
+                    desc: btn.getAttribute('data-desc')
+                };
+                openModal(data);
+            });
+        });
+
+        openBtn.addEventListener('click', function() { openModal(); });
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+        slugAutoBtn.addEventListener('click', autoSlug);
+    })();
+</script>
     <!-- 사이드바 스크립트 -->
     <div th:replace="~{admin/_sidebar :: sidebar-script}"></div>
 </body>

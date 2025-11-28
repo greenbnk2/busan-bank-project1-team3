@@ -52,33 +52,15 @@
                             <td class="search-label">펀드분류</td>
                             <td class="search-inputs">
                                 <select class="form-select search-select-medium" id="searchCategory" name="category">
-                                    <option value="">전체</option>
-                                    <option value="EQTY"
-                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'EQTY'}">주식형</option>
-                                    <option value="MIXEQ"
-                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'MIXEQ'}">혼합주식형</option>
-                                    <option value="MIXBD"
-                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'MIXBD'}">혼합채권형</option>
-                                    <option value="BOND"
-                                            th:selected="${pageRequestDTO != null && pageRequestDTO.category == 'BOND'}">채권형</option>
-                                    <option value="MMF"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'MMF'}">단기금융</option>
-                                    <option value="INVC"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'INVC'}">투자계약</option>
-                                    <option value="DERIV"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'DERIV'}">파생상품</option>
-                                    <option value="REIT"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'REIT'}">부동산</option>
-                                    <option value="PHYS"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'PHYS'}">실물</option>
-                                    <option value="FOF"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'FOF'}">재간접</option>
-                                    <option value="VINS"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'VINS'}">변액보험</option>
-                                    <option value="SPEC"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'SPEC'}">특별자산</option>
-                                    <option value="MIXAS"
-                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == 'MIXAS'}">혼합자산</option>
+                                    <option value=""
+                                            th:selected="${pageRequestDTO == null or pageRequestDTO.category == null or pageRequestDTO.category == ''}">
+                                        전체
+                                    </option>
+                                    <option th:each="cat : ${categoryList}"
+                                            th:value="${cat.categoryCode}"
+                                            th:text="${cat.categoryName}"
+                                            th:selected="${pageRequestDTO != null and pageRequestDTO.category == cat.categoryCode}">
+                                    </option>
                                 </select>
                             </td>
                         </tr>

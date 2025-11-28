@@ -30,6 +30,8 @@ public interface CsMapper {
     /* QNA 답변 */
     CsDTO selectQnaById(@Param("csId") Long csId);
     void updateQnaAnswer(CsDTO csDTO);
+    /* QnA 1:1문의 등록 */
+    void insertQna(CsDTO csDTO);
     /* QnA 삭제 */
     int deleteQna(@Param("csId") Long csId);
 }

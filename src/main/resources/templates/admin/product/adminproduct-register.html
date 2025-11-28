@@ -100,10 +100,16 @@
                         <div class="form-row">
                             <div class="form-label">펀드유형</div>
                             <div class="form-input-wrapper">
-                                <input type="text" class="form-input"
-                                       id="fundTypeName"
-                                       placeholder="펀드유형"
-                                       th:value="${fund != null} ? ${fund.fundTypeName} : ''" readonly>
+                                <select class="form-select"
+                                        name="fundType"
+                                        required>
+                                    <option value="">펀드유형 선택</option>
+                                    <option th:each="cat : ${categoryList}"
+                                            th:value="${cat.categoryCode}"
+                                            th:text="${cat.categoryName}"
+                                            th:selected="${fund != null and fund.fundType == cat.categoryCode}">
+                                    </option>
+                                </select>
                             </div>
                         </div>
 

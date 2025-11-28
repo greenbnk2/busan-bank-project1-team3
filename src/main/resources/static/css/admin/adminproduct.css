@@ -565,7 +565,6 @@
 .action-btn.reserve:disabled:hover {
     background: #d0d0d0;  /* 비활성화 시 호버도 회색 유지 */
     color: #666;
-    color: #666;
     border-color: #d0d0d0;
 }
 
@@ -1463,9 +1462,6 @@ table.form-table td > div {
     justify-content: space-between;
     padding: 5px;
     align-items: center;
-    /*
-    margin-bottom: 20px;
-    */
 }
 
 .financial-header-left {
@@ -1614,9 +1610,6 @@ table.form-table td > div {
 .table-note {
     font-size: 0.85rem;
     color: #666;
-    /*
-    margin-bottom: 15px;
-    */
     font-style: italic;
 }
 
@@ -1647,9 +1640,6 @@ table.form-table td > div {
     color: #333;
     padding-left: 3px;
     padding-bottom: 8px;
-    /*
-    border-bottom: 2px solid #ddd;
-    */
 }
 
 .fund-tabs-nav {

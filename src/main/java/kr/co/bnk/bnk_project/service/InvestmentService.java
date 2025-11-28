@@ -25,11 +25,11 @@ public class InvestmentService {
         // 2. 성향 판정
         String type;
         String desc;
-        if (score < 20) { type="안정형"; desc="원금 보전을 최우선으로 합니다."; }
-        else if (score < 40) { type="안정추구형"; desc="원금 보존과 이자 수익을 추구합니다."; }
-        else if (score < 60) { type="위험중립형"; desc="일정 손실을 감내하며 수익을 기대합니다."; }
-        else if (score < 80) { type="적극투자형"; desc="높은 수익을 위해 위험을 적극 수용합니다."; }
-        else { type="공격투자형"; desc="고수익을 위해 원금 손실 위험도 감수합니다."; }
+        if (score < 20) { type="매우 낮은 위험"; desc="원금 보전을 최우선으로 합니다."; }
+        else if (score < 40) { type="낮은 위험"; desc="원금 보존과 이자 수익을 추구합니다."; }
+        else if (score < 60) { type="중간 위험"; desc="일정 손실을 감내하며 수익을 기대합니다."; }
+        else if (score < 80) { type="높은 위험"; desc="높은 수익을 위해 위험을 적극 수용합니다."; }
+        else { type="매우 높은 위험"; desc="고수익을 위해 원금 손실 위험도 감수합니다."; }
 
         // 3. 사용자 식별번호(PK) 조회
         Long custNo = memberMapper.findCustNoByUserId(userId);

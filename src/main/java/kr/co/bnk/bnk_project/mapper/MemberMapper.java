@@ -2,10 +2,12 @@ package kr.co.bnk.bnk_project.mapper;
 
 import kr.co.bnk.bnk_project.dto.BnkUserDTO;
 import kr.co.bnk.bnk_project.dto.MemberUpdateDTO;
+import kr.co.bnk.bnk_project.dto.UserFundDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.security.SecureRandom;
+import java.util.List;
 
 @Mapper
 public interface MemberMapper {
@@ -47,4 +49,6 @@ public interface MemberMapper {
 
     //회원 정보 수정
     void updateMemberInfo(MemberUpdateDTO dto);
+
+    List<UserFundDTO> selectMyFundList(Long custNo);
 }

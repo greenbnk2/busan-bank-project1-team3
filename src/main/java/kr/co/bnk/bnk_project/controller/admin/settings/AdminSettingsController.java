@@ -1,7 +1,12 @@
 package kr.co.bnk.bnk_project.controller.admin.settings;
 
+import kr.co.bnk.bnk_project.dto.CsDTO;
+import kr.co.bnk.bnk_project.dto.PageRequestDTO;
+import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.UserTermsDTO;
+import kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO;
 import kr.co.bnk.bnk_project.service.UserTermsService;
+import kr.co.bnk.bnk_project.service.admin.FundCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,12 +19,62 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminSettingsController {
 
     private final UserTermsService userTermsService;
+    private final FundCategoryService fundCategoryService;
+
 
 
     @GetMapping("/category")
-    public String categoryManagement() {
+    public String categoryManagement(PageRequestDTO pageRequestDTO, Model model) {
+
+        // 목록 + 페이징 정보
+        PageResponseDTO<FundCategoryDTO> pageResponse = fundCategoryService.getCategoryPage(pageRequestDTO);
+
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+
         return "admin/settings/category_management";
     }
+
+    @PostMapping("/category/status")
+    public String toggleCategoryStatus(@RequestParam String categoryCode,
+                                       @RequestParam String status,
+                                       @RequestParam(defaultValue = "1") int pg,
+                                       @RequestParam(required = false) String keyword,
+                                       RedirectAttributes redirectAttributes) {
+
+        boolean success = fundCategoryService.updateCategoryStatus(categoryCode, status);
+        redirectAttributes.addFlashAttribute("msg", success ? "상태가 변경되었습니다." : "상태 변경에 실패했습니다.");
+
+        redirectAttributes.addAttribute("pg", pg);
+        if (keyword != null && !keyword.isBlank()) {
+            redirectAttributes.addAttribute("keyword", keyword);
+        }
+        return "redirect:/admin/settings/category";
+    }
+
+    @PostMapping("/category/register")
+    public String registerCategory(FundCategoryDTO fundCategoryDTO) {
+
+        fundCategoryService.createCategory(fundCategoryDTO);
+        return "redirect:/admin/settings/category";
+    }
+
+    @PostMapping("/category/update")
+    public String updateCategory(@ModelAttribute FundCategoryDTO dto,
+                                 RedirectAttributes redirectAttributes) {
+        fundCategoryService.updateCategory(dto);
+        return "redirect:/admin/settings/category";
+    }
+
+    @PostMapping("/category/delete")
+    public String deleteCategory(@RequestParam String categoryCode,
+                                 RedirectAttributes redirectAttributes,
+                                 PageRequestDTO pageRequestDTO) {
+        fundCategoryService.deleteCategory(categoryCode);
+        return "redirect:/admin/settings/category";
+    }
+
+
 
     @GetMapping("/search-keyword")
     public String searchKeyword() {

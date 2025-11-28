@@ -10,6 +10,7 @@ import kr.co.bnk.bnk_project.security.AdminUserDetails;
 import kr.co.bnk.bnk_project.service.admin.AdminFundService;
 import kr.co.bnk.bnk_project.service.admin.ApprovalService;
 import kr.co.bnk.bnk_project.service.admin.EditLockService;
+import kr.co.bnk.bnk_project.service.admin.FundCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,11 @@ public class AdminProductRegiserController {
     private final AdminFundService adminFundService;
     private final ApprovalService approvalService;
     private final EditLockService editLockService;
+    private final FundCategoryService fundCategoryService;
+
+    private void populateCategories(Model model) {
+        model.addAttribute("categoryList", fundCategoryService.getAllCategories());
+    }
 
     /*펀드 신규 등록 화면*/
     @GetMapping("/register")
@@ -40,6 +46,7 @@ public class AdminProductRegiserController {
 
         model.addAttribute("pageRequestDTO", pageRequestDTO);
         model.addAttribute("fund", fund);
+        populateCategories(model);
 
         return "admin/product/adminproduct-register";
     }
@@ -100,6 +107,7 @@ public class AdminProductRegiserController {
         AdminFundMasterDTO fund = adminFundService.getPendingFundEdit(fundCode);
         model.addAttribute("fund", fund);
         model.addAttribute("sessionId", sessionId);
+        populateCategories(model);
         
         // 잠금 시도
         String lockResult = editLockService.tryLock(fundCode, sessionId, userId);
@@ -157,6 +165,7 @@ public class AdminProductRegiserController {
         model.addAttribute("pageResponse", pageResponse);
         model.addAttribute("dtoList", pageResponse.getDtoList());
         model.addAttribute("lockStatusMap", lockStatusMap);
+        populateCategories(model);
 
         return "admin/product/adminproduct-pending";
     }
@@ -265,14 +274,21 @@ public class AdminProductRegiserController {
     @ResponseBody
     public ResponseEntity<Map<String, Boolean>> checkLocks(@RequestParam("fundCodes") List<String> fundCodes, HttpSession session) {
         String sessionId = session.getId();
+        System.out.println("=== checkLocks API 호출 ===");
+        System.out.println("요청 sessionId: " + sessionId);
+        System.out.println("요청 fundCodes: " + fundCodes);
+        
         Map<String, Boolean> lockStatusMap = new HashMap<>();
         
         for (String fundCode : fundCodes) {
             String lockCheck = editLockService.checkLock(fundCode, sessionId);
             // lockCheck가 null이 아니면 다른 사용자가 잠금 중
-            lockStatusMap.put(fundCode, lockCheck != null);
+            boolean isLocked = lockCheck != null;
+            lockStatusMap.put(fundCode, isLocked);
+            System.out.println("fundCode: " + fundCode + " -> isLocked: " + isLocked + " (lockCheck: " + lockCheck + ")");
         }
         
+        System.out.println("반환 lockStatusMap: " + lockStatusMap);
         return ResponseEntity.ok(lockStatusMap);
     }
 

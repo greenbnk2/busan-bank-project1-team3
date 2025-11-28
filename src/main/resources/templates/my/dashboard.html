@@ -23,13 +23,16 @@
                     <div class="summary-card total-asset">
                         <h4>총 평가금액</h4>
                         <div class="amount-wrap">
-                            <span class="amount">12,500,000</span> <span class="unit">원</span>
+                            <span class="amount" th:text="${#numbers.formatInteger(totalEval, 0, 'COMMA')}">0</span>
+                            <span class="unit">원</span>
                         </div>
                     </div>
                     <div class="summary-card total-yield">
                         <h4>총 수익률 (평가손익)</h4>
-                        <div class="amount-wrap plus"> <span class="rate">+ 5.2%</span>
-                            <span class="diff">(+ 650,000원)</span>
+                        <div class="amount-wrap"
+                             th:classappend="${totalDiff > 0} ? 'plus' : (${totalDiff < 0} ? 'minus' : '')">
+                            <span class="rate" th:text="${totalYield} + '%'">0.0%</span>
+                            <span class="diff" th:text="'(' + (${totalDiff > 0} ? '+' : '') + ${#numbers.formatInteger(totalDiff, 0, 'COMMA')} + '원)'">(+ 0원)</span>
                         </div>
                     </div>
                 </div>
@@ -55,28 +58,35 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
+                        <tr th:each="fund : ${fundList}">
                             <td style="text-align: left; padding-left: 20px;">
-                                <strong style="font-size: 14px; color: #333;">BNK 튼튼 배당주 증권 자투자신탁 1호</strong><br>
-                                <span style="font-size: 12px; color: #888;">123-45-67890</span>
+                                <strong style="font-size: 14px; color: #333;" th:text="${fund.fundName}">펀드명</strong><br>
+                                <span style="font-size: 12px; color: #888;" th:text="${fund.acctNo}">계좌번호</span>
                             </td>
-                            <td style="text-align: right; padding-right: 20px;">10,000,000원</td>
-                            <td style="text-align: right; padding-right: 20px; font-weight: bold;">10,650,000원</td>
-                            <td style="color: #cb2b11; font-weight: bold;">+ 6.50%</td>
-                            <td><span class="status-badge normal">정상</span></td>
+                            <td style="text-align: right; padding-right: 20px;"
+                                th:text="${#numbers.formatInteger(fund.purchaseAmount, 0, 'COMMA')} + '원'">투자원금</td>
+                            <td style="text-align: right; padding-right: 20px; font-weight: bold;"
+                                th:text="${#numbers.formatInteger(fund.currentEvalAmount, 0, 'COMMA')} + '원'">평가금액</td>
+
+                            <td style="font-weight: bold;"
+                                th:classappend="${fund.status == '수익'} ? 'plus-color' : (${fund.status == '손실'} ? 'minus-color' : '')"
+                                th:style="${fund.status == '수익'} ? 'color:#cb2b11' : (${fund.status == '손실'} ? 'color:#004890' : 'color:#333')"
+                                th:text="${(fund.yieldPct > 0 ? '+' : '') + fund.yieldPct + '%'}">
+                                수익률
+                            </td>
+
+                            <td>
+                                <span class="status-badge"
+                                      th:classappend="${fund.status == '수익'} ? 'profit' : (${fund.status == '손실'} ? 'loss' : 'flat')"
+                                      th:text="${fund.status}">
+                                    상태
+                                </span>
+                            </td>
                         </tr>
 
-                        <tr>
-                            <td style="text-align: left; padding-left: 20px;">
-                                <strong style="font-size: 14px; color: #333;">BNK 미국 인덱스 증권 투자신탁</strong><br>
-                                <span style="font-size: 12px; color: #888;">123-45-11111</span>
-                            </td>
-                            <td style="text-align: right; padding-right: 20px;">2,000,000원</td>
-                            <td style="text-align: right; padding-right: 20px; font-weight: bold;">1,850,000원</td>
-                            <td style="color: #004890; font-weight: bold;">- 7.50%</td>
-                            <td><span class="status-badge normal">정상</span></td>
+                        <tr th:if="${#lists.isEmpty(fundList)}">
+                            <td colspan="5" class="no-data-msg">보유 중인 펀드가 없습니다.</td>
                         </tr>
-
                         </tbody>
                     </table>
 

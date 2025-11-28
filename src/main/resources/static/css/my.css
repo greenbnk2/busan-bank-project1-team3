@@ -542,6 +542,7 @@
     background-color: #fff;
     transition: all 0.3s ease;     /* 부드러운 효과 */
     box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 미세한 그림자 */
+    font-family: 'Noto Sans KR', sans-serif;
 }
 
 /* 입력창 클릭 시(포커스) 강조 효과 */
@@ -610,4 +611,122 @@
 .my-info-form .error-message {
     margin-top: 8px;
     font-size: 13px;
+}
+
+/* ==========================================================================
+   1:1 문의 아코디언(List + Detail) 스타일
+   ========================================================================== */
+
+/* 1. 요약 행 (클릭 가능한 영역) */
+.qna-summary-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.qna-summary-row:hover {
+    background-color: #f9f9f9;
+}
+/* 활성화(펼쳐짐) 되었을 때 */
+.qna-summary-row.active {
+    background-color: #fff8f8; /* 아주 연한 붉은색 틴트 */
+    font-weight: bold;
+}
+.qna-summary-row.active .qna-title {
+    color: #cb2b11;
+}
+
+/* 2. 상세 내용 행 (숨겨진 영역) */
+.qna-detail-content {
+    background-color: #fcfcfc;
+    padding: 30px 40px;
+    text-align: left; /* 중앙 정렬 해제 */
+}
+
+/* 질문 박스 (Q) */
+.qna-detail-content .q-box {
+    margin-bottom: 25px;
+    position: relative;
+    padding-left: 30px;
+}
+.qna-detail-content .q-box .mark.q {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 900;
+    color: #cb2b11; /* Q는 빨간색 */
+    font-size: 18px;
+}
+.qna-detail-content .text {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    word-break: break-all;
+}
+
+/* 답변 박스 (A) */
+.qna-detail-content .a-box {
+    background-color: #f0f0f0; /* 회색 박스 배경 */
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+}
+.qna-detail-content .a-box .a-header {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.qna-detail-content .a-box .mark.a {
+    font-weight: 900;
+    color: #004890; /* A는 파란색 (신뢰감) */
+    font-size: 18px;
+}
+.qna-detail-content .a-box .manager-name {
+    font-weight: bold;
+    color: #333;
+}
+.qna-detail-content .a-box .date {
+    font-size: 12px;
+    color: #777;
+    margin-left: auto; /* 우측 정렬 */
+}
+
+/* 답변 대기 안내 문구 */
+.qna-detail-content .waiting-msg {
+    background-color: #fff;
+    border: 1px dashed #ddd;
+    padding: 20px;
+    text-align: center;
+    color: #888;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* 화살표 아이콘 */
+.arrow-icon {
+    font-size: 10px;
+    color: #999;
+}
+
+/* 수익 (빨강 - BNK 레드 계열) */
+.status-badge.profit {
+    background-color: #fff5f5;
+    color: #cb2b11;
+    border: 1px solid #ffcccc;
+}
+
+/* 손실 (파랑 - BNK 블루 계열) */
+.status-badge.loss {
+    background-color: #eef6fc;
+    color: #004890;
+    border: 1px solid #cce4f7;
+}
+
+/* 보합 (회색) */
+.status-badge.flat {
+    background-color: #f5f5f5;
+    color: #555;
+    border: 1px solid #ddd;
 }
