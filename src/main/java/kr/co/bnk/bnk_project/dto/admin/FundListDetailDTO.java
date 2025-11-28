@@ -28,7 +28,11 @@ public class FundListDetailDTO {
     private Double changeAmount;     // FUND_DAILY_HISTORY.DAILY_CHANGE_RATE (전일대비 금액)
     private Double dailyChangeRate;  // 전일대비 %
     private Double totalNav;         // FUND_DAILY_HISTORY.TOTAL_NAV (순자산총액)
-    private String tradeDate;         // 기준일자
+    private LocalDate tradeDate;     // 기준일자
+    // 추가
+    private Double navPerUnit;       // 현재기준가
+    private Double prevWeekChange;   // 전주대비
+    private Double prevWeekPercent;   // 전주대비 %
 
     /* ---------------------------
      * 2) 펀드 기본 정보 (FUND_MASTER)
@@ -92,7 +96,7 @@ public class FundListDetailDTO {
 
 
     /* ---------------------------
-     * 7) 자산구성내역 (FUND_SETTLEMENT_HISTORY)
+     * 7) 결산 및 상환 (FUND_SETTLEMENT_HISTORY)
      * --------------------------- */
     private List<FundSettlementHistoryDTO> settlementList;
 
@@ -112,10 +116,15 @@ public class FundListDetailDTO {
      * 9) 가격변동 추이
      * --------------------------- */
     private List<FundPriceHistoryDTO> priceHistoryList;
+
     /* ---------------------------
      * 10) 수익률 추이
      * --------------------------- */
     private List<FundReturnHistoryDTO> returnHistoryList;
 
+    /* ---------------------------
+     * 10) 자산 구성 내역
+     * --------------------------- */
+    private List<FundAssetAllocationDTO> assetAllocationList;
 
 }

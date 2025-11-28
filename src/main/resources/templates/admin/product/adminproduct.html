@@ -51,9 +51,9 @@
                             <td class="search-inputs">
                                 <select class="form-select search-select-medium" id="searchCategory" name="category">
                                     <option value="">전체</option>
-                                    <option value="주식형">주식형</option>
-                                    <option value="채권형">채권형</option>
-                                    <option value="혼합형">혼합형</option>
+                                    <option value="주식형">운용중</option>
+                                    <option value="채권형">운용대기</option>
+                                    <option value="혼합형">운용중단</option>
                                 </select>
                             </td>
                         </tr>
@@ -66,20 +66,16 @@
                                         <span>전체</span>
                                     </label>
                                     <label class="status-radio-label">
-                                        <input type="radio" name="status" value="게시중">
-                                        <span>게시중</span>
+                                        <input type="radio" name="status" value="운용중">
+                                        <span>운용중</span>
                                     </label>
                                     <label class="status-radio-label">
-                                        <input type="radio" name="status" value="수정중">
-                                        <span>수정중</span>
+                                        <input type="radio" name="status" value="운용대기">
+                                        <span>운용대기</span>
                                     </label>
                                     <label class="status-radio-label">
-                                        <input type="radio" name="status" value="대기중">
-                                        <span>대기중</span>
-                                    </label>
-                                    <label class="status-radio-label">
-                                        <input type="radio" name="status" value="중단">
-                                        <span>중단</span>
+                                        <input type="radio" name="status" value="운용중단">
+                                        <span>운용중단</span>
                                     </label>
                                 </div>
                             </td>
@@ -265,10 +261,9 @@
                 document.getElementById("fundCode").textContent = product.fundCode;
 
                 // PDF 버튼 RUL
-                document.getElementById("termsBtn").href = product.termsUrl;
-                document.getElementById("investBtn").href = product.investUrl;
-                document.getElementById("summaryBtn").href = product.summaryUrl;
-
+                document.getElementById("termsBtn").href = "/files/" + (product.termsPath ?? "#");
+                document.getElementById("investBtn").href = "/files/" + (product.investPath ?? "#");
+                document.getElementById("summaryBtn").href = "/files/" + (product.summaryPath ?? "#");
 
 
 
@@ -287,9 +282,11 @@
                         <!-- 회사로고 탭 -->
                         <div class="company-tab-content" id="companyLogoTab">
                             <div class="company-logo-container">
-                                <img src="/images/company-logo.png" alt="회사로고" class="company-logo-img">
+                                <img src="" alt="회사로고" class="company-logo-img">
                             </div>
                         </div>
+
+
 
                         <!-- 회사개황 탭 -->
                         <div class="company-tab-content" id="companyOverviewTab" style="display: none;">
@@ -323,14 +320,18 @@
                                     <span class="reference-date-text">기준일: ${product.lastModifiedDate ?? '-'}</span>
                                     <span class="unit-text">[단위: 억원, %]</span>
                                 </div>
-                                <button class="chart-list-btn">
+                                <button id="chartListViewBtn" class="chart-list-btn" onclick="toggleChartListView()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
                                     </svg>
                                     목록보기
                                 </button>
                             </div>
-                            <div class="financial-chart-container">
+                            <div id="chartView" style="width: 100%; height: 300px; margin: 20px 0;">
+                                <canvas id="financialChart"></canvas>
+                            </div>
+
+                            <div id="tableView" class="financial-chart-container" style="display:none;">
                                 <div class="financial-item">총자산: ${product.totalAsset?.toLocaleString() ?? '-'}</div>
                                 <div class="financial-item">총부채: ${product.totalLiabilities?.toLocaleString() ?? '-'}</div>
                                 <div class="financial-item">자본금: ${product.capital?.toLocaleString() ?? '-'}</div>
@@ -344,7 +345,7 @@
                     <div class="fund-price-section">
                         <div class="standard-price">
                             <div class="price-label">기준가</div>
-                            <div class="price-value">${product.initialNav?.toLocaleString() ?? '-'}</div>
+                            <div class="price-value">${product.navPerUnit?.toLocaleString() ?? '-'}</div>
                         </div>
                         <div class="price-comparison">
                             <div class="comparison-item">
@@ -355,8 +356,8 @@
                             </div>
                             <div class="comparison-item">
                                 <div class="comparison-label">전주대비</div>
-                                <div class="comparison-value">
-                                    ${product.prevWeekChange}, ${product.prevWeekPercent}
+                                <div class="comparison-value${product.prevWeekPercent >= 0 ? 'positive' : 'negative'}">
+                                    ${product.prevWeekChange ?? '-'}, ${product.prevWeekPercent ?? '-'}%
                                 </div>
                             </div>
                             <div class="reference-date">기준일:  ${product.tradeDate ?? '-'}</div>
@@ -553,7 +554,7 @@
                             <div class="chart-controls">
                                 <span class="unit-label">단위: 백만원, %</span>
                                 <span class="separator">|</span>
-                                <button class="chart-list-btn" id="chartListViewBtn" onclick="toggleChartListView()">
+                                <button class="chart-list-btn" id="returnListViewBtn" onclick="toggleReturnListView()">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px ">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
                                     </svg>
@@ -607,7 +608,7 @@
                         </div>
 
                         <!-- 차트 영역 -->
-                        <div id="chartView">
+                        <div id="returnChartView">
                             <div class="chart-container">
                                 <canvas id="returnChart" style="width: 100%; height: 400px;"></canvas>
                             </div>
@@ -650,7 +651,7 @@
                         </div>
 
                         <!-- 테이블 영역 -->
-                        <div class="chart-table-container" id="tableView" style="display: none;">
+                        <div class="chart-table-container" id="returnTableView" style="display: none;">
                             <div class="chart-table-wrapper">
                                 <table class="return-chart-table">
                                     <thead>
@@ -1015,6 +1016,11 @@
                     </div>
                 </div>
             `;
+                // 회사 로고
+                console.log("회사로고:", product.logo);
+                document.querySelector("#companyLogoTab img").src =
+                    "http://34.50.37.11:8080" + product.logo;
+
 
                 // 조회기간 검색(수익률차트추이,가격변동추이)
                 document.getElementById("returnSearchBtn").addEventListener("click", filterReturnData);
@@ -1278,98 +1284,54 @@
     };
 
     function updateChart() {
-        if (!returnChart) {
-            console.log('차트가 초기화되지 않았습니다.');
-            return;
-        }
+        if (!returnChart) return;
 
-        // 선택된 벤치마크 지수 가져오기
-        const selectedBenchmarks = [];
-        const modal = document.getElementById('productDetailModal');
-        const checkboxes = modal ? modal.querySelectorAll('input[name="benchmark"]:checked') : document.querySelectorAll('input[name="benchmark"]:checked');
-        checkboxes.forEach(checkbox => {
-            selectedBenchmarks.push(checkbox.value);
-        });
-
-        console.log('선택된 벤치마크:', selectedBenchmarks);
-
-        // 기본 데이터셋 (운용수익률, 설정원본)
-        const datasets = [
-            {
-                label: '운용수익률',
-                type: 'line',
-                data: [0, 2, 4, 11, 5.5, 8],
-                borderColor: '#ffc107',
-                backgroundColor: 'transparent',
-                borderWidth: 2,
-                borderDash: [],
-                pointRadius: 0,
-                pointHoverRadius: 4,
-                pointBackgroundColor: '#ffc107',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                yAxisID: 'y',
-                order: 1
-            },
-            {
-                label: '설정원본',
-                type: 'bar',
-                data: [2370, 2450, 2580, 2770, 2960, 3150],
-                backgroundColor: '#2196F3',
-                borderColor: '#2196F3',
-                borderWidth: 0,
-                yAxisID: 'y1',
-                order: 2,
-                barThickness: 40
-            }
+        // 1) 기존 DB 기반 차트 데이터 (운용수익률/설정원본) 유지
+        const baseDatasets = [
+            returnChart.data.datasets[0], // 운용수익률(DB 데이터)
+            returnChart.data.datasets[1]  // 설정원본(DB 데이터)
         ];
 
-        // 선택된 벤치마크 지수 추가
+        // 2) 선택된 벤치마크 읽기
+        const selectedBenchmarks = [];
+        const modal = document.getElementById('productDetailModal');
+        const checkboxes = modal.querySelectorAll('input[name="benchmark"]:checked');
+
+        checkboxes.forEach(cb => selectedBenchmarks.push(cb.value));
+
+        // 3) 벤치마크 데이터 추가
         selectedBenchmarks.forEach(benchmark => {
             const data = benchmarkData[benchmark];
             const color = benchmarkColors[benchmark];
-            const label = benchmark === 'kospi' ? 'KOSPI' :
-                benchmark === 'kosdaq' ? 'KOSDAQ' :
-                    benchmark === 'govt' ? '국공채' : '회사채';
+            const label =
+                benchmark === 'kospi' ? 'KOSPI' :
+                    benchmark === 'kosdaq' ? 'KOSDAQ' :
+                        benchmark === 'govt' ? '국공채' : '회사채';
 
-            console.log(`벤치마크 추가: ${label}, 색상: ${color}`);
-
-            // KOSPI, KOSDAQ은 오른쪽 Y축 사용
-            const yAxisID = (benchmark === 'kospi' || benchmark === 'kosdaq') ? 'y1' : 'y';
-            // 데이터 정규화
-            let normalizedData;
-            if (benchmark === 'kospi' || benchmark === 'kosdaq') {
-                // KOSPI, KOSDAQ: 오른쪽 Y축 사용 (그대로 사용)
-                normalizedData = data;
-            } else {
-                // 국공채, 회사채: 왼쪽 Y축 사용 (그대로 사용, 이미 0~12 범위)
-                normalizedData = data;
-            }
-
-            datasets.push({
+            baseDatasets.push({
                 label: label,
                 type: 'line',
-                data: normalizedData,
+                data: data,
                 borderColor: color,
                 backgroundColor: 'transparent',
-                borderWidth: 2, // 선 두께
-                borderDash: [], // 실선 (점선 제거)
-                pointRadius: 4, // 점 크기
+                borderWidth: 2,
+                pointRadius: 4,
                 pointHoverRadius: 6,
                 pointBackgroundColor: color,
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
                 pointHoverBorderWidth: 2,
                 pointStyle: 'circle',
-                yAxisID: yAxisID,
+                yAxisID: (benchmark === 'kospi' || benchmark === 'kosdaq') ? 'y1' : 'y',
                 order: 1
             });
         });
 
-        console.log('전체 데이터셋 개수:', datasets.length);
-        returnChart.data.datasets = datasets;
+        // 4) 차트 업데이트
+        returnChart.data.datasets = baseDatasets;
         returnChart.update();
     }
+
 
     function initReturnChart() {
         const ctx = document.getElementById('returnChart');
@@ -1690,10 +1652,22 @@
         const ctx = document.getElementById('financialChart');
         if (!ctx) return;
 
+        const product = window.currentProduct;
+        if (!product) return;
+
         // 기존 차트가 있으면 제거
         if (financialChart) {
             financialChart.destroy();
         }
+
+        const dataValues = [
+            product.netIncome / 100000000,        // 당기순이익
+            product.totalAsset / 100000000,       // 총자산
+            product.totalLiabilities / 100000000, // 총부채
+            product.capital / 100000000,          // 자본금
+            product.equityCapital / 100000000     // 자기자본금
+        ];
+
 
         financialChart = new Chart(ctx, {
             type: 'bar',
@@ -1701,7 +1675,7 @@
                 labels: ['당기순이익', '총자산', '총부채', '자본금', '자기자본금', '영업용순자본비율'],
                 datasets: [{
                     label: '억원',
-                    data: [6500, 57500, 12500, 1500, 46000, null],
+                    data: dataValues,
                     backgroundColor: [
                         '#ff6b35',  // 당기순이익 - 주황색
                         '#2196F3',  // 총자산 - 파란색
@@ -1739,9 +1713,10 @@
                 scales: {
                     x: {
                         beginAtZero: true,
-                        max: 60000,
+                        min: 0,
+                        max: 1000,
                         ticks: {
-                            stepSize: 10000,
+                            stepSize: 1000,
                             callback: function(value) {
                                 return value.toLocaleString();
                             }
@@ -1799,6 +1774,37 @@
         const chartView = document.getElementById('priceChartView');
         const tableView = document.getElementById('priceTableView');
         const btn = document.getElementById('priceListViewBtn');
+
+
+        if (chartView && tableView && btn) {
+            if (chartView.style.display === 'none') {
+                // 차트 보기
+                chartView.style.display = 'block';
+                tableView.style.display = 'none';
+                btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z" />
+                        </svg>
+                        목록보기
+                    `;
+            } else {
+                // 목록 보기
+                chartView.style.display = 'none';
+                tableView.style.display = 'block';
+                btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; margin-right: 5px; padding-top: 2px">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                        </svg>
+                        차트 보기
+                    `;
+            }
+        }
+    }
+
+    function toggleReturnListView() {
+        const chartView = document.getElementById('returnChartView');
+        const tableView = document.getElementById('returnTableView');
+        const btn = document.getElementById('returnListViewBtn');
 
         if (chartView && tableView && btn) {
             if (chartView.style.display === 'none') {

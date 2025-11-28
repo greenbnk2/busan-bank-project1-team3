@@ -45,6 +45,8 @@
                 AND fm.oper_status = #{pageRequestDTO.status}
             </if>
 
+            AND fm.oper_status = '운용중' or fm.oper_status = '운용중단' or fm.oper_status = '운용대기'
+
         </where>
     </sql>
 
@@ -157,7 +159,62 @@
             amc.last_modified_date     AS lastModifiedDate,
 
             /* 계산 컬럼 - 영업용순자본 */
-            (amc.total_asset - amc.total_liabilities) AS operatingCapital
+            (amc.total_asset - amc.total_liabilities) AS operatingCapital,
+
+            /* 전주대비 금액 */
+            (
+                fdh.nav_per_unit -
+                (
+                    SELECT nav_per_unit
+                    FROM fund_daily_history
+                    WHERE fund_code = fm.fund_code
+          <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+        ORDER BY trade_date DESC
+                        FETCH FIRST 1 ROWS ONLY
+                )
+                ) AS prevWeekChange,
+
+/* 전주대비 퍼센트 */
+            (
+                CASE
+                    WHEN (
+                             SELECT nav_per_unit
+                             FROM fund_daily_history
+                             WHERE fund_code = fm.fund_code
+              <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+            ORDER BY trade_date DESC
+                                 FETCH FIRST 1 ROWS ONLY
+                         ) IS NULL OR (
+                                          SELECT nav_per_unit
+                                          FROM fund_daily_history
+                                          WHERE fund_code = fm.fund_code
+              <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+            ORDER BY trade_date DESC
+                                              FETCH FIRST 1 ROWS ONLY
+                                      ) = 0 THEN NULL
+                    ELSE
+                        (
+                            (fdh.nav_per_unit -
+                             (SELECT nav_per_unit
+                              FROM fund_daily_history
+                              WHERE fund_code = fm.fund_code
+                       <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                     ORDER BY trade_date DESC
+                                  FETCH FIRST 1 ROWS ONLY
+                             )
+                                )
+                                /
+                            (SELECT nav_per_unit
+                             FROM fund_daily_history
+                             WHERE fund_code = fm.fund_code
+                   <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                 ORDER BY trade_date DESC
+                                 FETCH FIRST 1 ROWS ONLY
+                            )
+                            ) * 100
+                    END
+                ) AS prevWeekPercent
+
 
         FROM fund_master fm
 
@@ -165,13 +222,12 @@
                  LEFT JOIN (
             SELECT f1.*
             FROM fund_daily_history f1
-            WHERE (f1.fund_code, f1.trade_date) IN (
-                SELECT fund_code, MAX(trade_date)
-                FROM fund_daily_history
-                GROUP BY fund_code
+            WHERE f1.trade_date = (
+                SELECT MAX(f2.trade_date)
+                FROM fund_daily_history f2
+                WHERE f2.fund_code = f1.fund_code
             )
-        ) fdh
-                           ON fm.fund_code = fdh.fund_code
+        ) fdh ON fdh.fund_code = fm.fund_code
 
             /* 보수/수수료 */
                  LEFT JOIN fund_fee_structure ffs
@@ -232,6 +288,21 @@
         WHERE fund_code = #{fundCode}
         ORDER BY trade_date ASC
     </select>
+
+    <!-- 자산 구성 내역 -->
+    <select id="selectFundAssetAllocation" parameterType="map" resultType="kr.co.bnk.bnk_project.dto.admin.FundAssetAllocationDTO">
+        SELECT
+            asset_category                             AS assetCategory,
+            TO_CHAR(alloc_date, 'YYYY-MM-DD')          AS allocDate,
+            detail_name                                AS detailName,
+            weight_percent                             AS weightPercent
+        FROM
+            fund_asset_allocation
+        WHERE fund_code = #{fundCode}
+        ORDER BY asset_category, detail_name
+    </select>
+
+
 
     <!-- 결산 및 상환 -->
     <select id="selectFundSettlementHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundSettlementHistoryDTO">
