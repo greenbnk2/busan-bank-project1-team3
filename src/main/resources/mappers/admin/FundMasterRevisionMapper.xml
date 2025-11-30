@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.admin.FundMasterRevisionMapper">
+
+    <!-- 수정 이력 저장 -->
+    <insert id="insertRevision" parameterType="kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO">
+        INSERT INTO BNK.FUND_MASTER_REVISION (
+            FUND_CODE, FUND_SHORT_CODE, FUND_NAME, ASSET_MANAGER_ID,
+            SETUP_DATE, INITIAL_NAV, FUND_TYPE, INVEST_REGION, CLASSIFY_CODE,
+            PUBLIC_PRIVATE_TYPE, TRUSTEE_COMPANY, SALES_COMPANY, ADMIN_COMPANY,
+            OPER_PERIOD_TYPE, IS_UNIT_TYPE, INVEST_GRADE, FUND_FEATURE,
+            CLASS_NAME, OVERVIEW, REDEMPTION_METHOD, TRADE_METHOD,
+            SUBCRIPTION_METHOD, TRUST_MANAGEMENT, PAYMENT_ID,
+            NOTICE_1, NOTICE_2, RGN_TYPE, PRFM_TYPE,
+            REV_STATUS, CREATED_AT, CREATED_BY
+        ) VALUES (
+            #{fundCode}, #{fundShortCode}, #{fundName}, #{assetManagerId},
+            #{setupDate}, #{initialNav}, #{fundType}, #{investRegion}, #{classifyCode},
+            #{publicPrivateType}, #{trusteeCompany}, #{salesCompany}, #{adminCompany},
+            #{operPeriodType}, #{isUnitType}, #{investGrade}, #{fundFeature},
+            #{className}, #{overview}, #{redemptionMethod}, #{tradeMethod},
+            #{subscriptionMethod}, #{trustManagement}, #{paymentId},
+            #{notice1}, #{notice2}, #{rgnType}, #{prfmType},
+            '대기', SYSDATE, #{createdBy}
+        )
+    </insert>
+
+    <!-- 승인 대기 중인 수정 이력 조회 -->
+    <select id="selectPendingRevision" 
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO">
+        SELECT * FROM (
+            SELECT * FROM BNK.FUND_MASTER_REVISION
+            WHERE FUND_CODE = #{fundCode}
+              AND REV_STATUS IN ('대기', '수정완료')
+            ORDER BY CREATED_AT DESC
+        ) WHERE ROWNUM = 1
+    </select>
+
+    <!-- OPER_START_AT 기준으로 적용할 revision 조회 -->
+    <select id="selectRevisionsToApply"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO">
+        SELECT rev.REV_ID AS revId, 
+               rev.FUND_CODE AS fundCode, 
+               rev.REV_STATUS AS revStatus
+        FROM BNK.FUND_MASTER_REVISION rev
+        INNER JOIN BNK.FUND_MASTER fm ON rev.FUND_CODE = fm.FUND_CODE
+        WHERE rev.REV_STATUS = '수정완료'
+          AND fm.OPER_START_AT IS NOT NULL
+          AND fm.OPER_START_AT &lt;= SYSDATE
+          AND fm.RESERVE_YN = 'Y'
+          AND rev.REV_ID NOT IN (
+              SELECT REV_ID FROM BNK.FUND_MASTER_REVISION
+              WHERE REV_STATUS = '적용완료'
+          )
+          AND rev.REV_ID = (
+              SELECT MAX(REV_ID) 
+              FROM BNK.FUND_MASTER_REVISION 
+              WHERE FUND_CODE = rev.FUND_CODE 
+                AND REV_STATUS = '수정완료'
+          )
+    </select>
+
+    <!-- 승인 처리 -->
+    <update id="approveRevision">
+        UPDATE BNK.FUND_MASTER_REVISION
+        SET REV_STATUS = '승인완료',
+            APPROVED_AT = SYSDATE,
+            APPROVED_BY = #{approvedBy}
+        WHERE REV_ID = #{revId,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 수정사항을 FUND_MASTER에 반영 -->
+    <update id="applyRevisionToMaster" parameterType="long">
+        UPDATE BNK.FUND_MASTER fm
+        SET (
+            fm.FUND_SHORT_CODE, fm.FUND_NAME, fm.ASSET_MANAGER_ID,
+            fm.SETUP_DATE, fm.INITIAL_NAV, fm.FUND_TYPE, fm.INVEST_REGION,
+            fm.CLASSIFY_CODE, fm.PUBLIC_PRIVATE_TYPE, fm.TRUSTEE_COMPANY,
+            fm.SALES_COMPANY, fm.ADMIN_COMPANY, fm.OPER_PERIOD_TYPE,
+            fm.IS_UNIT_TYPE, fm.INVEST_GRADE, fm.FUND_FEATURE,
+            fm.CLASS_NAME, fm.OVERVIEW, fm.REDEMPTION_METHOD,
+            fm.TRADE_METHOD, fm.SUBCRIPTION_METHOD, fm.TRUST_MANAGEMENT,
+            fm.PAYMENT_ID, fm.NOTICE_1, fm.NOTICE_2,
+            fm.RGN_TYPE, fm.PRFM_TYPE, fm.LAST_UPD_DATE
+        ) = (
+            SELECT 
+                rev.FUND_SHORT_CODE, rev.FUND_NAME, rev.ASSET_MANAGER_ID,
+                rev.SETUP_DATE, rev.INITIAL_NAV, rev.FUND_TYPE, rev.INVEST_REGION,
+                rev.CLASSIFY_CODE, rev.PUBLIC_PRIVATE_TYPE, rev.TRUSTEE_COMPANY,
+                rev.SALES_COMPANY, rev.ADMIN_COMPANY, rev.OPER_PERIOD_TYPE,
+                rev.IS_UNIT_TYPE, rev.INVEST_GRADE, rev.FUND_FEATURE,
+                rev.CLASS_NAME, rev.OVERVIEW, rev.REDEMPTION_METHOD,
+                rev.TRADE_METHOD, rev.SUBCRIPTION_METHOD, rev.TRUST_MANAGEMENT,
+                rev.PAYMENT_ID, rev.NOTICE_1, rev.NOTICE_2,
+                rev.RGN_TYPE, rev.PRFM_TYPE, SYSDATE
+            FROM BNK.FUND_MASTER_REVISION rev
+            WHERE rev.REV_ID = #{revId,jdbcType=NUMERIC}
+        )
+        WHERE fm.FUND_CODE = (
+            SELECT FUND_CODE FROM BNK.FUND_MASTER_REVISION WHERE REV_ID = #{revId,jdbcType=NUMERIC}
+        )
+    </update>
+
+    <!-- 예약 시간 설정 -->
+    <update id="setApplyTime">
+        UPDATE BNK.FUND_MASTER_REVISION
+        SET APPLY_AT = #{applyAt}
+        WHERE REV_ID = #{revId,jdbcType=NUMERIC}
+    </update>
+
+    <!-- FUND_MASTER 전체 데이터 조회 (revision 생성용) -->
+    <select id="selectFundMasterForRevision"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO">
+        SELECT
+            FUND_CODE AS fundCode,
+            FUND_SHORT_CODE AS fundShortCode,
+            FUND_NAME AS fundName,
+            ASSET_MANAGER_ID AS assetManagerId,
+            SETUP_DATE AS setupDate,
+            INITIAL_NAV AS initialNav,
+            FUND_TYPE AS fundType,
+            INVEST_REGION AS investRegion,
+            CLASSIFY_CODE AS classifyCode,
+            PUBLIC_PRIVATE_TYPE AS publicPrivateType,
+            TRUSTEE_COMPANY AS trusteeCompany,
+            SALES_COMPANY AS salesCompany,
+            ADMIN_COMPANY AS adminCompany,
+            OPER_PERIOD_TYPE AS operPeriodType,
+            IS_UNIT_TYPE AS isUnitType,
+            INVEST_GRADE AS investGrade,
+            FUND_FEATURE AS fundFeature,
+            CLASS_NAME AS className,
+            OVERVIEW AS overview,
+            REDEMPTION_METHOD AS redemptionMethod,
+            TRADE_METHOD AS tradeMethod,
+            SUBCRIPTION_METHOD AS subscriptionMethod,
+            TRUST_MANAGEMENT AS trustManagement,
+            PAYMENT_ID AS paymentId,
+            NOTICE_1 AS notice1,
+            NOTICE_2 AS notice2,
+            RGN_TYPE AS rgnType,
+            PRFM_TYPE AS prfmType
+        FROM BNK.FUND_MASTER
+        WHERE FUND_CODE = #{fundCode}
+    </select>
+
+    <!-- 승인 시 REV_STATUS를 '수정완료'로 변경 (FUND_CODE 기준, 최신 revision) -->
+    <update id="updateRevisionStatusToCompleted">
+        UPDATE BNK.FUND_MASTER_REVISION
+        SET REV_STATUS = '수정완료',
+            APPROVED_AT = SYSDATE,
+            APPROVED_BY = #{approvedBy}
+        WHERE REV_ID = (
+            SELECT REV_ID FROM (
+                SELECT REV_ID
+                FROM BNK.FUND_MASTER_REVISION
+                WHERE FUND_CODE = #{fundCode}
+                  AND REV_STATUS = '대기'
+                ORDER BY CREATED_AT DESC
+            ) WHERE ROWNUM = 1
+        )
+    </update>
+
+    <!-- 반려 시 REV_STATUS를 '수정반려'로 변경 (FUND_CODE 기준, 최신 revision) -->
+    <update id="updateRevisionStatusToRejected">
+        UPDATE BNK.FUND_MASTER_REVISION
+        SET REV_STATUS = '수정반려',
+            APPROVED_AT = SYSDATE,
+            APPROVED_BY = #{approvedBy}
+        WHERE REV_ID = (
+            SELECT REV_ID FROM (
+                SELECT REV_ID
+                FROM BNK.FUND_MASTER_REVISION
+                WHERE FUND_CODE = #{fundCode}
+                  AND REV_STATUS = '대기'
+                ORDER BY CREATED_AT DESC
+            ) WHERE ROWNUM = 1
+        )
+    </update>
+
+    <!-- REV_STATUS를 '적용완료'로 변경 -->
+    <update id="updateRevisionStatusToApplied">
+        UPDATE BNK.FUND_MASTER_REVISION
+        SET REV_STATUS = '적용완료'
+        WHERE REV_ID = #{revId,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 디버깅용: 모든 revision 상태 조회 -->
+    <select id="selectAllRevisionsForDebug"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO">
+        SELECT REV_ID AS revId,
+               FUND_CODE AS fundCode,
+               REV_STATUS AS revStatus,
+               APPLY_AT AS applyAt,
+               CREATED_AT AS createdAt
+        FROM BNK.FUND_MASTER_REVISION
+        WHERE REV_STATUS IN ('대기', '수정완료', '적용완료')
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <!-- 수정완료된 revision 조회 (예약용) -->
+    <select id="selectCompletedRevision"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO">
+        SELECT * FROM (
+            SELECT * FROM BNK.FUND_MASTER_REVISION
+            WHERE FUND_CODE = #{fundCode}
+              AND REV_STATUS = '수정완료'
+            ORDER BY CREATED_AT DESC
+        ) WHERE ROWNUM = 1
+    </select>
+
+</mapper>

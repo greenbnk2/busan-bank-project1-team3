@@ -160,7 +160,7 @@
                     </thead>
                     <tbody id="pendingTableBody">
                         <tr th:each="dto, stat : ${dtoList}" 
-                            th:attr="data-product-id=${dto.fundCode},data-fund-code=${dto.fundCode},data-update-stat=${dto.updateStat}">
+                            th:attr="data-product-id=${dto.fundCode},data-fund-code=${dto.fundCode},data-rev-status=${dto.revStatus}">
                             <td th:text="${dto.fundCode}"></td>
                             <td>
                                 <span class="product-name-link"
@@ -183,16 +183,16 @@
                                       style="margin-left: 10px; color: #cd1317; font-weight: 600;">
                                     [수정중]
                                 </span>
-                                <!-- 잠금 상태가 아닐 때 기존 updateStat 표시 -->
-                                <span th:if="${(lockStatusMap == null or lockStatusMap[dto.fundCode] != true) and (dto.updateStat != null and dto.updateStat != '')}" 
+                                <!-- REV_STATUS 표시 -->
+                                <span th:if="${dto.revStatus != null and dto.revStatus != ''}"
                                       style="margin-left: 10px; color: #666;">
-                                    [<span th:text="${dto.updateStat}"></span>]
+                                    [<span th:text="${dto.revStatus}"></span>]
                                 </span>
                             </td>
                             <td>
                                 <button class="action-btn edit" 
                                         th:attr="data-fund-code=${dto.fundCode}"
-                                        th:disabled="${lockStatusMap != null and lockStatusMap[dto.fundCode] == true}"
+                                        th:disabled="${(dto.operStatus != '운용대기' and dto.operStatus != '운용중' and dto.operStatus != '운용중단') or (lockStatusMap != null and lockStatusMap[dto.fundCode] == true)}"
                                         onclick="editProduct(this.dataset.fundCode)">수정</button>
                             </td>
                             <td>
@@ -215,13 +215,13 @@
                                 <div class="action-buttons">
                                     <button class="action-btn approval" 
                                             th:attr="data-fund-code=${dto.fundCode},data-fund-name=${dto.fundName}"
-                                            th:disabled="${(dto.operStatus != '등록' and dto.operStatus != '수정') and (dto.updateStat == null or dto.updateStat != '수정')}"
+                                            th:disabled="${(dto.operStatus != '등록' and dto.operStatus != '수정') and (dto.revStatus == null or dto.revStatus != '대기')}"
                                             onclick="requestApproval(this)">승인요청</button>
                                 </div>
                             </td>
                             <td>
                                 <button class="action-btn reserve" th:attr="data-fund-code=${dto.fundCode}"
-                                        th:disabled="${(dto.operStatus != '등록완료' and dto.operStatus != '수정완료') and (dto.updateStat == null or dto.updateStat != '수정완료')}"
+                                        th:disabled="${(dto.operStatus != '등록완료' and dto.operStatus != '수정완료' and dto.operStatus != '운용대기') and (dto.revStatus == null or dto.revStatus != '수정완료')}"
                                         onclick="reserveProduct(this)">반영예약</button>
                             </td>
                         </tr>
@@ -389,6 +389,14 @@
                 </table>
             </div>
             <div class="modal-footer">
+                <!-- 숨겨진 폼 -->
+                <form id="reserveForm" method="post" action="/bnk/admin/product/reserve" style="display: none;">
+                    <input type="hidden" name="fundCode" id="reserveFormFundCode">
+                    <input type="hidden" name="date" id="reserveFormDate">
+                    <!-- CSRF 토큰 -->
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                </form>
+                
                 <button class="btn btn-secondary" onclick="closeReserveModal()">취소</button>
                 <button class="btn btn-red" onclick="submitReserveRequest()">예약</button>
             </div>
@@ -407,6 +415,15 @@
             // 잠금 상태 확인
             const row = document.querySelector(`tr[data-fund-code="${fundCode}"]`);
             const editBtn = row?.querySelector('.action-btn.edit');
+            const statusBadge = row?.querySelector('.status-text');
+            const status = statusBadge ? statusBadge.textContent.trim() : '';
+            
+            // 상태 체크: 운용대기, 운용중, 운용중단일 때만 수정 가능
+            const isEditAllowed = (status === '운용대기' || status === '운용중' || status === '운용중단');
+            if (!isEditAllowed) {
+                alert('운용대기, 운용중, 운용중단 상태에서만 수정할 수 있습니다.');
+                return;
+            }
             
             if (editBtn && editBtn.disabled) {
                 alert('다른 사용자가 수정 중입니다. 잠시 후 다시 시도해주세요.');
@@ -612,9 +629,13 @@
             //     alert('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
             // });
             
-            // 임시로 alert만 표시
-            alert(immediateApply ? '즉시 반영이 완료되었습니다.' : '반영예약이 완료되었습니다.');
-            closeReserveModal();
+            // 폼 데이터 설정 후 제출
+            console.log('>>> 폼 제출 시작 - fundCode:', productCode, ', date:', reserveDateTime);
+            document.getElementById('reserveFormFundCode').value = productCode;
+            document.getElementById('reserveFormDate').value = reserveDateTime;
+            
+            // 폼 제출
+            document.getElementById('reserveForm').submit();
         }
 
         // 승인요청 함수
@@ -635,15 +656,15 @@
                 row.querySelector('.product-name-link')?.textContent?.trim() || fundName;
             const status = row.querySelector('.status-text')?.textContent?.trim() || '';
 
-            // updateStat 값 가져오기
-            const updateStat = row.getAttribute('data-update-stat') || '';
+            // revStatus 값 가져오기
+            const revStatus = row.getAttribute('data-rev-status') || '';
 
             // 모달에 데이터 채우기
             document.getElementById('approvalProductCode').value = productCode;
             document.getElementById('approvalProductName').value = productName;
 
-            // updateStat이 '수정'이면 '수정'으로, 아니면 기존 status(operStatus)로 표시
-            document.getElementById('approvalStatus').value = (updateStat === '수정') ? '수정' : status;
+            // revStatus가 '대기'이면 '수정'으로, 아니면 기존 status(operStatus)로 표시
+            document.getElementById('approvalStatus').value = (revStatus === '대기') ? '수정' : status;
 
             // 요청사유 필드 초기화
             document.getElementById('approvalReason').value = '';
@@ -697,8 +718,8 @@
             const reserveBtn = row.querySelector('.action-btn.reserve');
             const statusBadge = row.querySelector('.status-text');
             
-            // updateStat 값 가져오기
-            const updateStat = row.getAttribute('data-update-stat') || '';
+            // revStatus 값 가져오기
+            const revStatus = row.getAttribute('data-rev-status') || '';
 
             // 운용중단 버튼: 운용중일 때만 표시
             if (stopBtn) {
@@ -715,18 +736,27 @@
                 waitingBtn.style.display = (status !== '운용중' && status !== '운용중단') ? 'inline-block' : 'none';
             }
 
-            // 승인요청 버튼: operStatus가 '등록' 또는 '수정'이거나, updateStat이 '수정'일 때 활성화
+            // 승인요청 버튼: operStatus가 '등록' 또는 '수정'이거나, revStatus가 '대기'일 때 활성화
             if (approvalBtn) {
                 const isOperStatusOk = (status === '등록' || status === '수정');
-                const isUpdateStatOk = (updateStat === '수정');
-                approvalBtn.disabled = !(isOperStatusOk || isUpdateStatOk);
+                const isRevStatusOk = (revStatus === '대기');
+                approvalBtn.disabled = !(isOperStatusOk || isRevStatusOk);
             }
 
-            // 반영예약 버튼: operStatus가 '등록완료' 또는 '수정완료'이거나, updateStat이 '수정완료'일 때 활성화
+            // 반영예약 버튼: operStatus가 '등록완료', '수정완료', '운용대기'이거나, revStatus가 '수정완료'일 때 활성화
             if (reserveBtn) {
-                const isOperStatusOk = (status === '등록완료' || status === '수정완료');
-                const isUpdateStatOk = (updateStat === '수정완료');
-                reserveBtn.disabled = !(isOperStatusOk || isUpdateStatOk);
+                const isOperStatusOk = (status === '등록완료' || status === '수정완료' || status === '운용대기');
+                const isRevStatusOk = (revStatus === '수정완료');
+                reserveBtn.disabled = !(isOperStatusOk || isRevStatusOk);
+            }
+
+            // 수정 버튼: 운용대기, 운용중, 운용중단일 때만 활성화
+            const editBtn = row.querySelector('.action-btn.edit');
+            if (editBtn) {
+                const isEditAllowed = (status === '운용대기' || status === '운용중' || status === '운용중단');
+                // 잠금 상태 확인
+                const isLocked = row.getAttribute('data-locked') === 'true';
+                editBtn.disabled = !isEditAllowed || isLocked;
             }
 
             if (statusBadge) {
@@ -774,22 +804,22 @@
                 const statusBadge = row.querySelector('.status-text');
                 if (statusBadge) {
                     const status = statusBadge.textContent.trim();
-                    const updateStat = row.getAttribute('data-update-stat') || '';
+                    const revStatus = row.getAttribute('data-rev-status') || '';
                     const approvalBtn = row.querySelector('.action-btn.approval');
                     const reserveBtn = row.querySelector('.action-btn.reserve');
                     
-                    // 승인요청 버튼: operStatus가 '등록' 또는 '수정'이거나, updateStat이 '수정'일 때 활성화
+                    // 승인요청 버튼: operStatus가 '등록' 또는 '수정'이거나, revStatus가 '대기'일 때 활성화
                     if (approvalBtn) {
                         const isOperStatusOk = (status === '등록' || status === '수정');
-                        const isUpdateStatOk = (updateStat === '수정');
-                        approvalBtn.disabled = !(isOperStatusOk || isUpdateStatOk);
+                        const isRevStatusOk = (revStatus === '대기');
+                        approvalBtn.disabled = !(isOperStatusOk || isRevStatusOk);
                     }
                     
-                    // 반영예약 버튼: operStatus가 '등록완료' 또는 '수정완료'이거나, updateStat이 '수정완료'일 때 활성화
+                    // 반영예약 버튼: operStatus가 '등록완료', '수정완료', '운용대기'이거나, revStatus가 '수정완료'일 때 활성화
                     if (reserveBtn) {
-                        const isOperStatusOk = (status === '등록완료' || status === '수정완료');
-                        const isUpdateStatOk = (updateStat === '수정완료');
-                        reserveBtn.disabled = !(isOperStatusOk || isUpdateStatOk);
+                        const isOperStatusOk = (status === '등록완료' || status === '수정완료' || status === '운용대기');
+                        const isRevStatusOk = (revStatus === '수정완료');
+                        reserveBtn.disabled = !(isOperStatusOk || isRevStatusOk);
                     }
                 }
             });
@@ -883,9 +913,12 @@
                 const editBtn = row.querySelector('.action-btn.edit');
                 const statusCell = row.querySelector('td:nth-child(5)'); // 최근수정일시 컬럼 (5번째)
                 
-                // 수정 버튼 비활성화/활성화 (관리 페이지에서만)
+                // 수정 버튼 비활성화/활성화 (운용대기, 운용중, 운용중단일 때만 활성화)
                 if (editBtn) {
-                    editBtn.disabled = isLocked;
+                    const statusBadge = row.querySelector('.status-text');
+                    const status = statusBadge ? statusBadge.textContent.trim() : '';
+                    const isEditAllowed = (status === '운용대기' || status === '운용중' || status === '운용중단');
+                    editBtn.disabled = !isEditAllowed || isLocked;
                 }
                 
                 // 수정상태 표시 업데이트

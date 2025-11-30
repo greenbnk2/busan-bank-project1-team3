@@ -19,7 +19,8 @@ public class ProductListDTO {
     private String operatorName;    // 회사명
     private LocalDateTime regDate;  // 등록일자
     private String operStatus;      // 상태 - 게시중, 수정중, 대기중, 중단
-    private String updateStat;      // OPER_STATUS
+    private String updateStat;      // OPER_STATUS (deprecated, revStatus 사용 권장)
+    private String revStatus;       // REV_STATUS - 수정 이력 상태
 
 
     // 추가
@@ -27,6 +28,7 @@ public class ProductListDTO {
 
 
     private LocalDateTime lastUpdDate;
-
+    
+    private LocalDateTime operStartAt;  // 운용 시작(예약) 일시
 
 }
