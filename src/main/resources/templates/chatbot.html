@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Fragment</title>
+</head>
+<body>
+
+<div th:fragment="chatbotFragment">
+
+    <div id="chatbot-ui">
+        <div id="chatbot-icon" onclick="toggleChat()">
+            💬
+        </div>
+
+        <div id="chatbot-window" class="hidden">
+            <div class="chat-header">
+                <span>BNK AI 챗봇</span>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">✕</button>
+            </div>
+            <div id="chat-history">
+                <div class="message bot">안녕하세요! 무엇을 도와드릴까요?☺️</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="궁금한 점을 질문해 주세요..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">전송</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #chatbot-icon {
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+            background-color: #4CAF50;
+            color: white; border-radius: 50%; text-align: center; line-height: 60px;
+            font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 9999; transition: transform 0.3s;
+        }
+        #chatbot-icon:hover { transform: scale(1.1); }
+
+        #chatbot-window {
+            position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px;
+            background-color: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; overflow: hidden; z-index: 9999;
+        }
+        .hidden { display: none !important; }
+        .chat-header {
+            background-color: #4CAF50; color: white; padding: 15px; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #chat-history {
+            flex: 1; padding: 15px; overflow-y: auto; background-color: #f9f9f9;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 20px; font-size: 14px; }
+        .message.user { align-self: flex-end; background-color: #4CAF50; color: white; border-bottom-right-radius: 5px; }
+        .message.bot { align-self: flex-start; background-color: #e9ecef; color: #333; border-bottom-left-radius: 5px; }
+
+        .chat-input-area {
+            padding: 10px; border-top: 1px solid #ddd; display: flex; background-color: white;
+        }
+        .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        .chat-input-area button {
+            margin-left: 10px; padding: 10px 15px; background-color: #4CAF50; color: white;
+            border: none; border-radius: 20px; cursor: pointer;
+        }
+    </style>
+
+    <script>
+        /* JavaScript는 <script> 태그 안에 그대로 넣어주세요 (이전에 드린 JS 코드) */
+        const chatWindow = document.getElementById('chatbot-window');
+        const userInput = document.getElementById('user-input');
+        const chatHistory = document.getElementById('chat-history');
+
+        function toggleChat() {
+            chatWindow.classList.toggle('hidden');
+            if (!chatWindow.classList.contains('hidden')) {
+                userInput.focus();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendMessage();
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            userInput.value = '';
+
+            const loadingMessage = document.createElement('div');
+            loadingMessage.classList.add('message', 'bot', 'loading');
+            loadingMessage.innerText = '잠시만요! 더 좋은 답을 드리려고 생각 중이에요 😊';
+            chatHistory.appendChild(loadingMessage);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            try {
+                const response = await fetch('/bnk/api/chatbot/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: text })
+                });
+
+                chatHistory.removeChild(document.querySelector('.message.loading'));
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const answer = data.answer;
+                    addMessage(answer, 'bot');
+                } else {
+                    addMessage('죄송합니다. 서버 통신에 문제가 발생했어요😭', 'bot');
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                const loadingElement = document.querySelector('.message.loading');
+                if (loadingElement) chatHistory.removeChild(loadingElement);
+                addMessage('네트워크 오류가 발생했습니다. 다시 시도해주세요.', 'bot');
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

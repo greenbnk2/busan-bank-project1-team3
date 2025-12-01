@@ -94,7 +94,7 @@
     <div class="modal-card">
         <h3>수시공시 등록</h3>
         <form id="adhocForm" class="modal-form"
-              th:action="@{/admin/info/ad-hoc}" method="post">
+              th:action="@{/admin/info/ad-hoc}" method="post" enctype="multipart/form-data">
 
             <div class="form-field">
                 <label for="adhocCode">공시번호</label>
@@ -124,6 +124,11 @@
             <div class="form-field">
                 <label for="adhocContent">내용</label>
                 <textarea id="adhocContent" name="content" rows="6" placeholder="공시 내용을 입력하세요" required></textarea>
+            </div>
+            <div class="form-field file-field">
+                <label for="adhocFile">첨부파일</label>
+                <input type="file" id="adhocFile" name="attachment">
+                <span class="field-hint">PDF, 이미지 등 최대 10MB까지 업로드 가능합니다.</span>
             </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -178,7 +183,7 @@
     <div class="modal-card">
         <h3>수시공시 수정</h3>
         <form id="adhocEditForm" class="modal-form"
-        th:action="@{/admin/info/ad-hoc/update}" method="post">
+              th:action="@{/admin/info/ad-hoc/update}" method="post" enctype="multipart/form-data">
             <input type="hidden" id="editPostId" name="postId">
             <input type="hidden" name="createdBy" value="admin">
             <input type="hidden" id="editStatus" name="status">
@@ -212,6 +217,12 @@
                 <label for="editAdhocContent">내용</label>
                 <textarea id="editAdhocContent" name="content" rows="6" placeholder="공시 내용을 입력하세요" required></textarea>
             </div>
+            <div id="editAdhocExistingFile" style="margin-bottom: 8px; color: #666;"></div>
+            <div class="form-field file-field">
+                <label for="editAdhocFile">첨부파일</label>
+                <input type="file" id="editAdhocFile" name="attachment">
+                <span class="field-hint">PDF, 이미지 등 최대 10MB까지 업로드 가능합니다.</span>
+            </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
                 <button type="button" id="adhocEditModalClose" class="btn btn-secondary">닫기</button>
@@ -227,19 +238,19 @@
         <form id="adhocDeleteForm" method="post" th:action="@{/admin/info/ad-hoc/delete}">
             <input type="hidden" id="deletePostId" name="postId">
             <div class="modal-form">
-            <div class="form-field">
-                <p style="margin: 0; color: #495057; font-size: 1rem;">
-                    정말로 <strong id="deleteAdhocTitle" style="color: #cd1317;"></strong> 공시를 삭제하시겠습니까?
-                </p>
-                <p style="margin: 10px 0 0 0; color: #868e96; font-size: 0.9rem;">
-                    삭제된 데이터는 복구할 수 없습니다.
-                </p>
+                <div class="form-field">
+                    <p style="margin: 0; color: #495057; font-size: 1rem;">
+                        정말로 <strong id="deleteAdhocTitle" style="color: #cd1317;"></strong> 공시를 삭제하시겠습니까?
+                    </p>
+                    <p style="margin: 10px 0 0 0; color: #868e96; font-size: 0.9rem;">
+                        삭제된 데이터는 복구할 수 없습니다.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" id="adhocDeleteConfirm" class="btn btn-primary">삭제</button>
+                    <button type="button" id="adhocDeleteModalClose" class="btn btn-secondary">취소</button>
+                </div>
             </div>
-            <div class="modal-actions">
-                <button type="submit" id="adhocDeleteConfirm" class="btn btn-primary">삭제</button>
-                <button type="button" id="adhocDeleteModalClose" class="btn btn-secondary">취소</button>
-            </div>
-        </div>
         </form>
     </div>
 </div>
@@ -259,6 +270,7 @@
         // 수정 모달
         const editModal = document.getElementById('adhocEditModal');
         const editForm = document.getElementById('adhocEditForm');
+        const editExistingFile = document.getElementById('editAdhocExistingFile');
         const editCloseBtn = document.getElementById('adhocEditModalClose');
 
         // 삭제 모달
@@ -371,6 +383,9 @@
                         document.getElementById('editAdhocStart').value = converted;
                         document.getElementById('editAdhocContent').value = content || '';
                         document.getElementById('editStatus').value = status || 'PUBLISHED';
+                        if (editExistingFile) {
+                            editExistingFile.textContent = "새 파일 업로드 시 기존 첨부파일이 교체됩니다.";
+                        }
                         showModal(editModal);
                     } else if (action === 'delete') {
                         // 삭제 모달에 데이터 채우기

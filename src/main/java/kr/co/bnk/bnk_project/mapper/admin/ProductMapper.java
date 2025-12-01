@@ -6,6 +6,7 @@ import kr.co.bnk.bnk_project.dto.admin.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -29,7 +30,7 @@ public interface ProductMapper {
     List<FundPriceHistoryDTO> selectFundPriceHistory(@Param("fundCode") String fundCode);
 
     // 자산구성내역
-
+    List<FundAssetAllocationDTO> selectFundAssetAllocation(@Param("fundCode") String fundCode);
 
     // 결산 및 상환
     List<FundSettlementHistoryDTO> selectFundSettlementHistory(@Param("fundCode") String fundCode);

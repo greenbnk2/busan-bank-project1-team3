@@ -98,14 +98,15 @@
             fm.fund_code               AS fundCode,
             fm.fund_name               AS fundName,
             fdh.nav_per_unit           AS navPerUnit,
-            fdh.daily_change_rate      AS changeAmount,
             fdh.daily_change_rate      AS dailyChangeRate,
             fdh.total_nav              AS totalNav,
+            fdh.setup_origin_amount    AS setupOriginAmount,
             TO_CHAR(fdh.trade_date, 'YYYY-MM-DD') AS tradeDate,
 
             /* -------------------------
              * 2) FUND_MASTER 기본 정보
              * ------------------------- */
+            fc.category_name           AS categoryName, <!-- 펀드카테고리 한글 이름 -->
             fm.fund_type               AS fundType,
             fm.invest_region           AS investRegion,
             fm.classify_code           AS classifyCode,
@@ -158,21 +159,92 @@
             amc.last_modified_date     AS lastModifiedDate,
 
             /* 계산 컬럼 - 영업용순자본 */
-            (amc.total_asset - amc.total_liabilities) AS operatingCapital
+            (amc.total_asset - amc.total_liabilities) AS operatingCapital,
+
+            /* 전일 NAV */
+            (
+                SELECT nav_per_unit
+                FROM fund_daily_history
+                WHERE fund_code = fm.fund_code
+                <![CDATA[ AND trade_date < fdh.trade_date]]>
+                ORDER BY trade_date DESC
+                FETCH FIRST 1 ROW ONLY
+            ) AS prevDayNav,
+
+            /* 전주 NAV */
+            (
+                SELECT nav_per_unit
+                FROM fund_daily_history
+                WHERE fund_code = fm.fund_code
+                <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                ORDER BY trade_date DESC
+                FETCH FIRST 1 ROW ONLY
+            ) AS prevWeekNav,
+
+            /* 전주대비 금액 */
+            (
+                fdh.nav_per_unit -
+                (
+                    SELECT nav_per_unit
+                    FROM fund_daily_history
+                    WHERE fund_code = fm.fund_code
+          <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                    ORDER BY trade_date DESC
+                    FETCH FIRST 1 ROWS ONLY
+                )
+            ) AS prevWeekChange,
+
+            /* 전주대비 퍼센트 */
+            (
+                CASE
+                    WHEN (
+                             SELECT nav_per_unit
+                             FROM fund_daily_history
+                             WHERE fund_code = fm.fund_code
+                             <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                             ORDER BY trade_date DESC
+                             FETCH FIRST 1 ROWS ONLY
+                         ) IS NULL OR (
+                                          SELECT nav_per_unit
+                                          FROM fund_daily_history
+                                          WHERE fund_code = fm.fund_code
+              <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                                        ORDER BY trade_date DESC
+                                        FETCH FIRST 1 ROWS ONLY
+                                      ) = 0 THEN NULL
+                    ELSE
+                        (
+                            (fdh.nav_per_unit -
+                             (SELECT nav_per_unit
+                              FROM fund_daily_history
+                              WHERE fund_code = fm.fund_code
+                       <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                     ORDER BY trade_date DESC
+                                  FETCH FIRST 1 ROWS ONLY
+                             )
+                                )
+                                /
+                            (SELECT nav_per_unit
+                             FROM fund_daily_history
+                             WHERE fund_code = fm.fund_code
+                   <![CDATA[ AND trade_date <= fdh.trade_date - 7 ]]>
+                 ORDER BY trade_date DESC
+                                 FETCH FIRST 1 ROWS ONLY
+                            )
+                            ) * 100
+                    END
+                ) AS prevWeekPercent
 
         FROM fund_master fm
 
                  /* 최신 기준가 */
-                 LEFT JOIN (
-            SELECT f1.*
-            FROM fund_daily_history f1
-            WHERE (f1.fund_code, f1.trade_date) IN (
-                SELECT fund_code, MAX(trade_date)
-                FROM fund_daily_history
-                GROUP BY fund_code
-            )
-        ) fdh
-                           ON fm.fund_code = fdh.fund_code
+                 LEFT JOIN fund_daily_history fdh
+                           ON fdh.fund_code = fm.fund_code
+                               AND fdh.trade_date = (
+                                   SELECT MAX(f2.trade_date)
+                                   FROM fund_daily_history f2
+                                   WHERE f2.fund_code = fm.fund_code
+                               )
 
             /* 보수/수수료 */
                  LEFT JOIN fund_fee_structure ffs
@@ -181,6 +253,9 @@
             /* 운용사 정보 */
                  LEFT JOIN asset_management_company amc
                            ON fm.asset_manager_id = amc.operator_id
+            /* 펀드 유형 - 카테고리 한글이름 */
+                LEFT JOIN FUND_CATEGORY fc
+                            ON fm.fund_type = fc.category_code
 
         WHERE fm.fund_code = #{fundCode}
 
@@ -198,41 +273,127 @@
     </select>
 
     <!-- 수익률 추이차트 -->
-    <select id="selectFundReturnHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundReturnHistoryDTO">
-        SELECT
-            TO_CHAR(fp.calc_date, 'YYYY-MM-DD')   AS calcDate,
-            fp.setup_amount                     AS setupAmount,
-            fp.fund_return                      AS fundReturn,
-            fdh.bm_kospi                        AS bmKospi,
-            fdh.bm_kosdaq                       AS bmKosdaq,
-            fdh.bm_gov_bond                     AS bmGovBond,
-            fdh.bm_corp_bond                    AS bmCorpBond
-        FROM
-            fund_performance fp
-        LEFT JOIN fund_daily_history fdh
-        ON fp.fund_code = fdh.fund_code
-        WHERE fp.fund_code = #{fundCode}
-        ORDER BY fp.calc_date ASC
+    <select id="selectFundReturnHistory" parameterType="string"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundReturnHistoryDTO">
+
+        SELECT *
+        FROM (
+                 SELECT
+                     TO_CHAR(trade_date, 'YYYY-MM-DD') AS tradeDate,
+                     setup_origin_amount AS setupOriginAmount,
+
+                     /* NAV 수익률 */
+                     CASE
+                         WHEN ROW_NUMBER() OVER (ORDER BY trade_date ASC) = 1 THEN 0
+                         WHEN LAG(nav_per_unit) OVER (ORDER BY trade_date ASC) IS NULL THEN 0
+             WHEN LAG(nav_per_unit) OVER (ORDER BY trade_date ASC) = 0 THEN 0
+             ELSE ROUND(
+                     (nav_per_unit /
+                      LAG(nav_per_unit) OVER (ORDER BY trade_date ASC)
+                      - 1) * 100, 2
+                 )
+         END AS navReturn,
+
+         /* KOSPI 수익률 */
+         CASE
+             WHEN ROW_NUMBER() OVER (ORDER BY trade_date ASC) = 1 THEN 0
+             WHEN LAG(bm_kospi) OVER (ORDER BY trade_date ASC) IS NULL THEN 0
+             WHEN LAG(bm_kospi) OVER (ORDER BY trade_date ASC) = 0 THEN 0
+             ELSE ROUND(
+                     (bm_kospi /
+                      LAG(bm_kospi) OVER (ORDER BY trade_date ASC)
+                      - 1) * 100, 2
+                 )
+         END AS kospiReturn,
+
+         /* KOSDAQ 수익률 */
+         CASE
+             WHEN ROW_NUMBER() OVER (ORDER BY trade_date ASC) = 1 THEN 0
+             WHEN LAG(bm_kosdaq) OVER (ORDER BY trade_date ASC) IS NULL THEN 0
+             WHEN LAG(bm_kosdaq) OVER (ORDER BY trade_date ASC) = 0 THEN 0
+             ELSE ROUND(
+                     (bm_kosdaq /
+                      LAG(bm_kosdaq) OVER (ORDER BY trade_date ASC)
+                      - 1) * 100, 2
+                 )
+         END AS kosdaqReturn,
+
+         /* 국공채 수익률 */
+         CASE
+             WHEN ROW_NUMBER() OVER (ORDER BY trade_date ASC) = 1 THEN 0
+             WHEN LAG(bm_gov_bond) OVER (ORDER BY trade_date ASC) IS NULL THEN 0
+             WHEN LAG(bm_gov_bond) OVER (ORDER BY trade_date ASC) = 0 THEN 0
+             ELSE ROUND(
+                     (bm_gov_bond /
+                      LAG(bm_gov_bond) OVER (ORDER BY trade_date ASC)
+                      - 1) * 100, 2
+                 )
+         END AS govBondReturn,
+
+         /* 회사채 수익률 */
+         CASE
+             WHEN ROW_NUMBER() OVER (ORDER BY trade_date ASC) = 1 THEN 0
+             WHEN LAG(bm_corp_bond) OVER (ORDER BY trade_date ASC) IS NULL THEN 0
+             WHEN LAG(bm_corp_bond) OVER (ORDER BY trade_date ASC) = 0 THEN 0
+             ELSE ROUND(
+                     (bm_corp_bond /
+                      LAG(bm_corp_bond) OVER (ORDER BY trade_date ASC)
+                      - 1) * 100, 2
+                 )
+         END AS corpBondReturn
+
+                 FROM fund_daily_history
+                 WHERE fund_code = #{fundCode}
+                 ORDER BY trade_date ASC
+             )
+        ORDER BY tradeDate ASC
     </select>
+
+
+
+
+
 
     <!-- 가격변동 추이 -->
     <select id="selectFundPriceHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundPriceHistoryDTO">
-        SELECT
-            TO_CHAR(trade_date, 'YYYY-MM-DD')     AS tradeDate,
-            nav_per_unit                        AS navPerUnit,
-            daily_change_rate                   AS dailyChangeRate,
-            tax_base_nav                        AS taxBaseNav,
-            setup_origin_amount                 AS setupOriginAmount,
-            bm_kospi                            AS bmKospi,
-            bm_kospi200                         AS bmKospi200,
-            bm_kosdaq                           AS bmKosdaq,
-            bm_gov_bond                         AS bmGovBond,
-            bm_corp_bond                        AS bmCorpBond
-        FROM
-            fund_daily_history
-        WHERE fund_code = #{fundCode}
-        ORDER BY trade_date ASC
+        SELECT *
+        FROM (
+                 SELECT
+                     TO_CHAR(trade_date, 'YYYY-MM-DD') AS tradeDate,
+                     nav_per_unit AS navPerUnit,
+                     daily_change_rate AS dailyChangeRate,
+                     tax_base_nav AS taxBaseNav,
+                     setup_origin_amount AS setupOriginAmount,
+                     bm_kospi AS bmKospi,
+                     bm_kospi200 AS bmKospi200,
+                     bm_kosdaq AS bmKosdaq,
+                     bm_gov_bond AS bmGovBond,
+                     bm_corp_bond AS bmCorpBond
+                 FROM fund_daily_history
+                 WHERE fund_code = #{fundCode}
+                 ORDER BY trade_date ASC
+             )
+        ORDER BY tradeDate ASC
     </select>
+
+    <!-- 자산 구성 내역 -->
+    <select id="selectFundAssetAllocation" parameterType="map" resultType="kr.co.bnk.bnk_project.dto.admin.FundAssetAllocationDTO">
+        SELECT
+            asset_category  AS assetCategory,
+            detail_name     AS detailName,
+            weight_percent  AS weightPercent,
+            alloc_date      AS allocDate
+        FROM fund_asset_allocation
+        WHERE fund_code = #{fundCode}
+          AND alloc_date = (
+            SELECT MAX(alloc_date)
+            FROM fund_asset_allocation
+            WHERE fund_code = #{fundCode}
+        )
+        ORDER BY asset_category, detail_name
+    </select>
+
+
 
     <!-- 결산 및 상환 -->
     <select id="selectFundSettlementHistory" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.admin.FundSettlementHistoryDTO">

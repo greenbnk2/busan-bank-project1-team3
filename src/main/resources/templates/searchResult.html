@@ -1,21 +1,16 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>펀드상품</title>
+    <title>BNK부산은행 - 펀드 검색결과</title>
     <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
     <link rel="preconnect" th:href="@{https://fonts.gstatic.com crossorigin}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/index.css}">
-    <link rel="stylesheet" th:href="@{/css/productList.css}">
-    <script th:src="@{/js/sidebar.js}"></script>
 </head>
-
 <body>
 
 <header class="header">
@@ -33,9 +28,7 @@
                         </a>
                         <span class="util-link" style="color: #ddd;">|</span>
                         <span id="sessionTimer" class="util-link" style="color: #cb2b11; font-weight: bold;">20:00</span>
-                        <button type="button" id="sessionExtendBtn" class="util-link" style="background: none; border: 1px solid #ccc; padding: 2px 6px; font-size: 11px; border-radius: 4px; cursor: pointer; line-height: 1.4;">
-                            연장
-                        </button>
+                        <button type="button" id="sessionExtendBtn" class="util-link" style="background: none; border: 1px solid #ccc; padding: 2px 6px; font-size: 11px; border-radius: 4px; cursor: pointer; line-height: 1.4;">연장</button>
                         <span class="util-link" style="color: #ddd;">|</span>
                         <form th:action="@{/logout}" method="post" style="display: inline; margin: 0; padding: 0;">
                             <button type="submit" class="util-link" style="background: none; border: none; padding: 0; font-size: 14px; cursor: pointer;">로그아웃</button>
@@ -45,7 +38,6 @@
                             <a th:href="@{/member/login}" class="util-link">로그인</a>
                     </span>
                 <button type="button" class="btn-search" title="검색하기">검색하기</button>
-<!--                <button type="button" class="btn-allmenu" title="전체메뉴">전체메뉴</button>-->
             </div>
         </div>
     </div>
@@ -62,87 +54,62 @@
     </nav>
 </header>
 
-<main>
-    <div class="main-container">
-        <div class="content-wrapper">
-            <!-- 사이드바 -->
-            <div th:replace="~{sidebar :: sidebar}"></div>
+<main class="main-content">
+    <div class="container" style="padding: 60px 0; min-height: 600px;">
 
-            <!-- 본문 -->
-            <div class="main-content">
-                <div class="content-header">
-                    <h1 id="title">펀드상품</h1>
-                </div>
-
-                <!-- 상단 탭 -->
-                <div class="tab-menu" id="tabs">
-                    <a class="tab active" data-type="fund">펀드상품</a>
-                    <a class="tab" data-type="recommend">추천펀드</a>
-                    <a class="tab" data-type="best">수익률BEST</a>
-                    <a class="tab" data-type="sale">판매BEST</a>
-                    <a class="tab" data-type="interest">관심상품</a>
-                </div>
-
-                <!-- 펀드상품 전용 필터 -->
-                <div class="sub-filter" id="fund-filter" style="display:flex;">
-                    <button class="active" data-category="all">전체</button>
-                    <button data-category="recommend">추천펀드</button>
-                    <button data-category="ipo">공격투자형</button>
-                    <button data-category="dividend">적극투자형</button>
-                    <button data-category="neutral">위험중립형</button>
-                    <button data-category="stable">안정추구형</button>
-                    <button data-category="safe">안정형</button>
-                </div>
-
-                <table>
-                    <thead>
-                    <tr>
-                        <th>상품명</th>
-                        <th>1개월</th>
-                        <th>3개월</th>
-                        <th>6개월</th>
-                        <th>12개월</th>
-                        <th>가입</th>
-                    </tr>
-                    </thead>
-                    <tbody id="fund-list">
-                    </tbody>
-                </table>
-                <div id="pagination" class="pagination"></div>
-            </div>
+        <div class="search-result-header">
+            <h2 class="result-title">
+                '<span class="highlight" th:text="${param.keyword}">검색어</span>' 검색 결과
+                <span class="count" th:if="${fundList != null}" th:text="${#lists.size(fundList)} + '건'">0건</span>
+                <span class="count" th:if="${fundList == null}">0건</span>
+            </h2>
         </div>
+
+        <div th:if="${fundList == null or #lists.isEmpty(fundList)}" class="no-result-box">
+            <div class="icon">😢</div>
+            <p class="msg">검색 결과가 없습니다.</p>
+            <p class="sub-msg">검색어의 철자가 정확한지 확인해보시거나, 다른 키워드로 검색해보세요.</p>
+            <button type="button" class="btn-retry" onclick="openSearchModal()">다시 검색하기</button>
+        </div>
+
+        <div th:unless="${fundList == null or #lists.isEmpty(fundList)}" class="kb-card-grid">
+
+            <div th:each="fund : ${fundList}" class="kb-card" style="cursor: pointer;"
+                 th:onclick="|location.href='@{/fund/productDetail/{code}(code=${fund.fundcode})}'|">
+
+                <div class="card-badges" style="margin-bottom: 15px;">
+                    <span class="kb-badge" th:text="${fund.investRegion}">지역</span>
+
+                    <span class="kb-badge orange"
+                          th:if="${fund.investgrade != null and #strings.contains(fund.investgrade, '높은')}"
+                          th:text="${fund.investgrade}">높은위험</span>
+                    <span class="kb-badge" style="background:#e8f4fd; color:#004890;"
+                          th:unless="${fund.investgrade != null and #strings.contains(fund.investgrade, '높은')}"
+                          th:text="${fund.investgrade}">낮은위험</span>
+                </div>
+
+                <div class="kb-card-title" th:text="${fund.fundName}">펀드명</div>
+
+                <div class="kb-card-desc" style="margin-bottom: 15px; font-size: 14px; color: #888;">
+                    <span th:text="${fund.fundType}">유형</span> <span style="margin:0 5px; color:#ddd;">|</span>
+                    <span th:text="${fund.assetManagerId}">운용사</span>
+                </div>
+
+                <div class="card-tags" style="color: #666; font-size: 13px; border-top: 1px solid #eee; padding-top: 15px;">
+                    <span style="color:#2487A9; font-weight:bold;">#BNK추천</span>
+                    <span th:if="${fund.trustManagement != null}"
+                          th:text="${#strings.abbreviate(fund.trustManagement, 20)}">#관련태그</span>
+                </div>
+            </div> </div>
+
     </div>
 </main>
-
-<script th:src="@{/js/productList.js}"></script>
-
 <footer class="footer">
     <div class="container">
         <div class="footer-links">
-            <a href="#"><span style="color: #004890 !important;">개인정보처리방침</span></a>
-            <span class="divider">·</span>
-            <a href="#">영업점</a>
-            <span class="divider">·</span>
-            <a href="#">고객정보취급방침</a>
-            <span class="divider">·</span>
-            <a href="#">보호금융상품목록</a>
-            <span class="divider">·</span>
-            <a href="#">상품공시실</a>
-            <span class="divider">·</span>
-            <a href="#">전자민원접수</a>
-            <span class="divider">·</span>
-            <a href="#">전자금융이용자보호조치</a>
-            <span class="divider">·</span>
-            <a href="#">전자금융거래기본약관펀드</a>
-        </div>
-        <div class="footer-links">
-            <a href="#">위치기반서비스 이용약관</a>
-        </div>
-        <div class="footer-info">
-            <p><strong>고객상담 1588-6200, 1544-6200 | 해외 82-2-1588-6200</strong></p>
-        </div>
+            <a href="#">개인정보처리방침</a> </div>
         <div class="footer-copyright">
-            <p>COPYRIGHT © 2014 BUSANBANK. ALL RIGHTS RESERVED.</p>
+            <p>COPYRIGHT © 2014 BUSANBANK. ALL RIGHTS RESERVED</p>
         </div>
     </div>
 </footer>
@@ -152,15 +119,14 @@
         <button type="button" class="btn-modal-close" onclick="closeSearchModal()">X</button>
         <div class="search-inner">
             <h2 class="search-title">무엇을 찾고 계신가요?</h2>
-
             <form th:action="@{/fund/search}" method="get" class="search-form">
                 <input type="text" name="keyword" class="search-input" placeholder="키워드 입력" autocomplete="off">
                 <button type="submit" class="btn-search-submit">검색</button>
             </form>
-
             <div class="recommend-keyword-section">
                 <p class="keyword-label">지금 많이 찾는 키워드</p>
                 <div class="keyword-tags">
+
                     <th:block th:if="${keywordList == null or #lists.isEmpty(keywordList)}">
                         <a href="/fund/search?keyword=미국주식" class="tag-btn">#미국주식</a>
                         <a href="/fund/search?keyword=배당주" class="tag-btn">#배당주</a>
@@ -173,6 +139,7 @@
                            class="tag-btn"
                            th:text="'#' + ${k.keywordName}">#키워드</a>
                     </th:block>
+
                 </div>
             </div>
         </div>
@@ -184,5 +151,6 @@
     const serverTimeoutInSeconds = /*[[${sessionTimeout}]]*/ 1200;
     initSessionTimer(serverTimeoutInSeconds);
 </script>
+
 </body>
 </html>

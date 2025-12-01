@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 초기화 함수 실행
     initSidebar();
+    initSearch();
 
 });
 
@@ -297,3 +298,42 @@ function setCookie(name, value, days) {
     expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
+
+// ==================== 검색 모달 기능 ====================
+
+function initSearch() {
+    const searchButton = document.querySelector('.btn-search');
+    const modal = document.getElementById('searchLayer');
+
+    // 헤더의 검색 버튼 클릭 시
+    if (searchButton && modal) {
+        searchButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSearchModal();
+        });
+    }
+}
+
+function openSearchModal() {
+    const modal = document.getElementById('searchLayer');
+    if(modal) {
+        modal.style.display = 'flex';
+        // 모달 열릴 때 입력창에 바로 포커스
+        const input = modal.querySelector('.search-input');
+        if(input) input.focus();
+    }
+}
+
+function closeSearchModal() {
+    const modal = document.getElementById('searchLayer');
+    if(modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// ESC 키 누르면 모달 닫기 (UX 추가)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeSearchModal();
+    }
+});

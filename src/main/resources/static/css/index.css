@@ -897,3 +897,256 @@ section {
     .kb-title-md { font-size: 28px; }
 }
 
+/* ==================== SEARCH MODAL STYLES ==================== */
+.search-modal-overlay {
+    display: none; /* 기본 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95); /* 흰색 배경에 약간 투명 */
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-modal-content {
+    width: 100%;
+    max-width: 800px;
+    position: relative;
+    padding: 20px;
+    text-align: center;
+}
+
+.btn-modal-close {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    color: #333;
+}
+
+.search-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px;
+    color: #111;
+}
+
+.search-form {
+    position: relative;
+    margin-bottom: 50px;
+    border-bottom: 4px solid #111;
+}
+
+.search-input {
+    width: 100%;
+    border: none;
+    font-size: 24px;
+    padding: 15px 50px 15px 10px;
+    outline: none;
+    background: transparent;
+    font-weight: bold;
+}
+
+.btn-search-submit {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: url(/bnk/images/main/ico_gnb_search.png) no-repeat center; /* 기존 아이콘 활용 */
+    background-size: 24px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    text-indent: -9999px;
+    cursor: pointer;
+}
+
+.keyword-label {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 15px;
+}
+
+.keyword-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tag-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #f1f1f1;
+    border-radius: 20px;
+    color: #444;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.2s;
+}
+
+.tag-btn:hover {
+    background: #cb2b11; /* BNK 레드 */
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+
+/* ==================== SEARCH MODAL STYLES (팝업형 리뉴얼) ==================== */
+/* 1. 어두운 배경 오버레이 */
+.search-modal-overlay {
+    display: none; /* 기본 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* 배경을 더 어둡게 처리 */
+    z-index: 9999;
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
+    padding: 20px; /* 모바일에서 화면에 꽉 차지 않게 여백 */
+}
+
+/* 2. 실제 팝업창 컨텐츠 박스 */
+.search-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 700px; /* 팝업창 최대 너비 설정 (이미지와 비슷하게) */
+    background: #fff; /* 흰색 배경 */
+    padding: 50px 40px; /* 내부 여백 넉넉하게 */
+    border-radius: 24px; /* 둥근 모서리 */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2); /* 부드러운 그림자 */
+    text-align: center;
+    animation: modalFadeIn 0.3s ease-out; /* 나타날 때 부드러운 효과 */
+}
+
+/* 팝업 나타나는 애니메이션 효과 */
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 닫기 버튼 (X) */
+.btn-modal-close {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    background: none;
+    border: none;
+    font-size: 32px; /* 크기 조절 */
+    font-weight: 300; /* 얇게 */
+    cursor: pointer;
+    color: #333;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.btn-modal-close:hover {
+    transform: rotate(90deg); /* 마우스 올리면 회전 효과 */
+    color: #cb2b11;
+}
+
+/* 검색 타이틀 */
+.search-title {
+    font-size: 36px; /* 폰트 크기 키움 */
+    font-weight: 800;
+    margin-bottom: 40px;
+    color: #111;
+    letter-spacing: -1px;
+}
+
+/* 검색 폼 영역 */
+.search-form {
+    position: relative;
+    margin: 0 auto 50px; /* 가운데 정렬 및 하단 여백 */
+    max-width: 500px; /* 검색바 길이 제한 */
+    border-bottom: 3px solid #111; /* 밑줄 두껍게 */
+}
+
+/* 검색 입력창 */
+.search-input {
+    width: 100%;
+    border: none;
+    font-size: 20px; /* 폰트 크기 적당히 조절 */
+    padding: 15px 45px 15px 5px; /* 오른쪽 패딩(버튼 공간) 확보 */
+    outline: none;
+    background: transparent;
+    font-weight: 500;
+    color: #333;
+}
+
+.search-input::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+/* 검색 돋보기 버튼 */
+.btn-search-submit {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: url(/bnk/images/main/ico_gnb_search.png) no-repeat center;
+    background-size: 28px; /* 아이콘 크기 키움 */
+    width: 40px;
+    height: 40px;
+    border: none;
+    text-indent: -9999px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.btn-search-submit:hover {
+    opacity: 1;
+}
+
+/* 추천 키워드 라벨 */
+.keyword-label {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+/* 키워드 태그 컨테이너 */
+.keyword-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px; /* 태그 사이 간격 */
+}
+
+/* 키워드 태그 버튼 (이미지 스타일 반영) */
+.tag-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background: #f4f4f4; /* 연한 회색 배경 */
+    border-radius: 30px; /* 완전 둥글게 */
+    color: #555;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.tag-btn:hover {
+    background: #cb2b11; /* BNK 레드 */
+    color: #fff;
+    box-shadow: 0 5px 10px rgba(203, 43, 17, 0.3); /* 붉은색 그림자 */
+    transform: translateY(-2px);
+}
+
+/* 검색 결과 타이틀과 카드 목록 사이 간격 조정 */
+.search-result-header {
+    margin-bottom: 50px !important; /* 기존 40px에서 60px로 늘림 (원하는 만큼 조절하세요) */
+    padding-bottom: 20px;
+}

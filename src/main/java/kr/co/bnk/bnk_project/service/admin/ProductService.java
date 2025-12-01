@@ -8,6 +8,7 @@ import kr.co.bnk.bnk_project.mapper.admin.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 /*
     날짜 : 2025/11/24
@@ -79,6 +80,10 @@ public class ProductService {
         // 가격변동 추이
         List<FundReturnHistoryDTO> returnHistoryList = productMapper.selectFundReturnHistory(fundCode);
         dto.setReturnHistoryList(returnHistoryList);
+
+        // 자산 구성 내역
+        List<FundAssetAllocationDTO> assetAllocationList = productMapper.selectFundAssetAllocation(fundCode);
+        dto.setAssetAllocationList(assetAllocationList);
 
         // 결산 및 상환
         List<FundSettlementHistoryDTO> settlementList = productMapper.selectFundSettlementHistory(fundCode);

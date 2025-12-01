@@ -12,14 +12,17 @@ import java.time.LocalDate;
 @Builder
 public class FundReturnHistoryDTO {
 
-    private LocalDate calcDate;         // 기준일 .FUND_PERFORMANCE
-    private Double setupAmount;         // 설정원본 .FUND_PERFORMANCE
-    private Double fundReturn;          // 운용 수익률 .FUND_PERFORMANCE
+    private LocalDate tradeDate;              // 기준일
+    private Double setupOriginAmount;         // 설정원본
 
-    private Double bmKospi;             // 밴치마크 지수(KOSPI) .FUND_DAILY_HISTORY
-    private Double bmKosdaq;            // 밴치마크 지수(KOSDAQ) .FUND_DAILY_HISTORY
-    private Double bmGovBond;           // 밴치마크 지수(국공채) .FUND_DAILY_HISTORY
-    private Double bmCorpBond;          // 밴치마크 지수(회사채) .FUND_DAILY_HISTORY
+    // 계산된 NAV 일일 수익률
+    private Double navReturn;
+
+    // 계산된 지수 수익률
+    private Double kospiReturn;
+    private Double kosdaqReturn;
+    private Double govBondReturn;
+    private Double corpBondReturn;
 
 
 }
