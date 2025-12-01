@@ -94,7 +94,7 @@
     <div class="modal-card">
         <h3>펀드정보 등록</h3>
         <form id="fundForm" class="modal-form"
-        th:action="@{/admin/info/fund-info}" method="post">
+              th:action="@{/admin/info/fund-info}" method="post" enctype="multipart/form-data">
             <div class="field-row">
                 <div class="form-field">
                     <label for="fundCode">상품코드</label>
@@ -128,6 +128,11 @@
             <div class="form-field">
                 <label for="fundDescription">설명</label>
                 <textarea id="fundDescription" name="content" rows="6" placeholder="상품 상세 설명을 입력하세요" required></textarea>
+            </div>
+            <div class="form-field file-field">
+                <label for="fundFile">첨부파일</label>
+                <input type="file" id="fundFile" name="attachment">
+                <span class="field-hint">PDF, 이미지 등 최대 10MB까지 업로드 가능합니다.</span>
             </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -184,7 +189,7 @@
     <div class="modal-card">
         <h3>펀드정보 수정</h3>
         <form id="fundEditForm" class="modal-form"
-        th:action="@{/admin/info/fund-info/update}" method="post">
+              th:action="@{/admin/info/fund-info/update}" method="post" enctype="multipart/form-data">
             <input type="hidden" id="editFundId" name="postId">
             <div class="field-row">
                 <div class="form-field">
@@ -220,6 +225,12 @@
                 <label for="editFundDescription">설명</label>
                 <textarea id="editFundDescription" name="content" rows="6" placeholder="상품 상세 설명을 입력하세요" required></textarea>
             </div>
+            <div id="editFundExistingFile" style="margin-bottom: 8px; color: #666;"></div>
+            <div class="form-field file-field">
+                <label for="editFundFile">첨부파일</label>
+                <input type="file" id="editFundFile" name="attachment">
+                <span class="field-hint">PDF, 이미지 등 최대 10MB까지 업로드 가능합니다.</span>
+            </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
                 <button type="button" id="fundEditModalClose" class="btn btn-secondary">닫기</button>
@@ -234,20 +245,20 @@
         <h3>펀드정보 삭제</h3>
         <form id="fundInfoDeleteForm" method="post" th:action="@{/admin/info/fund-info/delete}">
             <input type="hidden" id="deleteFundId" name="postId">
-        <div class="modal-form">
-            <div class="form-field">
-                <p style="margin: 0; color: #495057; font-size: 1rem;">
-                    정말로 <strong id="deleteFundName" style="color: #cd1317;"></strong> 펀드를 삭제하시겠습니까?
-                </p>
-                <p style="margin: 10px 0 0 0; color: #868e96; font-size: 0.9rem;">
-                    삭제된 데이터는 복구할 수 없습니다.
-                </p>
+            <div class="modal-form">
+                <div class="form-field">
+                    <p style="margin: 0; color: #495057; font-size: 1rem;">
+                        정말로 <strong id="deleteFundName" style="color: #cd1317;"></strong> 펀드를 삭제하시겠습니까?
+                    </p>
+                    <p style="margin: 10px 0 0 0; color: #868e96; font-size: 0.9rem;">
+                        삭제된 데이터는 복구할 수 없습니다.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" id="fundDeleteConfirm" class="btn btn-primary">삭제</button>
+                    <button type="button" id="fundDeleteModalClose" class="btn btn-secondary">취소</button>
+                </div>
             </div>
-            <div class="modal-actions">
-                <button type="submit" id="fundDeleteConfirm" class="btn btn-primary">삭제</button>
-                <button type="button" id="fundDeleteModalClose" class="btn btn-secondary">취소</button>
-            </div>
-        </div>
         </form>
     </div>
 </div>
@@ -267,6 +278,7 @@
         // 수정 모달
         const editModal = document.getElementById('fundEditModal');
         const editForm = document.getElementById('fundEditForm');
+        const editExistingFile = document.getElementById('editFundExistingFile');
         const editCloseBtn = document.getElementById('fundEditModalClose');
 
         // 삭제 모달
@@ -386,6 +398,9 @@
                         }
                         document.getElementById('editFundStartDate').value = formatted;
                         document.getElementById('editFundDescription').value = description || '';
+                        if (editExistingFile) {
+                            editExistingFile.textContent = "새 파일 업로드 시 기존 첨부파일이 교체됩니다.";
+                        }
                         showModal(editModal);
                     } else if (action === 'delete') {
                         // 삭제 모달에 데이터 채우기

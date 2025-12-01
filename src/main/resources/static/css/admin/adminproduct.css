@@ -2170,3 +2170,51 @@ table.form-table td > div {
     border-bottom: none;
 }
 
+
+/* 전일/전주 기준가 작은 글자 */
+.comparison-subtext {
+    font-size: 0.85rem;     /* 더 작게 조정 → 기준가 대비 자연스러움 */
+    color: #666;
+    margin: 0 0 4px 0;
+}
+
+/* 전일/전주 대비 값 숫자 크기 */
+.comparison-value {
+    font-size: 0.85rem;        /* 기준가 큰 글자와 대비되게 적당한 크기 */
+    font-weight: 500;
+    color: #333;
+}
+
+/* 기준가는 크게 유지 */
+.price-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* 전일대비/전주대비 한 줄 */
+.comparison-inline {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 6px;
+}
+
+/* 라벨 */
+.comparison-inline .label {
+    color: #555;
+}
+
+/* 상승/하락 색상 */
+.up {
+    color: #cd1317; /* 빨강 */
+}
+
+.down {
+    color: #0066cc; /* 파랑 */
+}
+
+/* 기준일 */
+.reference-inline {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+}

@@ -87,5 +87,6 @@ spring:
 UPLOAD_PATH: file:C:/bnk_upload/
 
 file:
+  path: upload
   upload:
     path: upload

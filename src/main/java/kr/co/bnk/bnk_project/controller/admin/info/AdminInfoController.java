@@ -103,10 +103,11 @@ public class AdminInfoController {
         return "admin/info&disclosures/ad-hoc_disclosure";
     }
 
-    // 수시공시 등록
+    // 수시공시등록 + 파일첨부
     @PostMapping("/ad-hoc")
-    public String createAdHoc(InfoPostDTO dto){
-        infoPostService.createAdHoc(dto);
+    public String createAdHoc(InfoPostDTO dto,
+                              @RequestParam(value = "attachment", required = false) MultipartFile attachment){
+        infoPostService.createAdHoc(dto, attachment);
         return "redirect:/admin/info/ad-hoc";
     }
 
@@ -122,8 +123,9 @@ public class AdminInfoController {
 
     // 수시공시 수정
     @PostMapping("/ad-hoc/update")
-    public String updateAdHoc(InfoPostDTO dto) {
-        infoPostService.updateAdHoc(dto);
+    public String updateAdHoc(InfoPostDTO dto,
+                              @RequestParam(value = "attachment", required = false) MultipartFile attachment) {
+        infoPostService.updateAdHoc(dto, attachment);
         return "redirect:/admin/info/ad-hoc";
     }
 
@@ -149,10 +151,11 @@ public class AdminInfoController {
         return "admin/info&disclosures/fund_info";
     }
 
-    // 펀드정보 등록
+    // 펀드정보등록 + 파일첨부
     @PostMapping("/fund-info")
-    public String createFundInfo(InfoPostDTO dto){
-        infoPostService.createFundInfo(dto);
+    public String createFundInfo(InfoPostDTO dto,
+                                 @RequestParam(value = "attachment", required = false) MultipartFile attachment){
+        infoPostService.createFundInfo(dto, attachment);
         return "redirect:/admin/info/fund-info";
     }
 
@@ -168,8 +171,9 @@ public class AdminInfoController {
 
     // 펀드정보 수정
     @PostMapping("/fund-info/update")
-    public String updateFundInfo(InfoPostDTO dto) {
-        infoPostService.updateFundInfo(dto);
+    public String updateFundInfo(InfoPostDTO dto,
+                                 @RequestParam(value = "attachment", required = false) MultipartFile attachment) {
+        infoPostService.updateFundInfo(dto, attachment);
         return "redirect:/admin/info/fund-info";
     }
 
@@ -202,7 +206,7 @@ public class AdminInfoController {
     // 펀드 시황 등록 + 파일첨부
     @PostMapping("/market")
     public String createMarket(@ModelAttribute("postForm") InfoPostDTO infoPostDTO,
-                              @RequestParam("attachment")MultipartFile attachment) {
+                               @RequestParam("attachment")MultipartFile attachment) {
 
         infoPostService.createMarket(infoPostDTO,attachment);
         return "redirect:/admin/info/fund-market";

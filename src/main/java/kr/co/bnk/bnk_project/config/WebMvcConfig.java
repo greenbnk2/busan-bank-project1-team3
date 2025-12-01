@@ -1,5 +1,6 @@
 package kr.co.bnk.bnk_project.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import kr.co.bnk.bnk_project.interceptor.FundAccessInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -15,13 +16,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    @Value("${file.path}")
+    private String filePath;
     private final FundAccessInterceptor fundAccessInterceptor;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
+        // 약관/투자설명서/간이설명서 ( 임의 설정 -> 경로정해지면 수정예정 )
         registry.addResourceHandler("/files/**")
-                .addResourceLocations("file:C:/bnk_upload/");
+                .addResourceLocations("file:///" + filePath + "/");
+
+        registry.addResourceHandler("/upload/**")
+                .addResourceLocations("file:/home/ec2-user/upload/");
     }
 
     @Override
