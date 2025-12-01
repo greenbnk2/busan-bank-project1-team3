@@ -27,8 +27,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/files/**")
                 .addResourceLocations("file:///" + filePath + "/");
 
+        // 로고 포함 모든 업로드 파일
         registry.addResourceHandler("/upload/**")
-                .addResourceLocations("file:/home/ec2-user/upload/");
+                .addResourceLocations("file:/home/rsa-key-20251117/upload/");
+
+        // 로고 전용 경로
+        registry.addResourceHandler("/upload/logo/**")
+                .addResourceLocations("file:/home/rsa-key-20251117/upload/logo/");
     }
 
     @Override

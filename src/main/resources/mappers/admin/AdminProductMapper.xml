@@ -380,13 +380,17 @@
     <!-- 자산 구성 내역 -->
     <select id="selectFundAssetAllocation" parameterType="map" resultType="kr.co.bnk.bnk_project.dto.admin.FundAssetAllocationDTO">
         SELECT
-            asset_category                             AS assetCategory,
-            TO_CHAR(alloc_date, 'YYYY-MM-DD')          AS allocDate,
-            detail_name                                AS detailName,
-            weight_percent                             AS weightPercent
-        FROM
-            fund_asset_allocation
+            asset_category  AS assetCategory,
+            detail_name     AS detailName,
+            weight_percent  AS weightPercent,
+            alloc_date      AS allocDate
+        FROM fund_asset_allocation
         WHERE fund_code = #{fundCode}
+          AND alloc_date = (
+            SELECT MAX(alloc_date)
+            FROM fund_asset_allocation
+            WHERE fund_code = #{fundCode}
+        )
         ORDER BY asset_category, detail_name
     </select>
 

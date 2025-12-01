@@ -82,8 +82,8 @@ public class ProductService {
         dto.setReturnHistoryList(returnHistoryList);
 
         // 자산 구성 내역
-        //List<FundAssetAllocationDTO> assetAllocationList = productMapper.selectFundAssetAllocation(fundCode);
-
+        List<FundAssetAllocationDTO> assetAllocationList = productMapper.selectFundAssetAllocation(fundCode);
+        dto.setAssetAllocationList(assetAllocationList);
 
         // 결산 및 상환
         List<FundSettlementHistoryDTO> settlementList = productMapper.selectFundSettlementHistory(fundCode);

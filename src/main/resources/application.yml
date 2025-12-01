@@ -82,12 +82,10 @@ spring:
         - classpath:/public/
         - classpath:/resources/
         - classpath:/META-INF/resources/
-        - ${UPLOAD_PATH:file:C:/bnk_upload/}
-
-UPLOAD_PATH: file:C:/bnk_upload/
+        - "file:\${file.path}/"
 
 file:
-  path: upload
+  path: /home/rsa-key-20251117/upload
   upload:
     path: upload
 

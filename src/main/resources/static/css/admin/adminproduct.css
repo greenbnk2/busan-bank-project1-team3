@@ -2218,3 +2218,20 @@ table.form-table td > div {
     color: #666;
     margin-top: 8px;
 }
+/* --- 펀드 상세 탭 6등분 강제 적용 --- */
+.fund-tabs-nav {
+    display: flex !important;     /* inline-flex 제거 */
+    width: 100% !important;
+    padding: 0;
+}
+
+.fund-tabs-nav .fund-tab-btn {
+    flex: 1 !important;           /* 6등분 */
+    text-align: center !important;
+    padding: 12px 0 !important;
+    border-right: 1px solid #ddd;
+}
+
+.fund-tabs-nav .fund-tab-btn:last-child {
+    border-right: none;
+}

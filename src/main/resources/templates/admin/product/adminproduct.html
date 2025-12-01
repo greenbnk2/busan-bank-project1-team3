@@ -261,9 +261,10 @@
                 document.getElementById("fundCode").textContent = product.fundCode;
 
                 // PDF 버튼 RUL
-                document.getElementById("termsBtn").href = "/files/" + (product.termsPath ?? "#");
-                document.getElementById("investBtn").href = "/files/" + (product.investPath ?? "#");
-                document.getElementById("summaryBtn").href = "/files/" + (product.summaryPath ?? "#");
+                const ctx = "/bnk";
+                document.getElementById("termsBtn").href = ctx + "/files/" + (product.termsUrl ?? "#");
+                document.getElementById("investBtn").href = ctx + "/files/" + (product.investUrl ?? "#");
+                document.getElementById("summaryBtn").href = ctx + "/files/" + (product.summaryUrl ?? "#");
 
 
 
@@ -793,7 +794,7 @@
                         <div style="display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-bottom: 10px;">
                             <div style="font-size: 14px; color: #666;">
                                 <span>기준일자: </span>
-                                <span style="font-weight: 500;">2025/11/11</span>
+                                <span id="assetAllocDate" style="font-weight: 500;"></span>
                             </div>
                             <div style="font-size: 14px; color: #666;">
                                 <span>단위: </span>
@@ -812,12 +813,12 @@
                                         <th>기타</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="assetSummaryBody">
                                     <tr>
-                                        <td>96.38</td>
-                                        <td>0</td>
-                                        <td>3.62</td>
-                                        <td>0</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -836,18 +837,18 @@
                                                 <th>비중(%)</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="assetCategoryBody">
                                             <tr>
                                                 <td>KSE</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>KOSDAQ</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>기타</td>
-                                                <td>100</td>
+                                                <td></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -860,26 +861,26 @@
                                                 <th>비중(%)</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="assetItemBody">
                                             <tr>
                                                 <td>CD</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>CP</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>콜론</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>예금</td>
-                                                <td>22.19</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>기타</td>
-                                                <td>77.81</td>
+                                                <td></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -892,26 +893,26 @@
                                                 <th>비중(%)</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="assetTypeBody">
                                             <tr>
                                                 <td>국고채</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>통안채</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>금융채</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>회사채</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td>기타</td>
-                                                <td>0</td>
+                                                <td></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -1030,10 +1031,11 @@
                     </div>
                 </div>
             `;
+
+                console.log(product.assetAllocationList);
                 // 회사 로고
                 console.log("회사로고:", product.logo);
-                document.querySelector("#companyLogoTab img").src =
-                    "http://34.50.37.11:8080" + product.logo;
+                document.querySelector("#companyLogoTab img").src = product.logo;
 
 
                 // 조회기간 검색(수익률차트추이,가격변동추이)
@@ -1050,28 +1052,28 @@
 
                     if (!product.returnHistoryList || product.returnHistoryList.length === 0) {
                         tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align:center; padding:15px;">
-                    수익률 데이터가 없습니다.
-                </td>
-            </tr>`;
-                        return;
-                    }
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:15px;">
+                            수익률 데이터가 없습니다.
+                        </td>
+                    </tr>`;
+                                return;
+                            }
 
                     product.returnHistoryList.forEach(item => {
                         tbody.innerHTML += `
-            <tr>
-                <td>${item.tradeDate || '-'}</td>
-                <td>${item.setupOriginAmount?.toLocaleString() ?? '-'}</td>
-                <td>${item.navReturn ?? '-'}</td>
-                <td>${item.kospiReturn ?? '-'}</td>
-                <td>${item.kosdaqReturn ?? '-'}</td>
-                <td>${item.govBondReturn ?? '-'}</td>
-                <td>${item.corpBondReturn ?? '-'}</td>
-            </tr>
-            `;
-                    });
-                }
+                    <tr>
+                        <td>${item.tradeDate || '-'}</td>
+                        <td>${item.setupOriginAmount?.toLocaleString() ?? '-'}</td>
+                        <td>${item.navReturn ?? '-'}</td>
+                        <td>${item.kospiReturn ?? '-'}</td>
+                        <td>${item.kosdaqReturn ?? '-'}</td>
+                        <td>${item.govBondReturn ?? '-'}</td>
+                        <td>${item.corpBondReturn ?? '-'}</td>
+                    </tr>
+                    `;
+                            });
+                        }
                 /* ===============================
                     ■  가격변동 추이
                 ================================*/
@@ -1081,31 +1083,91 @@
 
                     if (!product.priceHistoryList || product.priceHistoryList.length === 0) {
                         tbody.innerHTML = `
-            <tr>
-                <td colspan="10" style="text-align:center; padding:15px;">
-                    가격변동 데이터가 없습니다.
-                </td>
-            </tr>`;
-                        return;
-                    }
+                    <tr>
+                        <td colspan="10" style="text-align:center; padding:15px;">
+                            가격변동 데이터가 없습니다.
+                        </td>
+                    </tr>`;
+                                return;
+                            }
 
                     product.priceHistoryList.forEach(item => {
                         tbody.innerHTML += `
-        <tr>
-            <td>${item.tradeDate || '-'}</td>
-            <td>${item.navPerUnit?.toLocaleString() ?? '-'}</td>
-            <td>${item.dailyChangeRate ?? '-'}</td>
-            <td>${item.taxBaseNav ?? '-'}</td>
-            <td>${item.setupOriginAmount?.toLocaleString() ?? '-'}</td>
-            <td>${item.bmKospi ?? '-'}</td>
-            <td>${item.bmKospi200 ?? '-'}</td>
-            <td>${item.bmKosdaq ?? '-'}</td>
-            <td>${item.bmGovBond ?? '-'}</td>
-            <td>${item.bmCorpBond ?? '-'}</td>
-        </tr>
-        `;
+                    <tr>
+                        <td>${item.tradeDate || '-'}</td>
+                        <td>${item.navPerUnit?.toLocaleString() ?? '-'}</td>
+                        <td>${item.dailyChangeRate ?? '-'}</td>
+                        <td>${item.taxBaseNav ?? '-'}</td>
+                        <td>${item.setupOriginAmount?.toLocaleString() ?? '-'}</td>
+                        <td>${item.bmKospi ?? '-'}</td>
+                        <td>${item.bmKospi200 ?? '-'}</td>
+                        <td>${item.bmKosdaq ?? '-'}</td>
+                        <td>${item.bmGovBond ?? '-'}</td>
+                        <td>${item.bmCorpBond ?? '-'}</td>
+                    </tr>
+                    `;
+                                });
+                            }
+                /* ===============================
+                 ■ 자산구성내역 렌더링 (정답 버전)
+                ================================*/
+                function renderAssetAllocation(product) {
+
+                    const list = product.assetAllocationList;
+                    if (!list || list.length === 0) return;
+
+                    // 1) 기준일
+                    document.getElementById("assetAllocDate").textContent =
+                        list[0].allocDate ?? '-';
+
+                    let stock = 0, bond = 0, liquid = 0, etc = 0;
+
+                    const categoryRows = []; // 주식 (자산구분)
+                    const itemRows = [];     // 유동성 (종목별)
+                    const typeRows = [];     // 채권 (종류)
+
+                    list.forEach(item => {
+
+                        const fullCat = item.assetCategory; // "주식-KOSDAQ"
+                        const [mainCat, subCat] = fullCat.split("-"); // mainCat="주식", subCat="KOSDAQ"
+                        const val = item.weightPercent ?? 0;
+
+                        // 대분류 합계
+                        if (mainCat === "주식") stock += val;
+                        else if (mainCat === "채권") bond += val;
+                        else if (mainCat === "유동성") liquid += val;
+                        else etc += val;
+
+                        // 하위 테이블 분기
+                        if (mainCat === "주식") {
+                            categoryRows.push(`<tr><td>${subCat}</td><td>${val}</td></tr>`);
+                        }
+                        else if (mainCat === "유동성") {
+                            itemRows.push(`<tr><td>${subCat}</td><td>${val}</td></tr>`);
+                        }
+                        else if (mainCat === "채권") {
+                            typeRows.push(`<tr><td>${subCat}</td><td>${val}</td></tr>`);
+                        }
                     });
+
+                    // 상단 요약
+                    document.querySelector("#assetSummaryBody tr").innerHTML = `
+                        <td>${stock.toFixed(2)}</td>
+                        <td>${bond.toFixed(2)}</td>
+                        <td>${liquid.toFixed(2)}</td>
+                        <td>${etc.toFixed(2)}</td>
+                    `;
+
+                    // 하위 테이블
+                    document.getElementById("assetCategoryBody").innerHTML = categoryRows.join("");
+                    document.getElementById("assetItemBody").innerHTML = itemRows.join("");
+                    document.getElementById("assetTypeBody").innerHTML = typeRows.join("");
                 }
+
+
+
+
+
                 /* ===============================
                     ■ 결산 및 상환 테이블 렌더링
                 ================================*/
@@ -1118,29 +1180,29 @@
 
                     if (!product.settlementList || product.settlementList.length === 0) {
                         tbody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align:center; padding:20px;">
-                    결산 및 상환 데이터가 없습니다.
-                </td>
-            </tr>`;
-                        return;
-                    }
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:20px;">
+                            결산 및 상환 데이터가 없습니다.
+                        </td>
+                    </tr>`;
+                                return;
+                            }
 
                     product.settlementList.forEach(item => {
                         const row = `
-            <tr>
-                <td>${item.settleStartDate || '-'}</td>
-                <td>${item.settleDate || '-'}</td>
-                <td>${item.elapsedDays ?? '-'}</td>
-                <td>${item.settleNav?.toLocaleString() || '-'}</td>
-                <td>${item.settleTaxNav?.toLocaleString() || '-'}</td>
-                <td>${item.setupOriginAmount?.toLocaleString() || '-'}</td>
-                <td>${item.settleType || '-'}</td>
-            </tr>
-        `;
-                        tbody.insertAdjacentHTML("beforeend", row);
-                    });
-                }
+                    <tr>
+                        <td>${item.settleStartDate || '-'}</td>
+                        <td>${item.settleDate || '-'}</td>
+                        <td>${item.elapsedDays ?? '-'}</td>
+                        <td>${item.settleNav?.toLocaleString() || '-'}</td>
+                        <td>${item.settleTaxNav?.toLocaleString() || '-'}</td>
+                        <td>${item.setupOriginAmount?.toLocaleString() || '-'}</td>
+                        <td>${item.settleType || '-'}</td>
+                    </tr>
+                `;
+                                tbody.insertAdjacentHTML("beforeend", row);
+                            });
+                        }
 
                 // 수익률 차트 조회기간
                 function filterReturnData() {
@@ -1305,6 +1367,8 @@
                 renderReturnTable(product);
                 // 가격변동 추이차트
                 renderPriceTable(product);
+                // 자산 구성 내역
+                renderAssetAllocation(product);
                 // 결산 및 상환 테이블 실행
                 renderSettlementTable(product);
                 // 자동 날짜 세팅
@@ -1675,68 +1739,6 @@
                             drawBorder: false
                         }
                     }
-                }
-            }
-        });
-    }
-
-    function initAssetChart() {
-        const ctx = document.getElementById('assetChart');
-        if (!ctx) return;
-
-        // 기존 차트가 있으면 제거
-        if (assetChart) {
-            assetChart.destroy();
-        }
-
-        assetChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['주식', '채권', '유동성', '기타'],
-                datasets: [{
-                    data: [96.38, 0, 3.62, 0],
-                    backgroundColor: [
-                        '#ff9800', // 주식 - 주황색
-                        '#4CAF50', // 채권 - 초록색
-                        '#4CAF50', // 유동성 - 초록색
-                        '#9E9E9E'  // 기타 - 회색
-                    ],
-                    borderWidth: 0,
-                    borderAlign: 'inner'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '60%',
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += context.parsed + '%';
-                                return label;
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    animateRotate: true,
-                    animateScale: true
                 }
             }
         });
