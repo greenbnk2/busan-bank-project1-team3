@@ -24,4 +24,14 @@ public interface FundMapper {
 
     //마이페이지 - 수익률 조회
     List<UserFundDTO> selectFundYieldList(FundSearchDTO params);
+
+    // 추천 키워드 (랜덤 5개)
+    List<KeywordDTO> selectRandomKeywords();
+
+    // 연관 단어 찾기 (예: "파킹" -> "단기채권,채권")
+    List<String> selectRelatedKeywords(String searchWord);
+
+    // 실제 상품 검색
+    List<ProductDTO> selectFundsBySearch(@Param("searchWord") String searchWord,
+                                         @Param("expandedList") List<String> expandedList);
 }

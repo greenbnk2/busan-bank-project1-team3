@@ -190,4 +190,53 @@
         </if>
 
     </select>
+
+    <select id="selectRandomKeywords" resultType="kr.co.bnk.bnk_project.dto.KeywordDTO">
+        SELECT * FROM (
+                          SELECT KEYWORD_NAME as keywordName, RELATED_WORDS as relatedWords
+                          FROM KEYWORD
+                          ORDER BY DBMS_RANDOM.VALUE
+                      ) WHERE ROWNUM &lt;= 5
+    </select>
+
+    <select id="selectRelatedKeywords" resultType="String">
+        SELECT RELATED_WORDS
+        FROM KEYWORD
+        WHERE KEYWORD_NAME LIKE '%' || #{searchWord} || '%'
+           OR RELATED_WORDS LIKE '%' || #{searchWord} || '%'
+    </select>
+
+    <select id="selectFundsBySearch" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+        SELECT
+        FUND_CODE as fundcode,
+        INVEST_GRADE as investgrade,
+
+        FUND_NAME as fundName,
+        TRUST_MANAGEMENT as trustManagement,
+        INVEST_REGION as investRegion,
+        FUND_TYPE as fundType,
+        ASSET_MANAGER_ID as assetManagerId,
+        REG_DATE as regdate
+        FROM FUND_MASTER
+        WHERE
+        (
+        FUND_NAME LIKE '%' || #{searchWord} || '%'
+        OR FUND_CODE LIKE '%' || #{searchWord} || '%'
+        OR TRUST_MANAGEMENT LIKE '%' || #{searchWord} || '%'
+        )
+        <if test="expandedList != null and expandedList.size() > 0">
+            OR (
+            <foreach collection="expandedList" item="word" separator=" OR ">
+                FUND_NAME LIKE '%' || #{word} || '%'
+                OR TRUST_MANAGEMENT LIKE '%' || #{word} || '%'
+            </foreach>
+            )
+        </if>
+        ORDER BY
+        CASE
+        WHEN FUND_NAME LIKE '%' || #{searchWord} || '%' THEN 1
+        ELSE 2
+        END,
+        REG_DATE DESC
+    </select>
 </mapper>

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -84,5 +85,37 @@ public class FundService {
     @Transactional(readOnly = true)
     public List<UserFundDTO> getYieldList(FundSearchDTO params) {
         return productMapper.selectFundYieldList(params);
+    }
+
+    // 검색 기능
+    public List<ProductDTO> searchFunds(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // KEYWORD 테이블에서 연관 단어 찾기
+        List<String> relatedWordsDb = productMapper.selectRelatedKeywords(keyword);
+
+        List<String> expandedList = new ArrayList<>();
+        if (relatedWordsDb != null) {
+            for (String words : relatedWordsDb) {
+                if(words == null) continue;
+                // 콤마(,)로 쪼개서 리스트에 담기
+                String[] split = words.split(",");
+                for (String s : split) {
+                    if (!s.trim().isEmpty()) {
+                        expandedList.add(s.trim());
+                    }
+                }
+            }
+        }
+
+        // 검색어 + 연관단어 리스트를 가지고 DB 조회
+        return productMapper.selectFundsBySearch(keyword, expandedList);
+    }
+
+    // 추천 키워드 가져오기
+    public List<KeywordDTO> getRecommendedKeywords() {
+        return productMapper.selectRandomKeywords();
     }
 }

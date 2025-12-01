@@ -56,6 +56,38 @@
     </div>
 </footer>
 
+<div id="searchLayer" class="search-modal-overlay">
+    <div class="search-modal-content">
+        <button type="button" class="btn-modal-close" onclick="closeSearchModal()">X</button>
+        <div class="search-inner">
+            <h2 class="search-title">무엇을 찾고 계신가요?</h2>
+
+            <form th:action="@{/fund/search}" method="get" class="search-form">
+                <input type="text" name="keyword" class="search-input" placeholder="키워드 입력" autocomplete="off">
+                <button type="submit" class="btn-search-submit">검색</button>
+            </form>
+
+            <div class="recommend-keyword-section">
+                <p class="keyword-label">지금 많이 찾는 키워드</p>
+                <div class="keyword-tags">
+                    <th:block th:if="${keywordList == null or #lists.isEmpty(keywordList)}">
+                        <a href="/fund/search?keyword=미국주식" class="tag-btn">#미국주식</a>
+                        <a href="/fund/search?keyword=배당주" class="tag-btn">#배당주</a>
+                        <a href="/fund/search?keyword=단기채권" class="tag-btn">#단기채권</a>
+                    </th:block>
+
+                    <th:block th:unless="${keywordList == null or #lists.isEmpty(keywordList)}">
+                        <a th:each="k : ${keywordList}"
+                           th:href="@{/fund/search(keyword=${k.keywordName})}"
+                           class="tag-btn"
+                           th:text="'#' + ${k.keywordName}">#키워드</a>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script th:src="@{/js/index.js}"></script>
 <script th:src="@{/js/my.js}"></script>
 

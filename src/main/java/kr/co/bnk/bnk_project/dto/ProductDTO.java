@@ -32,4 +32,9 @@ public class ProductDTO {
     private String docfile;
 
 
+    private String trustManagement; // 태그/운용전략 (#배당주, #인덱스 등)
+    private String investRegion;    // 투자지역 (국내/해외)
+    private String fundType;        // 펀드유형 (주식형/채권형)
+    private String assetManagerId;  // 운용사명 (신한자산운용 등)
+
 }
