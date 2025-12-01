@@ -1,0 +1,102 @@
+<div th:replace="~{my/_head.html}"></div>
+
+<main>
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div th:replace="~{my/sidebar :: sidebar('price')}"></div>
+
+            <div class="main-content" id="priceInquiryArea">
+                <div class="content-header">
+                    <h1>기준가격조회</h1>
+                </div>
+
+                <div style="font-size: 13px; color: #666; line-height: 1.7; padding: 15px; border: 1px solid #eee; margin-bottom: 20px;">
+                    <p>서비스 이용시간은 09:00 ~ 24:00 입니다. (토요일, 공휴일 조회불가)</p>
+                    <p>기준가격은 향후 운용실적에 따라 달라 질 수 있으며 미래의 수익률을 보장하는 것은 아닙니다.</p>
+                </div>
+
+                <form th:action="@{/my/price}" method="get" id="searchForm">
+                    <div class="price-search-box">
+                        <table class="search-layout">
+                            <colgroup><col style="width: 140px;"><col></colgroup>
+                            <tr>
+                                <th>조회내용</th>
+                                <td>
+                                    <label class="radio-item">
+                                        <input type="radio" name="queryType" value="customer"
+                                               th:checked="${queryType == 'customer' or queryType == null}"
+                                               onchange="document.getElementById('searchForm').submit();">
+                                        고객보유상품
+                                    </label>
+
+                                    <label class="radio-item">
+                                        <input type="radio" name="queryType" value="all"
+                                               th:checked="${queryType == 'all'}"
+                                               onchange="document.getElementById('searchForm').submit();">
+                                        전체상품
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>조회기간</th>
+                                <td>
+                                    <input type="date" name="startDate" id="startDate" class="input-date" th:value="${startDate}" required> ~
+                                    <input type="date" name="endDate" id="endDate" class="input-date" th:value="${endDate}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>상품명</th>
+                                <td>
+                                    <select name="fundCode" style="min-width: 350px; padding: 5px; border:1px solid #ccc;" required>
+                                        <option value="">::: 펀드를 선택하세요 :::</option>
+                                        <option th:each="fund : ${fundList}" th:value="${fund.fundCode}" th:text="${fund.fundName}" th:selected="${fund.fundCode == fundCode}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="btn-area">
+                            <button type="submit" class="btn-red">조 회</button>
+                        </div>
+                    </div>
+                </form>
+
+                <h3 class="price-section-title" th:if="${not #lists.isEmpty(priceList)}">조회결과</h3>
+
+                <div class="table-wrap" th:if="${not #lists.isEmpty(priceList)}">
+                    <table class="grid-table">
+                        <colgroup><col style="width:15%"><col style="width:20%"><col style="width:20%"><col style="width:20%"><col style="width:25%"></colgroup>
+                        <thead>
+                        <tr><th>기준일자</th><th>기준가격</th><th>전일대비</th><th>과표기준가격</th><th>설정원본</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="price : ${priceList}">
+                            <td class="text-center" th:text="${#dates.format(price.tradeDate, 'yyyy-MM-dd')}"></td>
+                            <td class="text-right"><span th:text="${#numbers.formatDecimal(price.navPerUnit, 1, 2)}"></span></td>
+                            <td class="text-right">
+                                <span th:if="${price.changeAmount > 0}" class="fc-red">▲ <span th:text="${#numbers.formatDecimal(price.changeAmount, 1, 2)}"></span></span>
+                                <span th:if="${price.changeAmount < 0}" class="fc-blue">▼ <span th:text="${#numbers.formatDecimal(price.changeAmount * -1, 1, 2)}"></span></span>
+                                <span th:if="${price.changeAmount == 0}" class="fc-black">0.00</span>
+                            </td>
+                            <td class="text-right"><span th:text="${#numbers.formatDecimal(price.taxBaseNav, 1, 2)}"></span></td>
+                            <td class="text-right"><span th:text="${#numbers.formatInteger(price.setupOriginAmount, 0, 'COMMA')}"></span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${priceList != null and #lists.isEmpty(priceList)}" style="text-align:center; padding:80px 0; color:#999;">조회된 내역이 없습니다.</div>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{my/_tail.html}"></div>
+<script>
+    window.onload = function() {
+        if (!document.getElementById('startDate').value) {
+            const today = new Date();
+            const prev = new Date(); prev.setMonth(today.getMonth() - 1);
+            document.getElementById('endDate').valueAsDate = today;
+            document.getElementById('startDate').valueAsDate = prev;
+        }
+    };
+</script>

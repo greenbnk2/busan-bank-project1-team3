@@ -45,10 +45,149 @@
                 reg_date AS regdate
             FROM FUND_DOCUMENTS
             ORDER BY fund_code DESC
-
-
-
     </select>
 
+    <!-- 마이페이지 - 회원별 펀드 정보 -->
+    <select id="selectMyFundList" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.UserFundDTO">
+        SELECT
+            H.FUND_CODE             AS fundCode,
+            M.FUND_NAME             AS fundName,
+            H.ACCT_NO               AS acctNo,
+            H.PURCHASE_AMOUNT       AS purchaseAmount,
+            H.CURRENT_EVAL_AMT      AS currentEvalAmount,
+            -- 수익률 계산: (평가 - 원금) / 원금 * 100
+            ROUND((H.CURRENT_EVAL_AMT - H.PURCHASE_AMOUNT) / H.PURCHASE_AMOUNT * 100, 2) AS yieldPct,
+            -- 상태 판별
+            CASE
+                WHEN H.CURRENT_EVAL_AMT > H.PURCHASE_AMOUNT THEN '수익'
+                WHEN H.CURRENT_EVAL_AMT <![CDATA[ < ]]>  H.PURCHASE_AMOUNT THEN '손실'
+                ELSE '보합'
+                END                     AS status
+        FROM
+            USER_FUND_HOLDINGS H
+                JOIN
+            FUND_MASTER M ON H.FUND_CODE = M.FUND_CODE
+                JOIN
+            BNK_ACCOUNT A ON H.ACCT_NO = A.ACCT_NO -- 회원번호 연결을 위해 조인
+        WHERE
+            A.CUST_NO = #{custNo}  -- 로그인한 회원의 PK
+        ORDER BY
+            H.CURRENT_EVAL_AMT DESC
+    </select>
 
+    <!-- 마이페이지 - 기준가격조회 -->
+    <select id="selectFundPriceHistory" resultType="kr.co.bnk.bnk_project.dto.FundPriceDTO">
+        SELECT
+            TRADE_DATE          AS tradeDate,
+            NAV_PER_UNIT        AS navPerUnit,
+            TAX_BASE_NAV        AS taxBaseNav,
+            SETUP_ORIGIN_AMOUNT AS setupOriginAmount,
+            -- (오늘 기준가 - 어제 기준가)로 등락폭 계산 (LAG 함수 사용) 조회 기간의 첫날은 어제 데이터가 없으므로 0으로 나올 수 있음
+            NAV_PER_UNIT - LAG(NAV_PER_UNIT, 1, NAV_PER_UNIT) OVER (ORDER BY TRADE_DATE) AS changeAmount
+        FROM
+            FUND_DAILY_HISTORY
+        WHERE
+            FUND_CODE = #{fundCode}
+        AND TRADE_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+        ORDER BY
+            TRADE_DATE DESC
+    </select>
+
+    <!--모든 펀드 목록-->
+    <select id="selectAllFundList" resultType="kr.co.bnk.bnk_project.dto.FundMasterDTO">
+        SELECT
+            FUND_CODE   AS fundCode,
+            FUND_NAME   AS fundName,
+            FUND_TYPE   AS fundType
+        FROM
+            FUND_MASTER
+        ORDER BY
+            FUND_NAME ASC
+    </select>
+
+    <!--펀드 수익률 조회-->
+    <select id="selectFundYieldList" parameterType="kr.co.bnk.bnk_project.dto.FundSearchDTO" resultType="kr.co.bnk.bnk_project.dto.UserFundDTO">
+        <if test='searchType == "hold" or searchType == null'>
+            SELECT
+            -- 1. 가입일 (UserFundDTO.regDate)
+            TO_CHAR(BA.REG_DATE, 'YYYY-MM-DD')      AS regDate,
+
+            -- 2. 펀드명 (UserFundDTO.fundName)
+            FM.FUND_NAME                            AS fundName,
+
+            -- 3. 계좌번호 (UserFundDTO.acctNo)
+            BA.ACCT_NO                              AS acctNo,
+
+            -- 4. 투자원금 (UserFundDTO.purchaseAmount)
+            FH.PURCHASE_AMOUNT                      AS purchaseAmount,
+
+            -- 5. 평가금액 (UserFundDTO.currentEvalAmount)
+            FH.CURRENT_EVAL_AMT                     AS currentEvalAmount,
+
+            -- 6. 평가손익 (UserFundDTO.profitAmount)
+            (FH.CURRENT_EVAL_AMT - FH.PURCHASE_AMOUNT) AS profitAmount,
+
+            -- 7. 수익률 (UserFundDTO.yieldPct)
+            CASE
+            WHEN FH.PURCHASE_AMOUNT = 0 THEN 0
+            ELSE ROUND(((FH.CURRENT_EVAL_AMT - FH.PURCHASE_AMOUNT) / FH.PURCHASE_AMOUNT) * 100, 2)
+            END                                     AS yieldPct
+
+            FROM
+            BNK_ACCOUNT BA
+            INNER JOIN
+            USER_FUND_HOLDINGS FH ON BA.ACCT_NO = FH.ACCT_NO
+            INNER JOIN
+            FUND_MASTER FM ON FH.FUND_CODE = FM.FUND_CODE
+
+            WHERE
+            BA.CUST_NO = #{custNo}
+            <if test="fundCode != null and fundCode != ''">
+                AND FH.FUND_CODE = #{fundCode}
+            </if>
+            <if test="startDate != null and endDate != null">
+                AND BA.REG_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+                AND TO_DATE(#{endDate}, 'YYYY-MM-DD') + 0.99999
+            </if>
+            ORDER BY
+            BA.REG_DATE DESC
+        </if>
+
+        <if test='searchType == "all"'>
+            SELECT
+            FM.FUND_NAME                            AS fundName,
+
+            -- 전체조회 시 사용하지 않는 필드는 0 또는 null 처리
+            NULL                                    AS regDate,
+            NULL                                    AS acctNo,
+            0                                       AS purchaseAmount,
+            0                                       AS currentEvalAmount,
+            0                                       AS profitAmount,
+            0                                       AS yieldPct,
+
+            -- 기간 수익률 관련 필드 (DTO에 추가한 필드명과 일치시켜야 함)
+            START_H.NAV_PER_UNIT                    AS startNav,
+            END_H.NAV_PER_UNIT                      AS endNav,
+
+            CASE
+            WHEN START_H.NAV_PER_UNIT IS NULL OR START_H.NAV_PER_UNIT = 0 THEN 0
+            ELSE ROUND(((END_H.NAV_PER_UNIT - START_H.NAV_PER_UNIT) / START_H.NAV_PER_UNIT) * 100, 2)
+            END                                     AS periodYieldPct
+
+            FROM FUND_MASTER FM
+            LEFT JOIN FUND_DAILY_HISTORY START_H
+            ON FM.FUND_CODE = START_H.FUND_CODE
+            AND START_H.TRADE_DATE = TO_DATE(#{startDate}, 'YYYY-MM-DD')
+            LEFT JOIN FUND_DAILY_HISTORY END_H
+            ON FM.FUND_CODE = END_H.FUND_CODE
+            AND END_H.TRADE_DATE = TO_DATE(#{endDate}, 'YYYY-MM-DD')
+
+            WHERE 1=1
+            <if test="fundCode != null and fundCode != ''">
+                AND FM.FUND_CODE = #{fundCode}
+            </if>
+        </if>
+
+    </select>
 </mapper>

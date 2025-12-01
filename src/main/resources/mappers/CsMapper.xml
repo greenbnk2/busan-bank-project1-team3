@@ -79,7 +79,10 @@
         <where>
             cs.CATEGORY_ID = 9
 
-            <!-- 상태 필터: (전체 = 빈값이면 조건 없음) -->
+            <if test="pageRequestDTO.sellerId != null and pageRequestDTO.sellerId != ''">
+                AND cs.USER_ID = #{pageRequestDTO.sellerId}
+            </if>
+
             <if test="pageRequestDTO.status != null and pageRequestDTO.status != ''">
                 AND cs.STATUS = #{pageRequestDTO.status}
             </if>
@@ -185,7 +188,7 @@
          ANSWERED_AT)
         VALUES
             (
-                NULL,
+                CS_SEQ.NEXTVAL,
                 #{categoryId, jdbcType=NUMERIC},
                 '제목',
                 #{question, jdbcType=VARCHAR},
@@ -254,6 +257,26 @@
           AND cs.CATEGORY_ID = 9
     </select>
 
+    <!-- QNA 1:1문의 등록 -->
+    <insert id="insertQna" parameterType="kr.co.bnk.bnk_project.dto.CsDTO">
+        INSERT INTO CS (
+            CS_ID,
+            CATEGORY_ID,
+            TITLE,
+            QUESTION,
+            STATUS,
+            USER_ID,
+            CREATED_AT
+        ) VALUES (
+            CS_SEQ.NEXTVAL,
+            9,
+            #{title},
+            #{question},
+            '답변대기',
+            #{userId},
+            SYSDATE
+        )
+    </insert>
 
     <!-- QNA 답변 저장 -->
     <update id="updateQnaAnswer"

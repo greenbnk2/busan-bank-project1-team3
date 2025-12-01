@@ -6,6 +6,7 @@ import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -45,4 +46,26 @@ public interface AdminFundMapper {
     void updateStatusAfterApproval(@Param("fundCode") String fundCode,
                                    @Param("status") String status);
 
+
+
+    // 예약
+
+    List<AdminFundMasterDTO> selectFundsForOperateReserve();
+
+    void updateOperStatusToRunning(@Param("fundCode") String fundCode,
+                                   @Param("lastUpdId") String lastUpdId);
+
+    void setFundReserveTime(@Param("fundCode") String fundCode,
+                            @Param("operStartAt") LocalDateTime operStartAt);
+
+    // 상태를 운용대기로 변경 (등록완료일 때만)
+    void updateStatusToPending(@Param("fundCode") String fundCode);
+    
+    // 예약 시간이 지난 모든 펀드 조회 (revision 적용 배치용)
+    List<AdminFundMasterDTO> selectFundsWithExpiredReserveTime();
+    
+    // 예약 시간 초기화 (revision 적용 후)
+    void clearReserveTime(@Param("fundCode") String fundCode);
+
 }
+

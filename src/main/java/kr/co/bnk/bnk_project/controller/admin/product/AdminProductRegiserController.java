@@ -10,6 +10,7 @@ import kr.co.bnk.bnk_project.security.AdminUserDetails;
 import kr.co.bnk.bnk_project.service.admin.AdminFundService;
 import kr.co.bnk.bnk_project.service.admin.ApprovalService;
 import kr.co.bnk.bnk_project.service.admin.EditLockService;
+import kr.co.bnk.bnk_project.service.admin.FundCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,9 +20,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Controller
 @RequestMapping("/admin/product")
@@ -31,6 +35,11 @@ public class AdminProductRegiserController {
     private final AdminFundService adminFundService;
     private final ApprovalService approvalService;
     private final EditLockService editLockService;
+    private final FundCategoryService fundCategoryService;
+
+    private void populateCategories(Model model) {
+        model.addAttribute("categoryList", fundCategoryService.getAllCategories());
+    }
 
     /*펀드 신규 등록 화면*/
     @GetMapping("/register")
@@ -40,6 +49,7 @@ public class AdminProductRegiserController {
 
         model.addAttribute("pageRequestDTO", pageRequestDTO);
         model.addAttribute("fund", fund);
+        populateCategories(model);
 
         return "admin/product/adminproduct-register";
     }
@@ -100,6 +110,7 @@ public class AdminProductRegiserController {
         AdminFundMasterDTO fund = adminFundService.getPendingFundEdit(fundCode);
         model.addAttribute("fund", fund);
         model.addAttribute("sessionId", sessionId);
+        populateCategories(model);
         
         // 잠금 시도
         String lockResult = editLockService.tryLock(fundCode, sessionId, userId);
@@ -127,8 +138,16 @@ public class AdminProductRegiserController {
             return "redirect:/admin/product/edit?fundCode=" + fundCode + "&error=locked";
         }
 
-        // 수정 저장
-        adminFundService.updateFund(formDto);
+        // 현재 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = "system";
+        if (authentication != null && authentication.getPrincipal() instanceof AdminUserDetails) {
+            AdminUserDetails adminUserDetails = (AdminUserDetails) authentication.getPrincipal();
+            userId = adminUserDetails.getDisplayName();
+        }
+
+        // 수정 저장 (FUND_MASTER_REVISION에 INSERT)
+        adminFundService.updateFund(formDto, userId);
 
         // 잠금 해제
         editLockService.unlock(fundCode, sessionId);
@@ -157,6 +176,7 @@ public class AdminProductRegiserController {
         model.addAttribute("pageResponse", pageResponse);
         model.addAttribute("dtoList", pageResponse.getDtoList());
         model.addAttribute("lockStatusMap", lockStatusMap);
+        populateCategories(model);
 
         return "admin/product/adminproduct-pending";
     }
@@ -209,9 +229,7 @@ public class AdminProductRegiserController {
         }
         
         String sessionId = session.getId();
-        System.out.println("잠금 해제 요청 - fundCode: " + fundCode + ", sessionId: " + sessionId);
         boolean success = editLockService.unlock(fundCode, sessionId);
-        System.out.println("잠금 해제 결과: " + success);
         
         return ResponseEntity.ok(Map.of(
             "success", success,
@@ -233,9 +251,7 @@ public class AdminProductRegiserController {
         }
         
         String sessionId = session.getId();
-        System.out.println("잠금 해제 요청 (GET) - fundCode: " + fundCode + ", sessionId: " + sessionId);
         boolean success = editLockService.unlock(fundCode, sessionId);
-        System.out.println("잠금 해제 결과: " + success);
         
         return ResponseEntity.ok(Map.of(
             "success", success,
@@ -265,15 +281,28 @@ public class AdminProductRegiserController {
     @ResponseBody
     public ResponseEntity<Map<String, Boolean>> checkLocks(@RequestParam("fundCodes") List<String> fundCodes, HttpSession session) {
         String sessionId = session.getId();
+
         Map<String, Boolean> lockStatusMap = new HashMap<>();
         
         for (String fundCode : fundCodes) {
             String lockCheck = editLockService.checkLock(fundCode, sessionId);
             // lockCheck가 null이 아니면 다른 사용자가 잠금 중
-            lockStatusMap.put(fundCode, lockCheck != null);
+            boolean isLocked = lockCheck != null;
+            lockStatusMap.put(fundCode, isLocked);
         }
         
         return ResponseEntity.ok(lockStatusMap);
+    }
+
+    /*------------------------------------------------*/
+    /*--------------------예약----------------------------*/
+
+    @PostMapping("/reserve")
+    public String setFundReserveTime(
+        @RequestParam String fundCode,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime date) {
+        adminFundService.setFundReserveTime(fundCode, date);
+        return "redirect:/admin/product/pending";
     }
 
 }

@@ -40,15 +40,15 @@
                         수익률조회
                     </a>
                 </li>
-                <li>
+                <!--<li>
                     <a th:href="@{/my/report}" th:classappend="${activeMenu == 'report'} ? 'is-active' : ''">
                         자산운용보고서통보방법변경
                     </a>
-                </li>
+                </li>-->
             </ul>
         </li>
 
-        <li class="my-sidebar__item"
+        <!--<li class="my-sidebar__item"
             th:classappend="${activeMenu == 'newReservationCancel'} ? 'is-open' : ''">
 
             <button type="button"
@@ -102,6 +102,16 @@
                         추가투자예약내역조회/취소
                     </a>
                 </li>
+            </ul>
+        </li>-->
+
+        <li class="my-sidebar__item">
+            <button type="button" class="my-sidebar__button">
+                고객센터 <span class="my-sidebar__arrow">▶</span>
+            </button>
+            <ul class="my-sidebar__submenu">
+                <li><a th:href="@{/my/qna/write}">1:1 문의하기</a></li>
+                <li><a th:href="@{/my/qna/list}">나의 문의내역</a></li>
             </ul>
         </li>
 

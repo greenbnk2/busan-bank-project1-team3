@@ -3,6 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="kr.co.bnk.bnk_project.mapper.RiskTestMapper">
+
     <insert id="insertRiskTestResult" parameterType="kr.co.bnk.bnk_project.dto.RiskTestResultDTO">
         INSERT INTO RISK_TEST_RESULT (
             TEST_RUN_ID, CUST_NO, TEST_DATE, TOTAL_SCORE, RISK_TYPE, END_DATE
@@ -15,4 +16,16 @@
                      TRUNC(SYSDATE) + 1
                  )
     </insert>
+
+    <select id="findValidTestByCustNo" parameterType="Long" resultType="kr.co.bnk.bnk_project.dto.RiskTestResultDTO">
+        SELECT *
+        FROM (
+                 SELECT *
+                 FROM RISK_TEST_RESULT
+                 WHERE CUST_NO = #{custNo}
+                   AND END_DATE <![CDATA[ >= ]]> TRUNC(SYSDATE) -- 만료일이 지나지 않은 것
+                 ORDER BY TEST_DATE DESC
+             )
+        WHERE ROWNUM = 1
+    </select>
 </mapper>

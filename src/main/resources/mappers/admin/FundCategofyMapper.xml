@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.admin.FundCategoryMapper">
+
+    <sql id="productWhere">
+        <where>
+            <if test="pageRequestDTO.keyword != null and pageRequestDTO.keyword != ''">
+                <choose>
+                    <when test="pageRequestDTO.searchType == 'code'">
+                        AND CATEGORY_CODE = #{pageRequestDTO.keyword}
+                    </when>
+                    <when test="pageRequestDTO.searchType == 'name'">
+                        AND CATEGORY_NAME LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                    </when>
+                    <when test="pageRequestDTO.searchType == 'type'">
+                        AND CATEGORY_TYPE = #{pageRequestDTO.keyword}
+                    </when>
+                    <otherwise>
+                        AND (
+                            CATEGORY_CODE = #{pageRequestDTO.keyword}
+                            OR CATEGORY_NAME LIKE '%' || #{pageRequestDTO.keyword} || '%'
+                            OR CATEGORY_TYPE = #{pageRequestDTO.keyword}
+                        )
+                    </otherwise>
+                </choose>
+            </if>
+
+            <if test="pageRequestDTO.status != null and pageRequestDTO.status != ''">
+                AND STATUS = #{pageRequestDTO.status}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 카테고리 전체 조회 -->
+    <select id="selectAllCategories"
+            parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO">
+        SELECT
+        CATEGORY_CODE AS categoryCode,
+        CATEGORY_NAME AS categoryName,
+        CATEGORY_TYPE AS categoryType,
+        SLUG         AS slug,
+        STATUS       AS status,
+        CATE_DESC    AS cateDesc
+        FROM BNK.FUND_CATEGORY
+        <include refid="productWhere"/>
+        ORDER BY CATEGORY_CODE
+    </select>
+
+    <select id="selectCategoryTotal"
+            parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM BNK.FUND_CATEGORY
+        <include refid="productWhere"/>
+    </select>
+
+    <update id="updateCategoryStatus">
+        UPDATE BNK.FUND_CATEGORY
+        SET STATUS = #{status}
+        WHERE CATEGORY_CODE = #{categoryCode}
+    </update>
+
+    <insert id="insertCategory"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO">
+        INSERT INTO BNK.FUND_CATEGORY (
+            CATEGORY_CODE,
+            CATEGORY_NAME,
+            CATEGORY_TYPE,
+            SLUG,
+            STATUS,
+            CATE_DESC
+        ) VALUES (
+            #{categoryCode},
+            #{categoryName},
+            #{categoryType},
+            #{slug},
+            #{status},
+            #{cateDesc}
+        )
+    </insert>
+
+    <update id="updateCategory"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO">
+        UPDATE BNK.FUND_CATEGORY
+        SET
+            CATEGORY_NAME = #{categoryName},
+            CATEGORY_TYPE = #{categoryType},
+            SLUG          = #{slug},
+            STATUS        = #{status},
+            CATE_DESC     = #{cateDesc}
+        WHERE CATEGORY_CODE = #{categoryCode}
+    </update>
+
+    <delete id="deleteCategory">
+        DELETE FROM BNK.FUND_CATEGORY
+        WHERE CATEGORY_CODE = #{categoryCode}
+    </delete>
+
+    <select id="selectCategoryOptions"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO">
+        SELECT
+            CATEGORY_CODE AS categoryCode,
+            CATEGORY_NAME AS categoryName,
+            CATEGORY_TYPE AS categoryType,
+            SLUG         AS slug,
+            STATUS       AS status,
+            CATE_DESC    AS cateDesc
+        FROM BNK.FUND_CATEGORY
+        ORDER BY CATEGORY_NAME
+    </select>
+</mapper>

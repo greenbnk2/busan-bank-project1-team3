@@ -1,6 +1,8 @@
 package kr.co.bnk.bnk_project.service;
 
 import kr.co.bnk.bnk_project.dto.MemberUpdateDTO;
+import kr.co.bnk.bnk_project.dto.UserFundDTO;
+import kr.co.bnk.bnk_project.mapper.FundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import kr.co.bnk.bnk_project.dto.BnkUserDTO;
@@ -10,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.List;
 
 @Slf4j
 @Service

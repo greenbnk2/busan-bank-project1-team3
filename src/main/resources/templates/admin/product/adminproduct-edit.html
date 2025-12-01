@@ -61,12 +61,16 @@
                         <div class="form-row">
                             <div class="form-label">펀드유형</div>
                             <div class="form-input-wrapper">
-                                <input type="text" 
-                                       class="form-input" 
-                                       id="fundTypeName"
-                                       placeholder="펀드유형"
-                                       th:value="${fund != null} ? ${fund.fundTypeName} : ''"
-                                       readonly>
+                                <select class="form-select"
+                                        name="fundType"
+                                        required>
+                                    <option value="">펀드유형 선택</option>
+                                    <option th:each="cat : ${categoryList}"
+                                            th:value="${cat.categoryCode}"
+                                            th:text="${cat.categoryName}"
+                                            th:selected="${fund != null and fund.fundType == cat.categoryCode}">
+                                    </option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-row">
@@ -595,34 +599,21 @@
 
             console.log('잠금 해제 시도:', currentFundCode);
 
-            // navigator.sendBeacon을 사용하여 페이지 이탈 시에도 요청 전송
-            if (navigator.sendBeacon) {
-                const formData = new FormData();
-                formData.append('fundCode', currentFundCode);
-                
-                // sendBeacon은 Content-Type을 자동으로 설정하므로 헤더를 직접 설정할 수 없음
-                // CSRF 토큰은 쿼리 파라미터로 전송
-                const url = '/bnk/admin/product/edit/unlock?fundCode=' + encodeURIComponent(currentFundCode);
-                const blob = new Blob([], { type: 'application/x-www-form-urlencoded' });
-                navigator.sendBeacon(url, blob);
-            } else {
-                // sendBeacon을 지원하지 않는 경우 fetch 사용
-                const formData = new FormData();
-                formData.append('fundCode', currentFundCode);
-                
-                fetch('/bnk/admin/product/edit/unlock', {
-                    method: 'POST',
-                    headers: {
-                        [header]: token
-                    },
-                    body: formData,
-                    keepalive: true
-                }).then(function(response) {
-                    console.log('잠금 해제 응답:', response.status);
-                }).catch(function(error) {
-                    console.error('잠금 해제 실패:', error);
-                });
-            }
+            // fetch의 keepalive 옵션을 사용하여 페이지 이탈 시에도 요청 전송
+            // keepalive: true는 페이지가 닫혀도 요청이 완료될 때까지 기다림
+            const formData = new FormData();
+            formData.append('fundCode', currentFundCode);
+            
+            fetch('/bnk/admin/product/edit/unlock', {
+                method: 'POST',
+                headers: {
+                    [header]: token
+                },
+                body: formData,
+                keepalive: true
+            }).catch(function(error) {
+                console.error('잠금 해제 실패:', error);
+            });
         }
         /*]]>*/
     </script>
