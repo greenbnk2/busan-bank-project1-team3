@@ -85,6 +85,11 @@ public class SecurityConfig {
                 // 1. /admin/ 경로를 제외한 모든 경로를 이 필터체인이 처리
                 .securityMatcher("/**")
 
+                // 챗봇 용도 (필터 무시)
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/chatbot/ask")
+                )
+
                 // 2. 경로별 권한 설정 (⭐️ 순서가 중요 ⭐️)
                 .authorizeHttpRequests(auth -> auth
 

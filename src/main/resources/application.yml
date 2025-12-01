@@ -89,3 +89,7 @@ UPLOAD_PATH: file:C:/bnk_upload/
 file:
   upload:
     path: upload
+
+gemini:
+  api:
+    key: AIzaSyATRg8BRUUPulbzi37fiHJdzBcAf17Xpy8
