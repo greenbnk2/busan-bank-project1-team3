@@ -1,10 +1,8 @@
 package kr.co.bnk.bnk_project.controller.admin.settings;
 
-import kr.co.bnk.bnk_project.dto.CsDTO;
-import kr.co.bnk.bnk_project.dto.PageRequestDTO;
-import kr.co.bnk.bnk_project.dto.PageResponseDTO;
-import kr.co.bnk.bnk_project.dto.UserTermsDTO;
+import kr.co.bnk.bnk_project.dto.*;
 import kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO;
+import kr.co.bnk.bnk_project.service.KeywordService;
 import kr.co.bnk.bnk_project.service.UserTermsService;
 import kr.co.bnk.bnk_project.service.admin.FundCategoryService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +18,7 @@ public class AdminSettingsController {
 
     private final UserTermsService userTermsService;
     private final FundCategoryService fundCategoryService;
-
+    private final KeywordService keywordService;
 
 
     @GetMapping("/category")
@@ -75,13 +73,39 @@ public class AdminSettingsController {
     }
 
 
+    /*------------------------------검색어--------------------------------*/
 
-    @GetMapping("/search-keyword")
-    public String searchKeyword() {
+
+    @GetMapping("/keyword")
+    public String searchKeyword(PageRequestDTO pageRequestDTO, Model model) {
+
+        // 목록 + 페이징 정보
+        PageResponseDTO<KeywordDTO> pageResponse = keywordService.getKeywordPage(pageRequestDTO);
+
+        model.addAttribute("pageRequestDTO", pageRequestDTO);
+        model.addAttribute("pageResponse", pageResponse);
+
         return "admin/settings/search_keyword";
     }
 
+    @PostMapping("/keyword/register")
+    public String registerKeyword(KeywordDTO dto) {
+        keywordService.createKeyword(dto);
+        return "redirect:/admin/settings/keyword";
+    }
 
+    @PostMapping("/keyword/update")
+    public String updateKeyword(KeywordDTO dto) {
+        keywordService.updateKeyword(dto);
+        return "redirect:/admin/settings/keyword";
+    }
+
+    @PostMapping("/keyword/delete")
+    public String deleteKeyword(@RequestParam String keywordNo,
+                                 PageRequestDTO pageRequestDTO) {
+        keywordService.deleteKeyword(keywordNo);
+        return "redirect:/admin/settings/keyword";
+    }
 
 
     /*------------------------------약관--------------------------------*/

@@ -45,8 +45,7 @@
                 AND fm.oper_status = #{pageRequestDTO.status}
             </if>
 
-            AND fm.oper_status = '운용중' or fm.oper_status = '운용중단' or fm.oper_status = '운용대기'
-
+            AND fm.oper_status IN ('운용중','운용대기','운용중단')
         </where>
     </sql>
 

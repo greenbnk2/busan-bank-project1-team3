@@ -1,10 +1,18 @@
 package kr.co.bnk.bnk_project.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class KeywordDTO {
-    private int keywordNo;
-    private String keywordName;   // 예: 배당주
-    private String relatedWords;  // 예: 월배당, 인컴, 연금
+
+    private String keywordNo;
+    private String keywordName;
+    private String RegDate;
+    private String relatedWords;
+
 }

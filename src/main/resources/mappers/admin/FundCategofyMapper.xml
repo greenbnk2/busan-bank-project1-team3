@@ -45,7 +45,7 @@
         SLUG         AS slug,
         STATUS       AS status,
         CATE_DESC    AS cateDesc
-        FROM BNK.FUND_CATEGORY
+        FROM FUND_CATEGORY
         <include refid="productWhere"/>
         ORDER BY CATEGORY_CODE
     </select>
@@ -54,19 +54,19 @@
             parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
             resultType="int">
         SELECT COUNT(*)
-        FROM BNK.FUND_CATEGORY
+        FROM FUND_CATEGORY
         <include refid="productWhere"/>
     </select>
 
     <update id="updateCategoryStatus">
-        UPDATE BNK.FUND_CATEGORY
+        UPDATE FUND_CATEGORY
         SET STATUS = #{status}
         WHERE CATEGORY_CODE = #{categoryCode}
     </update>
 
     <insert id="insertCategory"
             parameterType="kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO">
-        INSERT INTO BNK.FUND_CATEGORY (
+        INSERT INTO FUND_CATEGORY (
             CATEGORY_CODE,
             CATEGORY_NAME,
             CATEGORY_TYPE,
@@ -85,7 +85,7 @@
 
     <update id="updateCategory"
             parameterType="kr.co.bnk.bnk_project.dto.admin.FundCategoryDTO">
-        UPDATE BNK.FUND_CATEGORY
+        UPDATE FUND_CATEGORY
         SET
             CATEGORY_NAME = #{categoryName},
             CATEGORY_TYPE = #{categoryType},
@@ -96,7 +96,7 @@
     </update>
 
     <delete id="deleteCategory">
-        DELETE FROM BNK.FUND_CATEGORY
+        DELETE FROM FUND_CATEGORY
         WHERE CATEGORY_CODE = #{categoryCode}
     </delete>
 
@@ -109,7 +109,7 @@
             SLUG         AS slug,
             STATUS       AS status,
             CATE_DESC    AS cateDesc
-        FROM BNK.FUND_CATEGORY
+        FROM FUND_CATEGORY
         ORDER BY CATEGORY_NAME
     </select>
 </mapper>
