@@ -1,5 +1,6 @@
 package kr.co.bnk.bnk_project.controller;
 
+import kr.co.bnk.bnk_project.dto.KeywordDTO;
 import kr.co.bnk.bnk_project.dto.ProductDTO;
 import kr.co.bnk.bnk_project.service.FundService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -91,6 +93,22 @@ public class FundController {
     @GetMapping("/investTest")
     public String investTest() {
         return "investTest";
+    }
+
+    @GetMapping("/search")
+    public String search(@RequestParam(value = "keyword", required = false) String keyword, Model model) {
+
+        // 검색 로직 수행
+        List<ProductDTO> resultList = productService.searchFunds(keyword);
+
+        // 결과 리스트 화면으로 전달
+        model.addAttribute("fundList", resultList);
+
+        // 검색 결과 페이지에서도 모달에 띄울 '추천 키워드' 전달
+        List<KeywordDTO> recommendedKeywords = productService.getRecommendedKeywords();
+        model.addAttribute("keywordList", recommendedKeywords);
+
+        return "searchResult";
     }
 }
 

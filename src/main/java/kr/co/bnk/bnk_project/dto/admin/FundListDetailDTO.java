@@ -28,11 +28,21 @@ public class FundListDetailDTO {
     private Double changeAmount;     // FUND_DAILY_HISTORY.DAILY_CHANGE_RATE (전일대비 금액)
     private Double dailyChangeRate;  // 전일대비 %
     private Double totalNav;         // FUND_DAILY_HISTORY.TOTAL_NAV (순자산총액)
-    private String tradeDate;         // 기준일자
+    private LocalDate tradeDate;     // 기준일자
+    private Double navPerUnit;       // 현재기준가
+
+    // 추가
+    private Double prevDayNav;       // 전일기준가
+    private Double prevDayChange;    // 전일대비 금액
+    private Double prevWeekNav;      // 전주 기준가
+    private Double prevWeekChange;   // 전주대비 금액
+    private Double prevWeekPercent;  // 전주대비 %
+    private Double setupOriginAmount;   // 설정원본 FUND_DAILY_HISTORY.SETUP_ORIGIN_AMOUNT (설정원본)
 
     /* ---------------------------
      * 2) 펀드 기본 정보 (FUND_MASTER)
      * --------------------------- */
+    private String categoryName;     // 펀드 카테고리 한글 이름
     private String fundType;         // FUND_MASTER.FUND_TYPE 펀드유형, 구분
     private String investRegion;     // FUND_MASTER.INVEST_REGION 투자지역. 투자지역구분
     private String classifyCode;     // FUND_MASTER.CLASSIFY_CODE 분류코드
@@ -47,6 +57,9 @@ public class FundListDetailDTO {
 
     private String rgnType;   // 판매지역분류
     private String prfmType;  // 운용실적공시분류
+
+
+
 
 
     /* ---------------------------
@@ -92,7 +105,7 @@ public class FundListDetailDTO {
 
 
     /* ---------------------------
-     * 7) 자산구성내역 (FUND_SETTLEMENT_HISTORY)
+     * 7) 결산 및 상환 (FUND_SETTLEMENT_HISTORY)
      * --------------------------- */
     private List<FundSettlementHistoryDTO> settlementList;
 
@@ -112,10 +125,15 @@ public class FundListDetailDTO {
      * 9) 가격변동 추이
      * --------------------------- */
     private List<FundPriceHistoryDTO> priceHistoryList;
+
     /* ---------------------------
      * 10) 수익률 추이
      * --------------------------- */
     private List<FundReturnHistoryDTO> returnHistoryList;
 
+    /* ---------------------------
+     * 10) 자산 구성 내역
+     * --------------------------- */
+    private List<FundAssetAllocationDTO> assetAllocationList;
 
 }

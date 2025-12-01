@@ -20,6 +20,7 @@ public class MainController {
      * 이 API가 호출되는 것만으로도 서버의 세션 시간이 20분으로 다시 초기화됩니다.
      * @return 간단한 JSON 응답
      */
+
     @PostMapping("/api/session/extend")
     @ResponseBody // HTML 템플릿이 아닌 JSON/텍스트 데이터를 직접 반환
     public Map<String, String> extendSession() {
