@@ -90,3 +90,7 @@ file:
   path: upload
   upload:
     path: upload
+
+gemini:
+  api:
+    key: AIzaSyATRg8BRUUPulbzi37fiHJdzBcAf17Xpy8
