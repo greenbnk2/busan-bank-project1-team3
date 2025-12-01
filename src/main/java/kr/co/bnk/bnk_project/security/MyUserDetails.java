@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 public class MyUserDetails implements UserDetails {
 
@@ -60,5 +61,20 @@ public class MyUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true; // 계정 활성화 여부 (일단 true)
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MyUserDetails that = (MyUserDetails) o;
+        // userDTO의 userId를 기준으로 같은지 비교
+        return Objects.equals(userDTO.getUserId(), that.userDTO.getUserId());
+    }
+
+    @Override
+    public int hashCode() {
+        // userId를 기준으로 해시코드 생성
+        return Objects.hash(userDTO.getUserId());
     }
 }

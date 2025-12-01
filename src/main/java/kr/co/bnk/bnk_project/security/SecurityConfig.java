@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 @EnableWebSecurity
@@ -40,10 +41,10 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. /admin/ 경로로 시작하는 모든 요청을 이 필터체인이 처리하도록 매칭
+                // /admin/ 경로로 시작하는 모든 요청을 이 필터체인이 처리하도록 매칭
                 .securityMatcher("/admin/**")
 
-                // 2. /admin/** 경로에 대한 권한 설정
+                // /admin/** 경로에 대한 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/login").permitAll() // 관리자 로그인 페이지는 모두 허용
                         .requestMatchers("/admin/monitor/**").hasRole("SAD")
@@ -52,10 +53,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 혹시 모를 나머지 admin 경로는 인증만 되면 허용
                 )
 
-                // 3. ⭐️ AdminSecurityService를 사용하여 인증하도록 설정
+                // AdminSecurityService를 사용하여 인증하도록 설정
                 .userDetailsService(adminSecurityService)
 
-                // 4. 관리자 전용 로그인 폼 설정
+                // 관리자 전용 로그인 폼 설정
                 .formLogin(form -> form
                         .loginPage("/admin/login") // 관리자 로그인 페이지 URL
                         .loginProcessingUrl("/admin/login") // 로그인 폼이 전송될 URL
@@ -65,7 +66,7 @@ public class SecurityConfig {
                         .failureUrl("/admin/login?error=true") // 로그인 실패 시 URL
                 )
 
-                // 5. 관리자 로그아웃 설정
+                // 관리자 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
                         .logoutSuccessUrl("/admin/login?logout=true")
@@ -82,7 +83,7 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. /admin/ 경로를 제외한 모든 경로를 이 필터체인이 처리
+                // /admin/ 경로를 제외한 모든 경로를 이 필터체인이 처리
                 .securityMatcher("/**")
 
                 // 챗봇 용도 (필터 무시)
@@ -90,24 +91,23 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/api/chatbot/ask")
                 )
 
-                // 2. 경로별 권한 설정 (⭐️ 순서가 중요 ⭐️)
+                // 경로별 권한 설정 (⭐️ 순서가 중요 ⭐️)
                 .authorizeHttpRequests(auth -> auth
 
                         // 1순위: /admin/** 경로는 이 필터체인에서 무조건 거부. (adminFilterChain이 담당)
                         .requestMatchers("/admin/**").denyAll()
 
                         // 2순위: 인증이 필요한 사용자 전용 페이지 (예: 마이페이지, 펀드 가입 신청 등)
-                        // ⭐️ 여기에 "로그인이 필요한" URL 패턴을 추가.
                         .requestMatchers("/my/**", "/fund/**", "/user/profile/**","/api/session/extend", "/member/survey/**").authenticated() // USER ROLE이 따로 없어서 로그인 하면 허용
 
                         // 3순위: 위 2개 외의 "모든" 요청은 허용 -> 공개 페이지가 자동으로 허용.
                         .anyRequest().permitAll()
                 )
 
-                // 3. ⭐️ UserSecurityService를 사용하여 인증하도록 설정
+                // UserSecurityService를 사용하여 인증하도록 설정
                 .userDetailsService(userSecurityService)
 
-                // 4. 일반 사용자 로그인 폼 설정
+                // 일반 사용자 로그인 폼 설정
                 .formLogin(form -> form
                         .loginPage("/member/login")
                         .loginProcessingUrl("/login")
@@ -117,14 +117,26 @@ public class SecurityConfig {
                         .failureUrl("/member/login?error=true")
                 )
 
-                // 5. 일반 사용자 로그아웃 설정
+                // 일반 사용자 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true) //서버 세션 파기
                         .deleteCookies("JSESSIONID") //브라우저 JSESSIONID 쿠키 삭제
+                )
+
+                // 동시 접속 제어 설정
+                .sessionManagement(session -> session
+                        .maximumSessions(1)               // 최대 허용 세션 수 (1로 설정 중복 로그인 방지)
+                        .maxSessionsPreventsLogin(false)  // false: 기존 사용자 로그아웃(팅김), true: 신규 로그인 차단
+                        .expiredUrl("/member/login?expired=true") // 중복 로그인으로 팅겼을 때 이동할 페이지
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 }
