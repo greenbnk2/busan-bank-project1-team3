@@ -15,7 +15,7 @@
 
         <div id="chatbot-window" class="hidden">
             <div class="chat-header">
-                <span>BNK AI 챗봇</span>
+                <span>BNK 금융비서 🧑‍💼</span>
                 <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">✕</button>
             </div>
             <div id="chat-history">
@@ -31,7 +31,7 @@
     <style>
         #chatbot-icon {
             position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
-            background-color: #4CAF50;
+            background-color: #cb2b11;
             color: white; border-radius: 50%; text-align: center; line-height: 60px;
             font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             z-index: 9999; transition: transform 0.3s;
@@ -45,7 +45,7 @@
         }
         .hidden { display: none !important; }
         .chat-header {
-            background-color: #4CAF50; color: white; padding: 15px; font-weight: bold;
+            background-color: #cb2b11; color: white; padding: 15px; font-weight: bold;
             display: flex; justify-content: space-between; align-items: center;
         }
         #chat-history {
@@ -53,7 +53,7 @@
             display: flex; flex-direction: column; gap: 10px;
         }
         .message { max-width: 80%; padding: 10px 15px; border-radius: 20px; font-size: 14px; }
-        .message.user { align-self: flex-end; background-color: #4CAF50; color: white; border-bottom-right-radius: 5px; }
+        .message.user { align-self: flex-end; background-color: #cb2b11; color: white; border-bottom-right-radius: 5px; }
         .message.bot { align-self: flex-start; background-color: #e9ecef; color: #333; border-bottom-left-radius: 5px; }
 
         .chat-input-area {
@@ -61,7 +61,7 @@
         }
         .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
         .chat-input-area button {
-            margin-left: 10px; padding: 10px 15px; background-color: #4CAF50; color: white;
+            margin-left: 10px; padding: 10px 15px; background-color: #cb2b11; color: white;
             border: none; border-radius: 20px; cursor: pointer;
         }
     </style>
@@ -108,7 +108,7 @@
                 const response = await fetch('/bnk/api/chatbot/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: text })
+                    body: JSON.stringify({ question: text, userId: "1007"})
                 });
 
                 chatHistory.removeChild(document.querySelector('.message.loading'));
