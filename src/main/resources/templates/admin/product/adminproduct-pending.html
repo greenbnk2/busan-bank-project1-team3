@@ -215,7 +215,7 @@
                                 <div class="action-buttons">
                                     <button class="action-btn approval" 
                                             th:attr="data-fund-code=${dto.fundCode},data-fund-name=${dto.fundName}"
-                                            th:disabled="${(dto.operStatus != '등록' and dto.operStatus != '수정') and (dto.revStatus == null or dto.revStatus != '대기')}"
+                                            th:disabled="${(dto.operStatus != '등록' and dto.operStatus != '등록대기' and dto.operStatus != '수정') and (dto.revStatus == null or dto.revStatus != '대기')}"
                                             onclick="requestApproval(this)">승인요청</button>
                                 </div>
                             </td>
@@ -736,9 +736,9 @@
                 waitingBtn.style.display = (status !== '운용중' && status !== '운용중단') ? 'inline-block' : 'none';
             }
 
-            // 승인요청 버튼: operStatus가 '등록' 또는 '수정'이거나, revStatus가 '대기'일 때 활성화
+            // 승인요청 버튼: operStatus가 '등록', '등록대기', '수정' 또는, revStatus가 '대기'일 때 활성화
             if (approvalBtn) {
-                const isOperStatusOk = (status === '등록' || status === '수정');
+                const isOperStatusOk = (status === '등록' || status === '등록대기' || status === '수정');
                 const isRevStatusOk = (revStatus === '대기');
                 approvalBtn.disabled = !(isOperStatusOk || isRevStatusOk);
             }
@@ -808,9 +808,9 @@
                     const approvalBtn = row.querySelector('.action-btn.approval');
                     const reserveBtn = row.querySelector('.action-btn.reserve');
                     
-                    // 승인요청 버튼: operStatus가 '등록' 또는 '수정'이거나, revStatus가 '대기'일 때 활성화
+                    // 승인요청 버튼: operStatus가 '등록', '등록대기', '수정'이거나, revStatus가 '대기'일 때 활성화
                     if (approvalBtn) {
-                        const isOperStatusOk = (status === '등록' || status === '수정');
+                        const isOperStatusOk = (status === '등록' || status === '등록대기' || status === '수정');
                         const isRevStatusOk = (revStatus === '대기');
                         approvalBtn.disabled = !(isOperStatusOk || isRevStatusOk);
                     }

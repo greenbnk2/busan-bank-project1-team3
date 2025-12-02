@@ -42,11 +42,11 @@
             </if>
 
             <if test="pageRequestDTO.dateFrom != null and pageRequestDTO.dateFrom != ''">
-                AND ah.REQUEST_TIME &gt;= TO_DATE(#{pageRequestDTO.dateFrom}, 'YYYY-MM-DD')
+                AND TRUNC(ah.REQUEST_TIME) &gt;= TO_DATE(#{pageRequestDTO.dateFrom}, 'YYYY-MM-DD')
             </if>
 
             <if test="pageRequestDTO.dateTo != null and pageRequestDTO.dateTo != ''">
-                AND ah.REQUEST_TIME &lt; TO_DATE(#{pageRequestDTO.dateTo}, 'YYYY-MM-DD') + 1
+                AND TRUNC(ah.REQUEST_TIME) &lt;= TO_DATE(#{pageRequestDTO.dateTo}, 'YYYY-MM-DD')
             </if>
         </where>
     </sql>
@@ -160,11 +160,11 @@
             </if>
 
             <if test="pageRequestDTO.dateFrom != null and pageRequestDTO.dateFrom != ''">
-                AND ah.APPROVAL_TIME &gt;= TO_DATE(#{pageRequestDTO.dateFrom}, 'YYYY-MM-DD')
+                AND TRUNC(ah.APPROVAL_TIME) &gt;= TO_DATE(#{pageRequestDTO.dateFrom}, 'YYYY-MM-DD')
             </if>
 
             <if test="pageRequestDTO.dateTo != null and pageRequestDTO.dateTo != ''">
-                AND ah.APPROVAL_TIME &lt; TO_DATE(#{pageRequestDTO.dateTo}, 'YYYY-MM-DD') + 1
+                AND TRUNC(ah.APPROVAL_TIME) &lt;= TO_DATE(#{pageRequestDTO.dateTo}, 'YYYY-MM-DD')
             </if>
         </where>
     </sql>

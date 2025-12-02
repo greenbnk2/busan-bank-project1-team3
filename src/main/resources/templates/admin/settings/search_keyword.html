@@ -28,8 +28,10 @@
 
             <section class="section-block">
                 <div class="table-info">
-                    <span>총 <strong>1</strong>건</span>
-                    <span class="pagination-info">1 / 1 page</span>
+                    <span>총 <strong th:text="${pageResponse != null ? pageResponse.total : 0}">0</strong>건</span>
+                    <span class="pagination-info" th:if="${pageResponse != null}">
+                        <span th:text="${pageResponse.pg}">1</span> / <span th:text="${pageResponse.end}">1</span> page
+                    </span>
                 </div>
                 <table class="fund-table">
                     <thead>
@@ -37,35 +39,55 @@
                         <th>번호</th>
                         <th>검색어</th>
                         <th>등록일</th>
-                        <th>사용 횟수</th>
                         <th>관리</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr
-                            data-id="1"
-                            data-keyword="해외주식형"
-                            data-date="2024-04-12"
-                            data-count="157"
-                            data-description="해외주식형 펀드 검색어입니다.">
-                        <td>1</td>
-                        <td class="text-left">해외주식형</td>
-                        <td>2024-04-12</td>
-                        <td>157</td>
+                    <tr th:if="${pageResponse == null or #lists.isEmpty(pageResponse.dtoList)}">
+                        <td colspan="4" class="text-center">검색어가 없습니다.</td>
+                    </tr>
+                    <tr th:each="dto, stat : ${pageResponse.dtoList}">
+                        <td th:text="${pageResponse.startNo - stat.index}">1</td>
+                        <td class="text-left" th:text="${dto.keywordName}">해외주식형</td>
+                        <td th:text="${dto.regDate != null ? dto.regDate : ''}">2024-04-12</td>
                         <td class="cell-actions">
-                            <button type="button" class="btn-action" data-action="edit">수정</button>
-                            <button type="button" class="btn-action" data-action="delete">삭제</button>
+                            <button type="button" class="btn-action" 
+                                    data-action="edit"
+                                    th:attr="data-keyword-no=${dto.keywordNo},
+                                             data-keyword-name=${dto.keywordName},
+                                             data-related-words=${dto.relatedWords != null ? dto.relatedWords : ''}">수정</button>
+                            <button type="button" class="btn-action" 
+                                    data-action="delete"
+                                    th:attr="data-keyword-no=${dto.keywordNo},
+                                             data-keyword-name=${dto.keywordName}">삭제</button>
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </section>
-            <div class="pagination">
-                <button class="page-btn prev" disabled>&lt;</button>
+            <!-- 페이징 -->
+            <div class="pagination" th:if="${pageResponse != null and pageResponse.total > 0}">
+                <a class="page-btn prev"
+                   th:href="@{/admin/settings/keyword(pg=${pageResponse.pg - 1})}"
+                   th:classappend="${!pageResponse.prev} ? ' disabled'"
+                   th:attr="aria-disabled=${!pageResponse.prev}">
+                    &lt;
+                </a>
                 <div class="page-numbers">
-                    <button class="page-number active">1</button>
+                    <a class="page-number"
+                       th:each="num : ${#numbers.sequence(pageResponse.start, pageResponse.end)}"
+                       th:href="@{/admin/settings/keyword(pg=${num})}"
+                       th:text="${num}"
+                       th:classappend="${num == pageResponse.pg} ? ' active'">
+                        1
+                    </a>
                 </div>
-                <button class="page-btn next" disabled>&gt;</button>
+                <a class="page-btn next"
+                   th:href="@{/admin/settings/keyword(pg=${pageResponse.pg + 1})}"
+                   th:classappend="${!pageResponse.next} ? ' disabled'"
+                   th:attr="aria-disabled=${!pageResponse.next}">
+                    &gt;
+                </a>
             </div>
             <!-- 푸터 영역 -->
             <footer class="admin-footer"></footer>
@@ -77,14 +99,22 @@
 <div id="keywordModal" class="modal-overlay">
     <div class="modal-card">
         <h3>검색어 등록</h3>
-        <form id="keywordForm" class="modal-form">
+        <form id="keywordForm" class="modal-form" th:action="@{/admin/settings/keyword/register}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="form-field">
-                <label for="keywordValue">검색어</label>
-                <input type="text" id="keywordValue" name="keyword" placeholder="검색어를 입력하세요" required>
+                <label for="keywordValue">검색어명</label>
+                <input type="text" id="keywordValue" name="keywordName" placeholder="검색어명을 입력하세요" required>
             </div>
             <div class="form-field">
-                <label for="keywordDescription">설명</label>
-                <textarea id="keywordDescription" name="description" rows="6" placeholder="검색어에 대한 설명이나 노출 목적을 입력하세요"></textarea>
+                <label>연관단어</label>
+                <div id="relatedWordsContainer">
+                    <div class="related-word-item">
+                        <input type="text" class="related-word-input" placeholder="연관단어를 입력하세요">
+                        <button type="button" class="btn-remove-word" style="display: none;">삭제</button>
+                    </div>
+                </div>
+                <button type="button" id="addRelatedWordBtn" class="btn btn-secondary" style="margin-top: 8px;">추가</button>
+                <input type="hidden" id="relatedWordsHidden" name="relatedWords">
             </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -98,15 +128,23 @@
 <div id="keywordEditModal" class="modal-overlay">
     <div class="modal-card">
         <h3>검색어 수정</h3>
-        <form id="keywordEditForm" class="modal-form">
-            <input type="hidden" id="editKeywordId" name="id">
+        <form id="keywordEditForm" class="modal-form" th:action="@{/admin/settings/keyword/update}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" id="editKeywordNo" name="keywordNo">
             <div class="form-field">
                 <label for="editKeywordValue">검색어</label>
-                <input type="text" id="editKeywordValue" name="keyword" placeholder="검색어를 입력하세요" required>
+                <input type="text" id="editKeywordValue" name="keywordName" placeholder="검색어를 입력하세요" required>
             </div>
             <div class="form-field">
-                <label for="editKeywordDescription">설명</label>
-                <textarea id="editKeywordDescription" name="description" rows="6" placeholder="검색어에 대한 설명이나 노출 목적을 입력하세요"></textarea>
+                <label>연관단어</label>
+                <div id="editRelatedWordsContainer">
+                    <div class="related-word-item">
+                        <input type="text" class="related-word-input" placeholder="연관단어를 입력하세요">
+                        <button type="button" class="btn-remove-word" style="display: none;">삭제</button>
+                    </div>
+                </div>
+                <button type="button" id="addEditRelatedWordBtn" class="btn btn-secondary" style="margin-top: 8px;">추가</button>
+                <input type="hidden" id="editRelatedWordsHidden" name="relatedWords">
             </div>
             <div class="modal-actions">
                 <button type="submit" class="btn btn-primary">확인</button>
@@ -129,10 +167,14 @@
                     삭제된 데이터는 복구할 수 없습니다.
                 </p>
             </div>
-            <div class="modal-actions">
-                <button type="button" id="keywordDeleteConfirm" class="btn btn-primary">삭제</button>
-                <button type="button" id="keywordDeleteModalClose" class="btn btn-secondary">취소</button>
-            </div>
+            <form id="keywordDeleteForm" th:action="@{/admin/settings/keyword/delete}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" id="deleteKeywordNo" name="keywordNo">
+                <div class="modal-actions">
+                    <button type="submit" id="keywordDeleteConfirm" class="btn btn-primary">삭제</button>
+                    <button type="button" id="keywordDeleteModalClose" class="btn btn-secondary">취소</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -164,14 +206,104 @@
             modalElement?.classList.remove('show');
         }
 
+        // 연관단어 동적 추가/제거 함수
+        function addRelatedWordInput(container, initialValue = '') {
+            const item = document.createElement('div');
+            item.className = 'related-word-item';
+            item.style.display = 'flex';
+            item.style.gap = '8px';
+            item.style.marginBottom = '8px';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'related-word-input';
+            input.placeholder = '연관단어를 입력하세요';
+            input.value = initialValue;
+            input.style.flex = '1';
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-remove-word';
+            removeBtn.textContent = '삭제';
+            removeBtn.style.padding = '6px 12px';
+            removeBtn.style.background = '#dc3545';
+            removeBtn.style.color = 'white';
+            removeBtn.style.border = 'none';
+            removeBtn.style.borderRadius = '4px';
+            removeBtn.style.cursor = 'pointer';
+            
+            removeBtn.addEventListener('click', function() {
+                item.remove();
+                updateRelatedWordsHidden(container);
+                // 항목이 하나만 남으면 삭제 버튼 숨기기
+                if (container.children.length === 1) {
+                    container.querySelector('.btn-remove-word').style.display = 'none';
+                }
+            });
+            
+            item.appendChild(input);
+            item.appendChild(removeBtn);
+            container.appendChild(item);
+            
+            // 삭제 버튼 표시/숨김 처리
+            if (container.children.length > 1) {
+                container.querySelectorAll('.btn-remove-word').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+            } else {
+                removeBtn.style.display = 'none';
+            }
+        }
+        
+        function updateRelatedWordsHidden(container) {
+            const inputs = container.querySelectorAll('.related-word-input');
+            const values = Array.from(inputs)
+                .map(input => input.value.trim())
+                .filter(value => value !== '');
+            
+            // 쉼표로 구분된 문자열 생성
+            const relatedWordsValue = values.join(',');
+            
+            const hiddenInput = container.closest('.form-field').querySelector('input[type="hidden"]');
+            if (hiddenInput) {
+                hiddenInput.value = relatedWordsValue;
+                console.log('연관단어 저장값:', relatedWordsValue); // 디버깅용
+            }
+        }
+        
+        // 등록 모달 연관단어 추가 버튼
+        const addRelatedWordBtn = document.getElementById('addRelatedWordBtn');
+        const relatedWordsContainer = document.getElementById('relatedWordsContainer');
+        
+        addRelatedWordBtn?.addEventListener('click', function() {
+            addRelatedWordInput(relatedWordsContainer);
+        });
+        
+        // 등록 모달 연관단어 입력 필드 변경 시 hidden 필드 업데이트
+        relatedWordsContainer?.addEventListener('input', function(e) {
+            if (e.target.classList.contains('related-word-input')) {
+                updateRelatedWordsHidden(relatedWordsContainer);
+            }
+        });
+        
         // 등록 모달
-        openBtn?.addEventListener('click', () => showModal(modal));
+        openBtn?.addEventListener('click', () => {
+            form.reset();
+            // 연관단어 컨테이너 초기화
+            relatedWordsContainer.innerHTML = '';
+            addRelatedWordInput(relatedWordsContainer);
+            document.getElementById('relatedWordsHidden').value = '';
+            showModal(modal);
+        });
         closeBtn?.addEventListener('click', () => closeModal(modal));
 
         form?.addEventListener('submit', function (event) {
-            event.preventDefault();
-            // TODO: 등록 API 호출
-            closeModal(modal);
+            // 연관단어 값 업데이트 (폼 제출 전 최종 업데이트)
+            updateRelatedWordsHidden(relatedWordsContainer);
+            
+            // 최종 값 확인
+            const finalValue = document.getElementById('relatedWordsHidden').value;
+            console.log('최종 제출값:', finalValue); // 디버깅용
         });
 
         modal?.addEventListener('click', function (event) {
@@ -188,21 +320,32 @@
             }
         });
 
+        // 수정 모달 연관단어 추가 버튼
+        const addEditRelatedWordBtn = document.getElementById('addEditRelatedWordBtn');
+        const editRelatedWordsContainer = document.getElementById('editRelatedWordsContainer');
+        
+        addEditRelatedWordBtn?.addEventListener('click', function() {
+            addRelatedWordInput(editRelatedWordsContainer);
+        });
+        
+        // 수정 모달 연관단어 입력 필드 변경 시 hidden 필드 업데이트
+        editRelatedWordsContainer?.addEventListener('input', function(e) {
+            if (e.target.classList.contains('related-word-input')) {
+                updateRelatedWordsHidden(editRelatedWordsContainer);
+            }
+        });
+        
         editForm?.addEventListener('submit', function (event) {
-            event.preventDefault();
-            // TODO: 수정 API 호출
-            closeModal(editModal);
+            // 연관단어 값 업데이트 (폼 제출 전 최종 업데이트)
+            updateRelatedWordsHidden(editRelatedWordsContainer);
+            
+            // 최종 값 확인
+            const finalValue = document.getElementById('editRelatedWordsHidden').value;
+            console.log('수정 최종 제출값:', finalValue); // 디버깅용
         });
 
         // 삭제 모달
         deleteCloseBtn?.addEventListener('click', () => closeModal(deleteModal));
-        deleteConfirmBtn?.addEventListener('click', function () {
-            // TODO: 삭제 API 호출
-            const id = deleteConfirmBtn.getAttribute('data-id');
-            console.log('삭제할 검색어 ID:', id);
-            closeModal(deleteModal);
-            // 삭제 후 테이블 새로고침 또는 행 제거
-        });
 
         deleteModal?.addEventListener('click', function (event) {
             if (event.target === deleteModal) {
@@ -211,39 +354,41 @@
         });
 
         // 테이블 행의 버튼 이벤트 처리
-        const tableRows = document.querySelectorAll('.fund-table tbody tr');
-        tableRows.forEach(row => {
-            const buttons = row.querySelectorAll('[data-action]');
-            buttons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const action = this.getAttribute('data-action');
-                    const id = row.getAttribute('data-id');
-                    const keyword = row.getAttribute('data-keyword');
-                    const date = row.getAttribute('data-date');
-                    const count = row.getAttribute('data-count');
-                    const description = row.getAttribute('data-description');
+        document.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', function () {
+                const action = this.getAttribute('data-action');
+                const keywordNo = this.getAttribute('data-keyword-no');
+                const keywordName = this.getAttribute('data-keyword-name');
+                const relatedWords = this.getAttribute('data-related-words') || '';
 
-                    if (action === 'detail') {
-                        // 상세 모달에 데이터 채우기
-                        document.getElementById('detailKeywordId').textContent = id || '-';
-                        document.getElementById('detailKeywordValue').textContent = keyword || '-';
-                        document.getElementById('detailKeywordDate').textContent = date || '-';
-                        document.getElementById('detailKeywordCount').textContent = count || '-';
-                        document.getElementById('detailKeywordDescription').textContent = description || '-';
-                        showModal(detailModal);
-                    } else if (action === 'edit') {
-                        // 수정 모달에 데이터 채우기
-                        document.getElementById('editKeywordId').value = id || '';
-                        document.getElementById('editKeywordValue').value = keyword || '';
-                        document.getElementById('editKeywordDescription').value = description || '';
-                        showModal(editModal);
-                    } else if (action === 'delete') {
-                        // 삭제 모달에 데이터 채우기
-                        document.getElementById('deleteKeywordValue').textContent = keyword || '';
-                        deleteConfirmBtn.setAttribute('data-id', id || '');
-                        showModal(deleteModal);
+                if (action === 'edit') {
+                    // 수정 모달에 데이터 채우기
+                    document.getElementById('editKeywordNo').value = keywordNo || '';
+                    document.getElementById('editKeywordValue').value = keywordName || '';
+                    
+                    // 연관단어 데이터 로드
+                    editRelatedWordsContainer.innerHTML = '';
+                    if (relatedWords) {
+                        const words = relatedWords.split(',').filter(w => w.trim() !== '');
+                        if (words.length > 0) {
+                            words.forEach(word => {
+                                addRelatedWordInput(editRelatedWordsContainer, word.trim());
+                            });
+                        } else {
+                            addRelatedWordInput(editRelatedWordsContainer);
+                        }
+                    } else {
+                        addRelatedWordInput(editRelatedWordsContainer);
                     }
-                });
+                    document.getElementById('editRelatedWordsHidden').value = relatedWords;
+                    
+                    showModal(editModal);
+                } else if (action === 'delete') {
+                    // 삭제 모달에 데이터 채우기
+                    document.getElementById('deleteKeywordValue').textContent = keywordName || '';
+                    document.getElementById('deleteKeywordNo').value = keywordNo || '';
+                    showModal(deleteModal);
+                }
             });
         });
     });

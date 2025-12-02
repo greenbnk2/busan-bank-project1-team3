@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.KeywordMapper">
+
+    <!-- 키워드 전체 조회 -->
+    <select id="selectAllKeyword"
+            parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="kr.co.bnk.bnk_project.dto.KeywordDTO">
+        SELECT
+            KEYWORD_NO AS keywordNo,
+            KEYWORD_NAME AS keywordName,
+            REG_DATE AS regDate,
+            RELATED_WORDS AS relatedWords
+        FROM KEYWORD
+        ORDER BY KEYWORD_NO DESC
+    </select>
+
+    <select id="selectKeywordTotal"
+            parameterType="kr.co.bnk.bnk_project.dto.PageRequestDTO"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM KEYWORD
+    </select>
+
+    <insert id="insertKeyword"
+            parameterType="kr.co.bnk.bnk_project.dto.KeywordDTO">
+        <selectKey keyProperty="keywordNo" resultType="String" order="AFTER">
+            SELECT KEYWORD_NO FROM KEYWORD WHERE ROWID = (SELECT MAX(ROWID) FROM KEYWORD)
+        </selectKey>
+        INSERT INTO KEYWORD (
+            KEYWORD_NAME,
+            REG_DATE,
+            RELATED_WORDS
+        ) VALUES (
+            #{keywordName, jdbcType=VARCHAR},
+            SYSDATE,
+            #{relatedWords, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateKeyword"
+            parameterType="kr.co.bnk.bnk_project.dto.KeywordDTO">
+        UPDATE KEYWORD
+        SET
+            KEYWORD_NAME = #{keywordName, jdbcType=VARCHAR},
+            RELATED_WORDS = #{relatedWords, jdbcType=VARCHAR}
+        WHERE KEYWORD_NO = #{keywordNo, jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteKeyword"
+            parameterType="String">
+        DELETE FROM KEYWORD
+        WHERE KEYWORD_NO = #{keywordNo, jdbcType=VARCHAR}
+    </delete>
+
+</mapper>

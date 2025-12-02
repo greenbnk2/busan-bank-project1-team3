@@ -17,14 +17,14 @@
             NOTICE_1, NOTICE_2, RGN_TYPE, PRFM_TYPE,
             REV_STATUS, CREATED_AT, CREATED_BY
         ) VALUES (
-            #{fundCode}, #{fundShortCode}, #{fundName}, #{assetManagerId},
-            #{setupDate}, #{initialNav}, #{fundType}, #{investRegion}, #{classifyCode},
-            #{publicPrivateType}, #{trusteeCompany}, #{salesCompany}, #{adminCompany},
-            #{operPeriodType}, #{isUnitType}, #{investGrade}, #{fundFeature},
-            #{className}, #{overview}, #{redemptionMethod}, #{tradeMethod},
-            #{subscriptionMethod}, #{trustManagement}, #{paymentId},
-            #{notice1}, #{notice2}, #{rgnType}, #{prfmType},
-            '대기', SYSDATE, #{createdBy}
+            #{fundCode, jdbcType=VARCHAR}, #{fundShortCode, jdbcType=VARCHAR}, #{fundName, jdbcType=VARCHAR}, #{assetManagerId, jdbcType=VARCHAR},
+            #{setupDate, jdbcType=DATE}, #{initialNav, jdbcType=NUMERIC}, #{fundType, jdbcType=VARCHAR}, #{investRegion, jdbcType=VARCHAR}, #{classifyCode, jdbcType=VARCHAR},
+            #{publicPrivateType, jdbcType=VARCHAR}, #{trusteeCompany, jdbcType=VARCHAR}, #{salesCompany, jdbcType=VARCHAR}, #{adminCompany, jdbcType=VARCHAR},
+            #{operPeriodType, jdbcType=VARCHAR}, #{isUnitType, jdbcType=VARCHAR}, #{investGrade, jdbcType=VARCHAR}, #{fundFeature, jdbcType=VARCHAR},
+            #{className, jdbcType=VARCHAR}, #{overview, jdbcType=VARCHAR}, #{redemptionMethod, jdbcType=VARCHAR}, #{tradeMethod, jdbcType=VARCHAR},
+            #{subscriptionMethod, jdbcType=VARCHAR}, #{trustManagement, jdbcType=VARCHAR}, #{paymentId, jdbcType=VARCHAR},
+            #{notice1, jdbcType=VARCHAR}, #{notice2, jdbcType=VARCHAR}, #{rgnType, jdbcType=VARCHAR}, #{prfmType, jdbcType=VARCHAR},
+            '대기', SYSDATE, #{createdBy, jdbcType=VARCHAR}
         )
     </insert>
 

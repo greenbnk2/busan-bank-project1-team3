@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -199,7 +199,7 @@
                             <textarea id="approvalComment" name="remarks" placeholder="승인 또는 반려 사유를 입력하세요."></textarea>
                         </div>
                         <div class="error-message" id="approvalError" aria-live="polite"></div>
-                        <div class="detail-actions">
+                        <div class="detail-actions" sec:authorize="hasRole('SAD')">
                             <button type="submit" class="btn btn-red" id="approveButton">승인</button>
                             <button type="button" class="btn btn-secondary" id="rejectButton">반려</button>
                         </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,9 @@
             <header class="page-header">
                 <h1>펀드 목록</h1>
                 <div class="header-actions">
-                    <a th:href="@{/admin/product/pending}" class="btn btn-red">펀드관리</a>
+                    <a th:href="@{/admin/product/pending}" 
+                       class="btn btn-red"
+                       sec:authorize="hasAnyRole('ADM', 'SAD')">펀드관리</a>
                 </div>
             </header>
 
@@ -116,12 +118,12 @@
                         <th>회사명</th>
                         <th>등록일자</th>
                         <th>상태</th>
-                        <th>상품관리</th>
+                        <th sec:authorize="hasAnyRole('ADM', 'SAD')">상품관리</th>
                     </tr>
                     </thead>
                     <tbody id="productTableBody">
                     <tr th:each="item, stat : ${dtoList}">
-                        <td th:text="${stat.index + 1}"></td>
+                        <td th:text="${pageResponse.startNo - stat.index}">1</td>
                         <td th:text="${item.fundCode}"></td>
                         <td th:text="${item.categoryName}"></td>
                         <td th:text="${item.fundName}"></td>
@@ -136,9 +138,10 @@
                         <td th:text="${#temporals.format(item.regDate, 'yyyy-MM-dd')}"></td>
                         <td><span class="status-badge modifying" th:text="${item.operStatus}"></span></td>
 
-                        <td>
+                        <td sec:authorize="hasAnyRole('ADM', 'SAD')">
                             <div class="action-buttons">
-                                <a th:href="@{/admin/product/pending}" class="btn btn-gry">펀드관리</a>
+                                <a th:href="@{/admin/product/pending(searchType='code', keyword=${item.fundCode})}" 
+                                   class="btn btn-gry">펀드관리</a>
                             </div>
                         </td>
 

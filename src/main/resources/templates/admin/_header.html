@@ -5,11 +5,11 @@
         <header class="main-header" th:fragment="header">
             <script src="https://use.fontawesome.com/releases/v5.2.0/js/all.js"></script>
             <div class="header-right">
-                <div id="notification" class="nav-btn">
-                    <i class="fa fa-bell"></i>
-                    <span class="note-num">3</span>
-                </div>
-                <span class="header-divider">|</span>
+<!--                <div id="notification" class="nav-btn">-->
+<!--                    <i class="fa fa-bell"></i>-->
+<!--                    <span class="note-num">3</span>-->
+<!--                </div>-->
+<!--                <span class="header-divider">|</span>-->
                 <span sec:authorize="isAuthenticated()" sec:authentication="name" class="user-name">관리자ID</span>
                 <span class="header-divider">|</span>
                 <form th:action="@{/admin/logout}" method="post" style="display: inline; margin: 0; padding: 0;">

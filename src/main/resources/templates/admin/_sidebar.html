@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
     <!-- 사이드바 Fragment -->
     <aside class="sidebar" th:fragment="sidebar(activeMenu)">
@@ -13,36 +13,46 @@
         </div>
         <nav class="sidebar-menu">
             <ul>
+                <!-- 펀드 관리 - CS는 펀드 목록만, ADM/SAD는 전체 -->
                 <li class="menu-item has-submenu" 
-                    th:classappend="${activeMenu != null && (activeMenu == 'product-list' || activeMenu == 'product-register' || activeMenu == 'product-pending' || activeMenu == 'product-edit' || activeMenu == 'product-documents') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'product-list' || activeMenu == 'product-register' || activeMenu == 'product-pending' || activeMenu == 'product-edit' || activeMenu == 'product-documents') ? 'open' : ''}"
+                    sec:authorize="hasAnyRole('ADM', 'SAD', 'CS')">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">펀드 관리</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/product}" 
                                th:classappend="${activeMenu == 'product-list' ? 'active' : ''}">펀드 목록</a></li>
-<!--                        <li><a th:href="@{/admin/product/register}"
-                               th:classappend="${activeMenu == 'product-register' ? 'active' : ''}">펀드 등록</a></li>-->
-                        <li><a th:href="@{/admin/product/pending}" 
-                               th:classappend="${activeMenu == 'product-pending' ? 'active' : ''}">펀드 관리</a></li>
-<!--                        <li><a th:href="@{/admin/product/edit}"
-                               th:classappend="${activeMenu == 'product-edit' ? 'active' : ''}">펀드 수정</a></li>-->
-                        <!--<li><a th:href="@{/admin/product/documents}"
-                               th:classappend="${activeMenu == 'product-documents' ? 'active' : ''}">펀드 문서 관리</a></li>-->
-                        <li><a th:href="@{/admin/product/status}"
-                               th:classappend="${activeMenu == 'product-status' ? 'active' : ''}">펀드 가입 현황</a></li>
+                        <!-- CS는 펀드 목록만, ADM/SAD는 추가 메뉴 표시 -->
+                        <li sec:authorize="hasAnyRole('ADM', 'SAD')">
+                            <a th:href="@{/admin/product/pending}" 
+                               th:classappend="${activeMenu == 'product-pending' ? 'active' : ''}">펀드 관리</a>
+                        </li>
+                        <li sec:authorize="hasAnyRole('ADM', 'SAD')">
+                            <a th:href="@{/admin/product/status}"
+                               th:classappend="${activeMenu == 'product-status' ? 'active' : ''}">펀드 가입 현황</a>
+                        </li>
                     </ul>
                 </li>
+                
+                <!-- 회원 관리 - CS는 회원 관리만, ADM/SAD는 전체 -->
                 <li class="menu-item has-submenu"
-                    th:classappend="${activeMenu != null && (activeMenu == 'member' || activeMenu == 'permission') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'member' || activeMenu == 'permission') ? 'open' : ''}"
+                    sec:authorize="hasAnyRole('ADM', 'SAD', 'CS')">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">회원 관리</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/member/list}"
                                th:classappend="${activeMenu == 'member' ? 'active' : ''}">회원 관리</a></li>
-                        <li><a th:href="@{/admin/member/permission}"
-                               th:classappend="${activeMenu == 'permission' ? 'active' : ''}">권한 관리</a></li>
+                        <!-- SAD만 표시 -->
+                        <li sec:authorize="hasRole('SAD')">
+                            <a th:href="@{/admin/member/permission}"
+                               th:classappend="${activeMenu == 'permission' ? 'active' : ''}">권한 관리</a>
+                        </li>
                     </ul>
                 </li>
+                
+                <!-- 정보/공시 - CS는 숨김, ADM/SAD만 -->
                 <li class="menu-item has-submenu"
-                    th:classappend="${activeMenu != null && (activeMenu == 'info-disclosures' || activeMenu == 'info-ad-hoc' || activeMenu == 'info-fund-info' || activeMenu == 'info-guide' || activeMenu == 'info-fund-market') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'info-disclosures' || activeMenu == 'info-ad-hoc' || activeMenu == 'info-fund-info' || activeMenu == 'info-guide' || activeMenu == 'info-fund-market') ? 'open' : ''}"
+                    sec:authorize="hasAnyRole('ADM', 'SAD')">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">정보/공시</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/info/disclosures}"
@@ -55,11 +65,13 @@
                                th:classappend="${activeMenu == 'info-guide' ? 'active' : ''}">펀드가이드</a></li>
                         <li><a th:href="@{/admin/info/fund-market}"
                                th:classappend="${activeMenu == 'info-fund-market' ? 'active' : ''}">펀드시황관리</a></li>
-
                     </ul>
                 </li>
+                
+                <!-- 고객 지원 - CS, ADM, SAD 모두 -->
                 <li class="menu-item has-submenu" 
-                    th:classappend="${activeMenu != null && (activeMenu == 'faq' || activeMenu == 'qna') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'faq' || activeMenu == 'qna') ? 'open' : ''}"
+                    sec:authorize="hasAnyRole('CS', 'ADM', 'SAD')">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">고객 지원</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/cs/faq}" 
@@ -68,11 +80,14 @@
                                th:classappend="${activeMenu == 'qna' ? 'active' : ''}">QnA 관리</a></li>
                     </ul>
                 </li>
+                
+                <!-- 환경 설정 - CS는 숨김, ADM/SAD만 -->
                 <li class="menu-item has-submenu"
-                    th:classappend="${activeMenu != null && (activeMenu == 'settings-search-keyword' || activeMenu == 'settings-category' || activeMenu == 'settings-terms') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'settings-search-keyword' || activeMenu == 'settings-category' || activeMenu == 'settings-terms') ? 'open' : ''}"
+                    sec:authorize="hasAnyRole('ADM', 'SAD')">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">환경 설정</a>
                     <ul class="submenu">
-                        <li><a th:href="@{/admin/settings/search-keyword}"
+                        <li><a th:href="@{/admin/settings/keyword}"
                                th:classappend="${activeMenu == 'settings-search-keyword' ? 'active' : ''}">검색어 관리</a></li>
                         <li><a th:href="@{/admin/settings/category}"
                                th:classappend="${activeMenu == 'settings-category' ? 'active' : ''}">카테고리 관리</a></li>
@@ -82,8 +97,11 @@
                                th:classappend="${activeMenu == 'dev-logs' ? 'active' : ''}">개발 관리</a></li>
                     </ul>
                 </li>
+                
+                <!-- 결재 - CS는 숨김, ADM/SAD만 -->
                 <li class="menu-item has-submenu"
-                    th:classappend="${activeMenu != null && (activeMenu == 'approval' || activeMenu == 'approval-history') ? 'open' : ''}">
+                    th:classappend="${activeMenu != null && (activeMenu == 'approval' || activeMenu == 'approval-history') ? 'open' : ''}"
+                    sec:authorize="hasAnyRole('ADM', 'SAD')">
                     <a href="#" onclick="toggleSubmenu(this.parentElement); return false;">결재</a>
                     <ul class="submenu">
                         <li><a th:href="@{/admin/approval}" 

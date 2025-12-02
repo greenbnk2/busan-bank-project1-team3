@@ -18,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final LoginSuccessHandler loginSuccessHandler;
+    private final AdminLoginSuccessHandler adminLoginSuccessHandler;  // 추가
 
     // @Qualifier를 사용하여 Bean 이름을 기준으로 정확히 주입. - UserDetailsService
     @Qualifier("adminSecurityService")
@@ -48,8 +49,12 @@ public class SecurityConfig {
                         .requestMatchers("/admin/login").permitAll() // 관리자 로그인 페이지는 모두 허용
                         .requestMatchers("/admin/monitor/**").hasRole("SAD")
                         .requestMatchers("/admin/cs/**").hasAnyRole("CS", "ADM", "SAD") // CS 페이지는 3가지 역할 모두
+                        .requestMatchers("/admin/product").hasAnyRole("CS", "ADM", "SAD") // CS 페이지는 3가지 역할 모두
+                        .requestMatchers("/admin/member/permission").hasAnyRole(  "SAD") // CS 페이지는 3가지 역할 모두
+                        .requestMatchers("/admin/member/**").hasAnyRole("CS", "ADM", "SAD") // CS 페이지는 3가지 역할 모두
                         .requestMatchers("/admin/**").hasAnyRole("ADM", "SAD") // 그 외 관리자 페이지는 ADM, SAD만
                         .anyRequest().authenticated() // 혹시 모를 나머지 admin 경로는 인증만 되면 허용
+
                 )
 
                 // 3. ⭐️ AdminSecurityService를 사용하여 인증하도록 설정
@@ -61,7 +66,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/admin/login") // 로그인 폼이 전송될 URL
                         .usernameParameter("adminId") // 로그인 폼의 아이디 필드 name (adminId)
                         .passwordParameter("password") // 로그인 폼의 비밀번호 필드 name (password)
-                        .defaultSuccessUrl("/admin/main", true) // 로그인 성공 시 이동할 URL
+                        .successHandler(adminLoginSuccessHandler)  // defaultSuccessUrl 대신 핸들러 사용
                         .failureUrl("/admin/login?error=true") // 로그인 실패 시 URL
                 )
 

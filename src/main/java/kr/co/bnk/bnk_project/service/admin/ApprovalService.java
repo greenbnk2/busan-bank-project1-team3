@@ -4,6 +4,7 @@ import kr.co.bnk.bnk_project.dto.CsDTO;
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.ApprovalDTO;
+import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
 import kr.co.bnk.bnk_project.mapper.admin.ApprovalMapper;
 import kr.co.bnk.bnk_project.mapper.admin.FundMasterRevisionMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,23 @@ public class ApprovalService {
     public void insertApproval(ApprovalDTO approvalDTO) {
         approvalMapper.insertApproval(approvalDTO);
 
-            adminFundService.updateOperStatus(approvalDTO.getFundCode());
+        String fundCode = approvalDTO.getFundCode();
+        if (fundCode == null || fundCode.isBlank()) {
+            return;
+        }
 
+        AdminFundMasterDTO currentFund = adminFundService.getPendingFundEdit(fundCode);
+        if (currentFund == null) {
+            return;
+        }
+
+        String operStatus = currentFund.getOperStatus() != null ? currentFund.getOperStatus().trim() : "";
+        String updateStat = currentFund.getUpdateStat() != null ? currentFund.getUpdateStat().trim() : null;
+
+        if (("등록".equals(operStatus) && (updateStat == null || updateStat.isEmpty())) 
+            || ("운용중".equals(operStatus) && "수정".equals(updateStat))) {
+            adminFundService.updateOperStatus(fundCode);
+        }
     }
 
 

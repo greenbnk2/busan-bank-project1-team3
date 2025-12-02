@@ -187,20 +187,24 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
 }
 
 .page-btn:hover:not(:disabled) {
     background: #cd1317;
     border-color: #cd1317;
     color: white;
+    text-decoration: none;
 }
 
-.page-btn:disabled {
+.page-btn:disabled,
+.page-btn.disabled {
     opacity: 0.4;
     cursor: not-allowed;
     background: white;
     border-color: #ddd;
     color: #999;
+    text-decoration: none;
 }
 
 .page-numbers {
@@ -223,12 +227,14 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
 }
 
 .page-number:hover {
     background: #cd1317;
     border-color: #cd1317;
     color: white;
+    text-decoration: none;
 }
 
 .page-number.active {
@@ -236,12 +242,14 @@ button:hover {
     border-color: #ddd;
     color: #cd1317;
     font-weight: 600;
+    text-decoration: none;
 }
 
 .page-number.active:hover {
     background: #cd1317;
     border-color: #cd1317;
     color: white;
+    text-decoration: none;
 }
 
 .modal-overlay {
