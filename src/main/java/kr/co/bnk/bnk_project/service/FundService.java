@@ -1,6 +1,7 @@
 package kr.co.bnk.bnk_project.service;
 
 import kr.co.bnk.bnk_project.dto.*;
+import kr.co.bnk.bnk_project.dto.FundPeriodDTO;
 import kr.co.bnk.bnk_project.mapper.FundMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,23 @@ public class FundService {
 
     private final FundMapper productMapper;
 
-    public List<ProductDTO> getProductList(){
-        return productMapper.find_ProductList();
+    public List<ProductDTO> getProductList() {
+        List<ProductDTO> list = productMapper.find_ProductList();
+
+        for (ProductDTO dto : list) {
+            Double cur = dto.getCurrentNav();
+            Double nav1 = dto.getNav1M();
+            Double nav3 = dto.getNav3M();
+            Double nav6 = dto.getNav6M();
+            Double nav12 = dto.getNav12M();
+
+            dto.setPerf1M(calcYield(cur, nav1));
+            dto.setPerf3M(calcYield(cur, nav3));
+            dto.setPerf6M(calcYield(cur, nav6));
+            dto.setPerf12M(calcYield(cur, nav12));
+        }
+
+        return list;
     }
 
     public ProductDTO getProductDetail(String fundcode) {
@@ -118,4 +134,30 @@ public class FundService {
     public List<KeywordDTO> getRecommendedKeywords() {
         return productMapper.selectRandomKeywords();
     }
+
+    public List<FundChartDTO> getFundNavLast3Months(String fundCode) {
+        return productMapper.selectFundNavLast3Months(fundCode);
+    }
+
+    public FundPeriodDTO getFundPeriodYield(String fundCode) {
+        FundPeriodDTO dto = productMapper.selectFundPeriodYield(fundCode);
+
+        if (dto == null) return null;
+
+        // 수익률 계산
+        dto.setYield1M(calcYield(dto.getCurrentNav(), dto.getNav1M()));
+        dto.setYield3M(calcYield(dto.getCurrentNav(), dto.getNav3M()));
+        dto.setYield6M(calcYield(dto.getCurrentNav(), dto.getNav6M()));
+        dto.setYield12M(calcYield(dto.getCurrentNav(), dto.getNav12M()));
+
+        return dto;
+    }
+
+    private double calcYield(Double current, Double past) {
+        if (current == null || past == null || past == 0) return 0.0;
+        return (current - past) / past * 100.0;
+    }
+
+
+
 }

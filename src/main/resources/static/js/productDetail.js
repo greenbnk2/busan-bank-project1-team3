@@ -1,19 +1,43 @@
 // ===== 상단 기준가 추이 =====
-new Chart(document.getElementById('fundTrend'), {
-    type: 'line',
-    data: {
-        labels: ['8월', '9월', '10월', '11월'],
-        datasets: [{
-            label: '기준가 (원)',
-            data: [9400, 9700, 10200, 10800],
-            borderColor: '#b22222',
-            backgroundColor: 'rgba(178,34,34,0.15)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.3
-        }]
-    },
-    options: { plugins: { legend: { display: false } } }
+// ====================== 상단 기준가 추이 (DB 연동) ======================
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fundCode = document.getElementById("fundCode").value;
+
+    fetch(`/bnk/fund/nav/${fundCode}`)
+        .then(res => res.json())
+        .then(json => {
+            const ctx = document.getElementById('fundTrend').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: json.labels,          // ['2025-01-01', '2025-01-02', ...]
+                    datasets: [{
+                        label: '기준가 (원)',
+                        data: json.data,          // [10200.33, 10210.50 ...]
+                        borderColor: '#b22222',
+                        backgroundColor: 'rgba(178,34,34,0.15)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 5,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(err => console.error("차트 데이터 로딩 실패:", err));
 });
 
 // ===== 성별 분석 =====

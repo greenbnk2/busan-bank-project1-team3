@@ -6,10 +6,7 @@ import kr.co.bnk.bnk_project.service.FundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -109,6 +106,28 @@ public class FundController {
         model.addAttribute("keywordList", recommendedKeywords);
 
         return "searchResult";
+    }
+
+    @GetMapping("/nav/{fundCode}")
+    @ResponseBody
+    public Object getFundNavLast3Months(@PathVariable("fundCode") String fundCode) {
+
+        var list = productService.getFundNavLast3Months(fundCode);
+
+        // labels, data 배열 생성
+        List<String> labels = new java.util.ArrayList<>();
+        List<Double> data = new java.util.ArrayList<>();
+
+        list.forEach(row -> {
+            labels.add(row.getBaseDate());
+            data.add(row.getNavPerUnit());
+        });
+
+        // JSON 형태로 리턴
+        return java.util.Map.of(
+                "labels", labels,
+                "data", data
+        );
     }
 }
 

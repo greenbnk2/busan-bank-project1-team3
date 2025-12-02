@@ -78,6 +78,7 @@
             <div class="main-content">
 
                 <h1 th:text="${detail.fundName}" class="fund-title"></h1>
+                <input type="hidden" id="fundCode" th:value="${detail.fundcode}">
                 <div class="subtitle">주식형</div>
 
                 <!-- 기본정보 + 차트 -->
@@ -95,7 +96,7 @@
                     </div>
 
                     <div class="chart-box">
-                        <h4>최근 3개월 기준가(DB 데이터 예정)</h4>
+                        <h4>최근 3개월 기준가</h4>
                         <canvas id="fundTrend"></canvas>
                     </div>
                 </div>

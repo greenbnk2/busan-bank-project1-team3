@@ -239,4 +239,74 @@
         END,
         REG_DATE DESC
     </select>
+
+    <select id="selectFundNavLast3Months"
+            parameterType="string"
+            resultType="kr.co.bnk.bnk_project.dto.FundChartDTO">
+    <![CDATA[
+        SELECT
+            TO_CHAR(TRADE_DATE, 'YYYY-MM-DD') AS baseDate,
+            NAV_PER_UNIT AS navPerUnit
+        FROM
+            FUND_DAILY_HISTORY
+        WHERE
+            FUND_CODE = #{fundCode}
+          AND TRADE_DATE >= ADD_MONTHS(TRUNC(SYSDATE), -3)
+        ORDER BY
+            TRADE_DATE ASC
+        ]]>
+</select>
+
+    <select id="selectFundPeriodYield"
+            parameterType="string"
+            resultType="kr.co.bnk.bnk_project.dto.FundPeriodDTO">
+
+    <![CDATA[
+        SELECT
+            #{fundCode} AS fundCode,
+
+            /* 현재 NAV */
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = #{fundCode}
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS currentNav,
+
+            /* 1개월 NAV */
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = #{fundCode}
+               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -1)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav1M,
+
+            /* 3개월 NAV */
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = #{fundCode}
+               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -3)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav3M,
+
+            /* 6개월 NAV */
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = #{fundCode}
+               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -6)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav6M,
+
+            /* 12개월 NAV */
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = #{fundCode}
+               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -12)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav12M
+
+        FROM DUAL
+        ]]>
+</select>
+
+
 </mapper>

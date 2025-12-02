@@ -1,6 +1,7 @@
 package kr.co.bnk.bnk_project.mapper;
 
 import kr.co.bnk.bnk_project.dto.*;
+import kr.co.bnk.bnk_project.dto.FundPeriodDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -34,4 +35,9 @@ public interface FundMapper {
     // 실제 상품 검색
     List<ProductDTO> selectFundsBySearch(@Param("searchWord") String searchWord,
                                          @Param("expandedList") List<String> expandedList);
+
+    List<FundChartDTO> selectFundNavLast3Months(String fundCode);
+
+    FundPeriodDTO selectFundPeriodYield(String fundCode);
 }
+

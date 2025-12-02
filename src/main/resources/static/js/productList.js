@@ -1,6 +1,10 @@
 /* ================================================================
    🔥 펀드상품 리스트 + 위험등급 매핑 + 필터 + 탭 + 페이지네이션 (10개씩)
    ================================================================ */
+function formatYield(v) {
+    if (v === null || v === undefined) return "-";
+    return v.toFixed(2) + "%";
+}
 
 let fundData = [];        // DB 전체 데이터
 let filteredData = [];    // 필터 적용된 데이터
@@ -101,10 +105,10 @@ function renderFundList(category = null) {
 
             </td>
 
-            <td>${fund.perf1M ?? "-"}</td>
-            <td>${fund.perf3M ?? "-"}</td>
-            <td>${fund.perf6M ?? "-"}</td>
-            <td>${fund.perf12M ?? "-"}</td>
+           <td>${formatYield(fund.perf1M)}</td>
+            <td>${formatYield(fund.perf3M)}</td>
+            <td>${formatYield(fund.perf6M)}</td>
+            <td>${formatYield(fund.perf12M)}</td>
 
             <td>
               <button class="btn-join"
