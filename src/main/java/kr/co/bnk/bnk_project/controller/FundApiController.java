@@ -20,4 +20,9 @@ public class FundApiController {
     public List<ProductDTO> getFundList() {
         return fundService.getProductList();
     }
+    @GetMapping("/best")
+    public List<ProductDTO> getFundBest() {
+        return fundService.getFundYieldBest();
+    }
 }
+

@@ -3,6 +3,7 @@ package kr.co.bnk.bnk_project.service;
 import kr.co.bnk.bnk_project.dto.*;
 import kr.co.bnk.bnk_project.dto.FundPeriodDTO;
 import kr.co.bnk.bnk_project.mapper.FundMapper;
+import kr.co.bnk.bnk_project.mapper.admin.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,7 +116,7 @@ public class FundService {
         List<String> expandedList = new ArrayList<>();
         if (relatedWordsDb != null) {
             for (String words : relatedWordsDb) {
-                if(words == null) continue;
+                if (words == null) continue;
                 // 콤마(,)로 쪼개서 리스트에 담기
                 String[] split = words.split(",");
                 for (String s : split) {
@@ -158,6 +159,37 @@ public class FundService {
         return (current - past) / past * 100.0;
     }
 
+    public Double calculate1MonthReturn(Long fundId) {
 
+        ProductDTO today = productMapper.getLatestNav(fundId);
+        if (today == null || today.getNav() == null) {
+            return null;
+        }
 
+        ProductDTO monthAgo = productMapper.getOneMonthAgoNav(fundId, today.getTradeDate());
+        if (monthAgo == null || monthAgo.getNav() == null) {
+            return null;
+        }
+
+        double result = (today.getNav() / monthAgo.getNav() - 1) * 100;
+
+        // 소수점 2자리까지 반올림
+        return Math.round(result * 100) / 100.0;
+    }
+
+    public List<ProductDTO> getFundYieldBest() {
+
+        List<ProductDTO> list = productMapper.selectFundYieldBest();
+
+        // 🔥 perf1M이 NULL이면 아예 제거
+        list.removeIf(dto -> dto.getPerf1M() == null);
+
+        // 🔥 안전한 정렬
+        list.sort((a, b) -> Double.compare(b.getPerf1M(), a.getPerf1M()));
+
+        // 🔥 TOP10만 반환
+        return list.stream().limit(10).toList();
+
+    }
 }
+
