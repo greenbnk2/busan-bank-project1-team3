@@ -82,7 +82,6 @@ spring:
         - classpath:/public/
         - classpath:/resources/
         - classpath:/META-INF/resources/
-        - "file:\${file.path}/"
 
 file:
   path: /home/rsa-key-20251117/upload

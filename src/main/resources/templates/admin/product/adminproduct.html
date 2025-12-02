@@ -265,9 +265,9 @@
 
                 // PDF 버튼 RUL
                 const ctx = "/bnk";
-                document.getElementById("termsBtn").href = ctx + "/files/" + (product.termsUrl ?? "#");
-                document.getElementById("investBtn").href = ctx + "/files/" + (product.investUrl ?? "#");
-                document.getElementById("summaryBtn").href = ctx + "/files/" + (product.summaryUrl ?? "#");
+                document.getElementById("termsBtn").href = ctx + (product.termsUrl ?? "#");
+                document.getElementById("investBtn").href = ctx + (product.investUrl ?? "#");
+                document.getElementById("summaryBtn").href = ctx + (product.summaryUrl ?? "#");
 
 
 
@@ -1210,7 +1210,7 @@
                 // 수익률 차트 조회기간
                 function filterReturnData() {
 
-                    if (!product || !product.returnHistoryList) return;
+                    if (!product || !product.priceHistoryList) return;
 
                     const start = document.getElementById("returnStartDate").value;
                     const end = document.getElementById("returnEndDate").value;
@@ -1224,22 +1224,19 @@
                     const startNum = Number(start.replace(/-/g, ""));
                     const endNum = Number(end.replace(/-/g, ""));
 
-                    // 조건에 맞는 데이터 필터
-                    let filtered = product.returnHistoryList.filter(item => {
+                    // 가격변동 추이 데이터 필터링 (절대값 사용)
+                    let filteredPrice = product.priceHistoryList.filter(item => {
                         const dateNum = Number(item.tradeDate.replace(/-/g, ""));
                         return dateNum >= startNum && dateNum <= endNum;
                     });
 
-                    // 2) 월말 기준
+                    // 월말 기준 처리
                     const basis = document.querySelector('input[name="chartBasis"]:checked').value;
-
                     if (basis === 'monthly') {
                         const monthly = [];
-
-                        filtered.forEach(item => {
+                        filteredPrice.forEach(item => {
                             const month = item.tradeDate.substring(0, 7);
-                            const last  = monthly[monthly.length - 1];
-
+                            const last = monthly[monthly.length - 1];
                             if (!last || last.tradeDate.substring(0, 7) !== month) {
                                 monthly.push(item);
                             } else {
@@ -1248,16 +1245,66 @@
                                 }
                             }
                         });
-
-                        filtered = monthly;
+                        filteredPrice = monthly;
                     }
 
+                    if (filteredPrice.length === 0) {
+                        alert("조회 기간에 해당하는 데이터가 없습니다.");
+                        return;
+                    }
+
+                    // 첫 번째 날짜 기준값 (기준일)
+                    const baseDate = filteredPrice[0];
+                    const baseNav = baseDate.navPerUnit || 0;
+                    const baseKospi = baseDate.bmKospi || 0;
+                    const baseKosdaq = baseDate.bmKosdaq || 0;
+                    const baseGovBond = baseDate.bmGovBond || 0;
+                    const baseCorpBond = baseDate.bmCorpBond || 0;
+
+                    // 누적 수익률 재계산 (첫 번째 날짜 기준)
+                    // -100 값 방지: 기준일값이 0이거나 NULL이면 수익률 = 0
+                    // 현재값이 0이거나 NULL이면 수익률 = 0
+                    const recalculated = filteredPrice.map((item, index) => {
+                        // NAV 수익률
+                        const navReturn = (index === 0 || baseNav === 0 || !baseNav || item.navPerUnit === 0 || !item.navPerUnit) 
+                            ? 0 
+                            : Number(((item.navPerUnit / baseNav - 1) * 100).toFixed(2));
+                        
+                        // KOSPI 수익률
+                        const kospiReturn = (index === 0 || baseKospi === 0 || !baseKospi || item.bmKospi === 0 || !item.bmKospi)
+                            ? 0
+                            : Number(((item.bmKospi / baseKospi - 1) * 100).toFixed(2));
+                        
+                        // KOSDAQ 수익률
+                        const kosdaqReturn = (index === 0 || baseKosdaq === 0 || !baseKosdaq || item.bmKosdaq === 0 || !item.bmKosdaq)
+                            ? 0
+                            : Number(((item.bmKosdaq / baseKosdaq - 1) * 100).toFixed(2));
+                        
+                        // 국공채 수익률
+                        const govBondReturn = (index === 0 || baseGovBond === 0 || !baseGovBond || item.bmGovBond === 0 || !item.bmGovBond)
+                            ? 0
+                            : Number(((item.bmGovBond / baseGovBond - 1) * 100).toFixed(2));
+                        
+                        // 회사채 수익률
+                        const corpBondReturn = (index === 0 || baseCorpBond === 0 || !baseCorpBond || item.bmCorpBond === 0 || !item.bmCorpBond)
+                            ? 0
+                            : Number(((item.bmCorpBond / baseCorpBond - 1) * 100).toFixed(2));
+
+                        return {
+                            ...item,
+                            navReturn: navReturn,
+                            kospiReturn: kospiReturn,
+                            kosdaqReturn: kosdaqReturn,
+                            govBondReturn: govBondReturn,
+                            corpBondReturn: corpBondReturn
+                        };
+                    });
 
                     // 테이블 갱신
-                    renderReturnTable({ returnHistoryList: filtered });
+                    renderReturnTable({ returnHistoryList: recalculated });
 
-                    // 차트 갱신 (사용하던 그대로)
-                    updateReturnChartByFiltered(filtered);
+                    // 차트 갱신
+                    updateReturnChartByFiltered(recalculated);
                 }
 
                 // 가격변동 추이 조회기간
@@ -1335,10 +1382,11 @@
                     returnChart.data.datasets[0].data = navReturns;
                     returnChart.data.datasets[1].data = setupOriginAmounts;
 
-                    // 벤치마크 재계산
-                    updateChart(); // ← 기존 함수 그대로 호출하면 됨
+                    // 벤치마크 데이터 채우기 (재계산된 데이터 사용)
+                    fillBenchmarkDataFromRecalculated(list);
 
-                    returnChart.update();
+                    // Y축 범위 재계산 및 차트 업데이트
+                    updateChartWithDynamicYAxis();
                 }
                 // 가격변동 차트
                 function updatePriceChartByFiltered(list) {
@@ -1414,6 +1462,14 @@
         benchmarkData.corp   = list.map(i => i.corpBondReturn ?? 0);
     }
 
+    // 필터링된 데이터로 벤치마크 데이터 채우기 (재계산된 수익률 사용)
+    function fillBenchmarkDataFromRecalculated(list) {
+        benchmarkData.kospi  = list.map(i => i.kospiReturn ?? 0);
+        benchmarkData.kosdaq = list.map(i => i.kosdaqReturn ?? 0);
+        benchmarkData.govt   = list.map(i => i.govBondReturn ?? 0);
+        benchmarkData.corp   = list.map(i => i.corpBondReturn ?? 0);
+    }
+
 
     function updateChart() {
         if (!returnChart) return;
@@ -1464,6 +1520,89 @@
         returnChart.update();
     }
 
+    // Y축 범위를 동적으로 계산하여 0 중심으로 대칭 범위 설정
+    function updateChartWithDynamicYAxis() {
+        if (!returnChart) return;
+
+        // 1) 기존 DB 기반 차트 데이터 (운용수익률/설정원본) 유지
+        const baseDatasets = [
+            returnChart.data.datasets[0], // 운용수익률
+            returnChart.data.datasets[1]  // 설정원본
+        ];
+
+        // 2) 선택된 벤치마크 읽기
+        const selectedBenchmarks = [];
+        const modal = document.getElementById('productDetailModal');
+        const checkboxes = modal.querySelectorAll('input[name="benchmark"]:checked');
+
+        checkboxes.forEach(cb => selectedBenchmarks.push(cb.value));
+
+        // 3) Y축 범위 계산: 운용수익률 + 선택된 벤치마크 데이터
+        const navReturns = returnChart.data.datasets[0].data;
+        const allReturnValues = [...navReturns];
+        
+        selectedBenchmarks.forEach(benchmark => {
+            const data = benchmarkData[benchmark];
+            if (data && data.length > 0) {
+                allReturnValues.push(...data);
+            }
+        });
+
+        // 유효한 값만 필터링
+        const validReturnValues = allReturnValues.filter(v => v != null && !isNaN(v) && isFinite(v));
+        
+        if (validReturnValues.length === 0) {
+            returnChart.update();
+            return;
+        }
+
+        const minReturn = Math.min(...validReturnValues);
+        const maxReturn = Math.max(...validReturnValues);
+
+        // 0을 중심으로 대칭 범위 계산
+        const absMax = Math.max(Math.abs(minReturn), Math.abs(maxReturn));
+        const padding = absMax * 0.15 || 0.1; // 15% 패딩
+        const adjustedMinReturn = -absMax - padding;
+        const adjustedMaxReturn = absMax + padding;
+
+        // 4) 벤치마크 데이터 추가
+        selectedBenchmarks.forEach(benchmark => {
+            const data = benchmarkData[benchmark];
+            const color = benchmarkColors[benchmark];
+            const label =
+                benchmark === 'kospi' ? 'KOSPI' :
+                    benchmark === 'kosdaq' ? 'KOSDAQ' :
+                        benchmark === 'govt' ? '국공채' : '회사채';
+
+            baseDatasets.push({
+                label: label,
+                type: 'line',
+                data: data,
+                borderColor: color,
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: color,
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointHoverBorderWidth: 2,
+                pointStyle: 'circle',
+                yAxisID: 'y',
+                order: 1
+            });
+        });
+
+        // 5) Y축 범위 업데이트
+        returnChart.options.scales.y.min = adjustedMinReturn;
+        returnChart.options.scales.y.max = adjustedMaxReturn;
+        returnChart.options.scales.y.ticks.stepSize = (adjustedMaxReturn - adjustedMinReturn) / 6;
+
+        // 6) 차트 업데이트
+        returnChart.data.datasets = baseDatasets;
+        returnChart.update();
+    }
+
 
     function initReturnChart() {
         const ctx = document.getElementById('returnChart');
@@ -1474,21 +1613,88 @@
             returnChart.destroy();
         }
 
-        // 날짜 라벨 (샘플 데이터 - 이미지 기준)
-        const list = window.currentProduct.returnHistoryList || [];
-        const labels = list.map(item => item.tradeDate);
-        const navReturns = list.map(item => item.navReturn ?? 0);
-        const setupOriginAmounts = list.map(item => item.setupOriginAmount ?? 0);
+        // 가격변동 추이 데이터 사용 (절대값)
+        const priceList = window.currentProduct.priceHistoryList || [];
+        
+        if (priceList.length === 0) {
+            return;
+        }
 
+        // 첫 번째 날짜 기준값 (기준일)
+        const baseDate = priceList[0];
+        const baseNav = baseDate.navPerUnit || 0;
+        const baseKospi = baseDate.bmKospi || 0;
+        const baseKosdaq = baseDate.bmKosdaq || 0;
+        const baseGovBond = baseDate.bmGovBond || 0;
+        const baseCorpBond = baseDate.bmCorpBond || 0;
 
-        const minReturn = Math.min(...navReturns);
-        const maxReturn = Math.max(...navReturns);
+        // 누적 수익률 재계산 (첫 번째 날짜 기준)
+        // -100 값 방지: 기준일값이 0이거나 NULL이면 수익률 = 0
+        // 현재값이 0이거나 NULL이면 수익률 = 0
+        const recalculated = priceList.map((item, index) => {
+            // NAV 수익률
+            const navReturn = (index === 0 || baseNav === 0 || !baseNav || item.navPerUnit === 0 || !item.navPerUnit) 
+                ? 0 
+                : Number(((item.navPerUnit / baseNav - 1) * 100).toFixed(2));
+            
+            // KOSPI 수익률
+            const kospiReturn = (index === 0 || baseKospi === 0 || !baseKospi || item.bmKospi === 0 || !item.bmKospi)
+                ? 0
+                : Number(((item.bmKospi / baseKospi - 1) * 100).toFixed(2));
+            
+            // KOSDAQ 수익률
+            const kosdaqReturn = (index === 0 || baseKosdaq === 0 || !baseKosdaq || item.bmKosdaq === 0 || !item.bmKosdaq)
+                ? 0
+                : Number(((item.bmKosdaq / baseKosdaq - 1) * 100).toFixed(2));
+            
+            // 국공채 수익률
+            const govBondReturn = (index === 0 || baseGovBond === 0 || !baseGovBond || item.bmGovBond === 0 || !item.bmGovBond)
+                ? 0
+                : Number(((item.bmGovBond / baseGovBond - 1) * 100).toFixed(2));
+            
+            // 회사채 수익률
+            const corpBondReturn = (index === 0 || baseCorpBond === 0 || !baseCorpBond || item.bmCorpBond === 0 || !item.bmCorpBond)
+                ? 0
+                : Number(((item.bmCorpBond / baseCorpBond - 1) * 100).toFixed(2));
+
+            return {
+                ...item,
+                navReturn: navReturn,
+                kospiReturn: kospiReturn,
+                kosdaqReturn: kosdaqReturn,
+                govBondReturn: govBondReturn,
+                corpBondReturn: corpBondReturn
+            };
+        });
+
+        const labels = recalculated.map(item => item.tradeDate);
+        const navReturns = recalculated.map(item => item.navReturn ?? 0);
+        const setupOriginAmounts = recalculated.map(item => item.setupOriginAmount ?? 0);
+
+        // Y축 범위 계산: 운용수익률 + 모든 벤치마크 데이터 포함
+        const allReturnValues = [...navReturns];
+        if (recalculated.some(i => i.kospiReturn)) allReturnValues.push(...recalculated.map(i => i.kospiReturn ?? 0));
+        if (recalculated.some(i => i.kosdaqReturn)) allReturnValues.push(...recalculated.map(i => i.kosdaqReturn ?? 0));
+        if (recalculated.some(i => i.govBondReturn)) allReturnValues.push(...recalculated.map(i => i.govBondReturn ?? 0));
+        if (recalculated.some(i => i.corpBondReturn)) allReturnValues.push(...recalculated.map(i => i.corpBondReturn ?? 0));
+
+        // 유효한 값만 필터링
+        const validReturnValues = allReturnValues.filter(v => v != null && !isNaN(v) && isFinite(v));
+        
+        const minReturn = validReturnValues.length > 0 ? Math.min(...validReturnValues) : 0;
+        const maxReturn = validReturnValues.length > 0 ? Math.max(...validReturnValues) : 1;
+
+        // 0을 중심으로 대칭 범위 계산
+        const absMax = Math.max(Math.abs(minReturn), Math.abs(maxReturn));
+        const padding = absMax * 0.15 || 0.1; // 15% 패딩
+        const adjustedMinReturn = -absMax - padding;
+        const adjustedMaxReturn = absMax + padding;
 
         const minSetup = Math.min(...setupOriginAmounts);
         const maxSetup = Math.max(...setupOriginAmounts);
 
-        // 벤치마크 데이터
-        fillBenchmarkData(list);
+        // 벤치마크 데이터 (재계산된 데이터 사용)
+        fillBenchmarkData(recalculated);
 
 
         returnChart = new Chart(ctx, {
@@ -1558,10 +1764,10 @@
                     y: {
                         type: 'linear',
                         position: 'left',
-                        min: minReturn,
-                        max: maxReturn,
+                        min: adjustedMinReturn,
+                        max: adjustedMaxReturn,
                         ticks: {
-                            stepSize: 2,
+                            stepSize: (adjustedMaxReturn - adjustedMinReturn) / 6,
                             color: '#666',
                             font: {
                                 size: 11
@@ -1606,8 +1812,9 @@
             modal.querySelectorAll('input[name="benchmark"]').forEach(checkbox => {
                 // 기존 리스너 제거
                 checkbox.removeEventListener('change', updateChart);
-                // 새 리스너 추가
-                checkbox.addEventListener('change', updateChart);
+                checkbox.removeEventListener('change', updateChartWithDynamicYAxis);
+                // 새 리스너 추가 (Y축 동적 업데이트)
+                checkbox.addEventListener('change', updateChartWithDynamicYAxis);
             });
         }
     }

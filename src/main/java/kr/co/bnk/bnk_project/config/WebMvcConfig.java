@@ -23,17 +23,21 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-        // 약관/투자설명서/간이설명서 ( 임의 설정 -> 경로정해지면 수정예정 )
-        registry.addResourceHandler("/files/**")
-                .addResourceLocations("file:///" + filePath + "/");
+        // 약관(terms)
+        registry.addResourceHandler("/upload/terms/**")
+                .addResourceLocations("file:///home/rsa-key-20251117/upload/terms/");
 
-        // 로고 포함 모든 업로드 파일
-        registry.addResourceHandler("/upload/**")
-                .addResourceLocations("file:/home/rsa-key-20251117/upload/");
+        // 투자설명서(invest)
+        registry.addResourceHandler("/upload/invest/**")
+                .addResourceLocations("file:///home/rsa-key-20251117/upload/invest/");
 
-        // 로고 전용 경로
+        // 간이설명서(summary)
+        registry.addResourceHandler("/upload/summary/**")
+                .addResourceLocations("file:///home/rsa-key-20251117/upload/summary/");
+
+        // 로고 전용 경로(logo)
         registry.addResourceHandler("/upload/logo/**")
-                .addResourceLocations("file:/home/rsa-key-20251117/upload/logo/");
+                .addResourceLocations("file:///home/rsa-key-20251117/upload/logo/");
     }
 
     @Override
