@@ -154,7 +154,7 @@ function renderPagination() {
    4) 상단 탭 버튼 이벤트
    ================================================================ */
 document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
+    tab.addEventListener("click", async () => {
 
         document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
@@ -162,6 +162,7 @@ document.querySelectorAll(".tab").forEach(tab => {
         const type = tab.dataset.type;
         document.getElementById("title").textContent = tab.textContent;
 
+        /* ======================  펀드상품 ======================= */
         if (type === "fund") {
             document.getElementById("fund-filter").style.display = "flex";
 
@@ -170,8 +171,42 @@ document.querySelectorAll(".tab").forEach(tab => {
 
             renderFundList();
             renderPagination();
+        }
 
-        } else {
+        /* ======================  수익률 BEST ======================= */
+        else if (type === "best") {
+            document.getElementById("fund-filter").style.display = "none";
+
+            const res = await fetch("/bnk/api/fund/best");
+            let bestList = await res.json();
+
+            console.log("🔥 BEST API 결과:", bestList);
+
+            //  fundData와 동일한 category 작업 추가
+            bestList = bestList.map(f => {
+                let category = "all";
+
+                switch (f.investgrade) {
+                    case "매우 낮은 위험": category = "safe"; break;
+                    case "낮은 위험": category = "stable"; break;
+                    case "중간 위험": category = "neutral"; break;
+                    case "높은 위험": category = "dividend"; break;
+                    case "매우 높은 위험": category = "ipo"; break;
+                    default: category = "all";
+                }
+
+                return { ...f, category };
+            });
+
+            filteredData = bestList;
+            currentPage = 1;
+
+            renderFundList();
+            renderPagination();
+        }
+
+        /* ======================  추천펀드 / 판매BEST / 관심상품 ======================= */
+        else {
             document.getElementById("fund-filter").style.display = "none";
 
             document.getElementById("fund-list").innerHTML =
@@ -179,8 +214,10 @@ document.querySelectorAll(".tab").forEach(tab => {
 
             document.getElementById("pagination").innerHTML = "";
         }
+
     });
 });
+
 
 
 /* ================================================================
@@ -205,3 +242,38 @@ document.querySelectorAll("#fund-filter button").forEach(btn => {
    6) 페이지 로드 시 실행
    ================================================================ */
 document.addEventListener("DOMContentLoaded", loadFundData);
+
+/* ================================================================
+    7) 기간별 수익률 탭 정렬 기능
+   ================================================================ */
+document.querySelectorAll(".tab-yield").forEach(btn => {
+    btn.addEventListener("click", () => {
+
+        document.querySelectorAll(".tab-yield")
+            .forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const type = btn.dataset.yield;
+
+        let key = null;
+
+        switch (type) {
+            case "1M": key = "perf1M"; break;
+            case "3M": key = "perf3M"; break;
+            case "6M": key = "perf6M"; break;
+            case "12M": key = "perf12M"; break;
+        }
+
+        if (key) {
+            // 🔥 null 제외 & 내림차순 정렬
+            filteredData = [...fundData]
+                .filter(f => f[key] != null)
+                .sort((a, b) => b[key] - a[key]);
+        }
+
+        currentPage = 1;
+
+        renderFundList();
+        renderPagination();
+    });
+});
