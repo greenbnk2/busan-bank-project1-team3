@@ -192,7 +192,7 @@
                             searchType=${pageRequestDTO.searchType},
                             keyword=${pageRequestDTO.keyword},
                             category=${pageRequestDTO.category},
-                            status=${pageRequestDTO.status}
+                            status=${pageRequestDTO.status},
                             )}'|">
                         &gt;
                     </button>
@@ -263,9 +263,9 @@
             summaryBtn.href = "#";
             return;
         }
-        termsBtn.href = `${SERVER_BASE}/upload/terms/${fundCode}_terms.pdf`;
-        investBtn.href = `${SERVER_BASE}/upload/invest/${fundCode}_invest.pdf`;
-        summaryBtn.href = `${SERVER_BASE}/upload/summary/${fundCode}_summary.pdf`;
+        termsBtn.href = `${SERVER_BASE}/upload/terms/${fundCode}_약관.pdf`;
+        investBtn.href = `${SERVER_BASE}/upload/invest/${fundCode}_투자설명서.pdf`;
+        summaryBtn.href = `${SERVER_BASE}/upload/summary/${fundCode}_간이투자설명서.pdf`;
     }
 
     function viewProductDetail(fundCode) {
