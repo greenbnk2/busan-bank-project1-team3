@@ -192,7 +192,7 @@
                             searchType=${pageRequestDTO.searchType},
                             keyword=${pageRequestDTO.keyword},
                             category=${pageRequestDTO.category},
-                            status=${pageRequestDTO.status}
+                            status=${pageRequestDTO.status},
                             )}'|">
                         &gt;
                     </button>
@@ -247,6 +247,27 @@
         location.href = editUrl + '?id=' + productId;
     }
 
+    // 문서(약관, 투자설명서, 간이투자설명서)
+    const SERVER_BASE = "http://34.50.37.11:8080/bnk";
+
+    function setPdfLinks(product){
+        const termsBtn = document.getElementById("termsBtn");
+        const investBtn = document.getElementById("investBtn");
+        const summaryBtn = document.getElementById("summaryBtn");
+
+        const fundCode = product.fundCode;
+
+        if(!fundCode){
+            termsBtn.href = "#";
+            investBtn.href = "#";
+            summaryBtn.href = "#";
+            return;
+        }
+        termsBtn.href = `${SERVER_BASE}/upload/terms/${fundCode}_약관.pdf`;
+        investBtn.href = `${SERVER_BASE}/upload/invest/${fundCode}_투자설명서.pdf`;
+        summaryBtn.href = `${SERVER_BASE}/upload/summary/${fundCode}_간이투자설명서.pdf`;
+    }
+
     function viewProductDetail(fundCode) {
 
         fetch(`/bnk/admin/product/detail?fundCode=${fundCode}`)
@@ -263,13 +284,8 @@
                 document.getElementById("fundFullName").textContent = product.fundName;
                 document.getElementById("fundCode").textContent = product.fundCode;
 
-                // PDF 버튼 RUL
-                const ctx = "/bnk";
-                document.getElementById("termsBtn").href = ctx + (product.termsUrl ?? "#");
-                document.getElementById("investBtn").href = ctx + (product.investUrl ?? "#");
-                document.getElementById("summaryBtn").href = ctx + (product.summaryUrl ?? "#");
-
-
+                // 문서(약관, 투자설명서, 간이투자설명서)
+                setPdfLinks(product);
 
                 const modalBody = document.getElementById('modalBody');
                 modalBody.innerHTML = `
@@ -1037,8 +1053,16 @@
 
                 console.log(product.assetAllocationList);
                 // 회사 로고
+                const LOGO_SERVER_BASE = "http://34.50.37.11:8080/bnk";
                 console.log("회사로고:", product.logo);
-                document.querySelector("#companyLogoTab img").src = product.logo;
+                const logoImg = document.querySelector("#companyLogoTab img");
+
+                if(product.logo){
+                    logoImg.src = LOGO_SERVER_BASE + product.logo;
+                    logoImg.style.display = "block";
+                } else {
+                    logoImg.style.display = "none";
+                }
 
 
                 // 조회기간 검색(수익률차트추이,가격변동추이)

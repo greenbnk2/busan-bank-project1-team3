@@ -404,4 +404,17 @@
         WHERE FUND_CODE = #{fundCode}
     </update>
 
+    <!-- 문서(약관, 투자설명서, 간이투자설명서) -->
+    <select id="selectFundDocuments" parameterType="string"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundDocumentDTO">
+        SELECT FUND_CODE    AS fundCode,
+               DOC_TYPE     AS docType,
+               DOC_URL      AS docUrl,
+               DOC_FILE_NAME AS docFileName,
+               REG_DATE     AS regDate
+        FROM FUND_DOCUMENTS
+        WHERE FUND_CODE = #{fundCode}
+        ORDER BY DOC_TYPE
+    </select>
+
 </mapper>

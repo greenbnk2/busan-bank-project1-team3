@@ -38,9 +38,12 @@ public class ProductDTO {
     private String assetManagerId;  // 운용사명 (신한자산운용 등)
 
     private Double currentNav;
+    private Double nav;
     private Double nav1M;
     private Double nav3M;
     private Double nav6M;
     private Double nav12M;
+    private Date tradeDate;
+
 
 }
