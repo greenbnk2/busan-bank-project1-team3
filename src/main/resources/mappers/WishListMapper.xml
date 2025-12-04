@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.WishListMapper">
+
+    <!-- 관심상품 존재 여부 확인 -->
+    <select id="existsWishlist" resultType="int">
+        SELECT COUNT(*)
+        FROM USER_FUND_WISHLIST
+        WHERE CUST_NO = #{custNo}
+          AND FUND_CODE = #{fundCode}
+    </select>
+
+    <!-- 관심상품 등록 -->
+    <insert id="insertWishlist">
+        INSERT INTO USER_FUND_WISHLIST
+            (WISH_NO, CUST_NO, FUND_CODE)
+        VALUES
+            (USER_FUND_WISH_SEQ.NEXTVAL, #{custNo}, #{fundCode})
+    </insert>
+
+    <!-- 관심상품 삭제 -->
+    <delete id="deleteWishlist">
+        DELETE FROM USER_FUND_WISHLIST
+        WHERE CUST_NO = #{custNo}
+          AND FUND_CODE = #{fundCode}
+    </delete>
+
+    <!-- 관심상품 목록 조회 (수익률 + NAV 포함) -->
+    <select id="getWishlist" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+        <![CDATA[
+        SELECT
+            t.fundcode,
+            t.fundname        AS fundName,
+            t.fundfeature,
+            t.investgrade,
+
+            /* NAV 매핑 */
+            t.current_nav     AS currentNav,
+            t.nav_1m          AS nav1M,
+            t.nav_3m          AS nav3M,
+            t.nav_6m          AS nav6M,
+            t.nav_12m         AS nav12M,
+
+            /* 수익률 매핑 */
+            ROUND((t.current_nav / t.nav_1m - 1) * 100, 2) AS perf1M,
+            ROUND((t.current_nav / t.nav_3m - 1) * 100, 2) AS perf3M,
+            ROUND((t.current_nav / t.nav_6m - 1) * 100, 2) AS perf6M,
+            ROUND((t.current_nav / t.nav_12m - 1) * 100, 2) AS perf12M
+
+        FROM (
+                 SELECT
+                     fm.fund_code AS fundcode,
+                     fm.fund_name AS fundname,
+                     fm.fund_feature AS fundfeature,
+                     fm.invest_grade AS investgrade,
+
+                     /* 최신 NAV */
+                     (SELECT NAV_PER_UNIT
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = fm.fund_code
+                      ORDER BY TRADE_DATE DESC
+                          FETCH FIRST 1 ROW ONLY) AS current_nav,
+
+                     /* 1개월 NAV */
+                     (SELECT NAV_PER_UNIT
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = fm.fund_code
+                        AND TRADE_DATE <= ADD_MONTHS(
+                              (SELECT MAX(TRADE_DATE)
+                               FROM FUND_DAILY_HISTORY
+                               WHERE FUND_CODE = fm.fund_code), -1)
+                      ORDER BY TRADE_DATE DESC
+                          FETCH FIRST 1 ROW ONLY) AS nav_1m,
+
+                     /* 3개월 NAV */
+                     (SELECT NAV_PER_UNIT
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = fm.fund_code
+                        AND TRADE_DATE <= ADD_MONTHS(
+                              (SELECT MAX(TRADE_DATE)
+                               FROM FUND_DAILY_HISTORY
+                               WHERE FUND_CODE = fm.fund_code), -3)
+                      ORDER BY TRADE_DATE DESC
+                          FETCH FIRST 1 ROW ONLY) AS nav_3m,
+
+                     /* 6개월 NAV */
+                     (SELECT NAV_PER_UNIT
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = fm.fund_code
+                        AND TRADE_DATE <= ADD_MONTHS(
+                              (SELECT MAX(TRADE_DATE)
+                               FROM FUND_DAILY_HISTORY
+                               WHERE FUND_CODE = fm.fund_code), -6)
+                      ORDER BY TRADE_DATE DESC
+                          FETCH FIRST 1 ROW ONLY) AS nav_6m,
+
+                     /* 12개월 NAV */
+                     (SELECT NAV_PER_UNIT
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = fm.fund_code
+                        AND TRADE_DATE <= ADD_MONTHS(
+                              (SELECT MAX(TRADE_DATE)
+                               FROM FUND_DAILY_HISTORY
+                               WHERE FUND_CODE = fm.fund_code), -12)
+                      ORDER BY TRADE_DATE DESC
+                          FETCH FIRST 1 ROW ONLY) AS nav_12m
+
+                 FROM USER_FUND_WISHLIST w
+                          JOIN FUND_MASTER fm ON w.fund_code = fm.fund_code
+                 WHERE w.cust_no = #{custNo}
+             ) t
+        ORDER BY t.fundcode DESC
+        ]]>
+    </select>
+
+</mapper>

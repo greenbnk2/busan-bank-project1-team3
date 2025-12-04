@@ -51,6 +51,8 @@ public interface FundMapper {
     );
 
     List<ProductDTO> selectFundYieldBest();
+
+
 }
 
 

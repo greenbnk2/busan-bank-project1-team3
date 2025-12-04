@@ -86,12 +86,19 @@
                 <!-- 펀드상품 전용 필터 -->
                 <div class="sub-filter" id="fund-filter" style="display:flex;">
                     <button class="active" data-category="all">전체</button>
-                    <button data-category="recommend">추천펀드</button>
                     <button data-category="ipo">공격투자형</button>
                     <button data-category="dividend">적극투자형</button>
                     <button data-category="neutral">위험중립형</button>
                     <button data-category="stable">안정추구형</button>
                     <button data-category="safe">안정형</button>
+                </div>
+
+                <!-- 수익률 BEST 전용 필터 (기간 정렬만 표시) -->
+                <div class="yield-filter" id="best-filter" style="display:none; gap:10px; margin-top:10px;">
+                    <button class="tab-yield" data-yield="1M">1개월</button>
+                    <button class="tab-yield" data-yield="3M">3개월</button>
+                    <button class="tab-yield" data-yield="6M">6개월</button>
+                    <button class="tab-yield" data-yield="12M">12개월</button>
                 </div>
 
                 <table>

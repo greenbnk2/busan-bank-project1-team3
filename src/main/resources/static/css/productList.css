@@ -153,5 +153,76 @@ th {
     color: white;
     border-color: #b22222;
 }
+/* ===============================
+    수익률 BEST 전용 필터
+=============================== */
+#best-filter {
+    display: flex;
+    gap: 8px;
+    margin: 15px 0 25px 0;
+    align-items: center;
+}
+
+#best-filter .tab-yield {
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    border-radius: 3px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#best-filter .tab-yield:hover {
+    background: #f0f0f0;
+}
+
+#best-filter .tab-yield.active {
+    background-color: #b22222;
+    color: white;
+    border-color: #b22222;
+}
+
+/* ===============================
+    펀드상품용 기간 정렬
+=============================== */
+#fund-yield-filter {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0 25px 0;
+}
+
+#fund-yield-filter .tab-yield {
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    border-radius: 3px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#fund-yield-filter .tab-yield.active {
+    background-color: #b22222;
+    color: #fff;
+    border-color: #b22222;
+}
+
+.wishlist-btn {
+    margin-top: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    border: 1px solid #b22222;
+    background: white;
+    color: #b22222;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.wishlist-btn:hover {
+    background-color: #b22222;
+    color: white;
+}
 
 

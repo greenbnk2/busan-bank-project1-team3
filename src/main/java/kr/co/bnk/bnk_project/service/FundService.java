@@ -219,15 +219,24 @@ public class FundService {
 
         List<ProductDTO> list = productMapper.selectFundYieldBest();
 
-        // 🔥 perf1M이 NULL이면 아예 제거
+        //  perf1M이 NULL이면 아예 제거
         list.removeIf(dto -> dto.getPerf1M() == null);
 
-        // 🔥 안전한 정렬
+        //  안전한 정렬
         list.sort((a, b) -> Double.compare(b.getPerf1M(), a.getPerf1M()));
 
-        // 🔥 TOP10만 반환
+        //  TOP10만 반환
         return list.stream().limit(10).toList();
 
     }
+
+    public interface ProductService {
+
+        List<ProductDTO> getAllFunds();   //  전체 펀드 조회
+
+        List<ProductDTO> getProductListByRisk(String riskType); // 기존 코드
+    }
+
+
 }
 
