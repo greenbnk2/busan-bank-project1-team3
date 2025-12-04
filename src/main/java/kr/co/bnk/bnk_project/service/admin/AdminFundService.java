@@ -78,17 +78,17 @@ public class AdminFundService {
         if (fundCode == null || fundCode.isBlank()) {
             return null;
         }
-        
+
         // 1. FUND_MASTER 데이터 조회
         AdminFundMasterDTO fund = adminFundMapper.selectPendingFundEdit(fundCode);
         if (fund == null) {
             return null;
         }
-        
+
         // 2. revision이 있으면 revision의 내용으로 덮어쓰기 (수정 가능한 필드만)
         FundMasterRevisionDTO revision = fundMasterRevisionMapper.selectPendingRevision(fundCode);
-        if (revision != null && (revision.getRevStatus() != null && 
-            (revision.getRevStatus().equals("대기") || revision.getRevStatus().equals("수정완료")))) {
+        if (revision != null && (revision.getRevStatus() != null &&
+                (revision.getRevStatus().equals("대기") || revision.getRevStatus().equals("수정완료")))) {
             // revision의 수정 가능한 필드들을 fund에 반영
             if (revision.getInvestGrade() != null) {
                 fund.setInvestGrade(revision.getInvestGrade());
@@ -106,7 +106,7 @@ public class AdminFundService {
                 fund.setNotice2(revision.getNotice2());
             }
         }
-        
+
         return fund;
     }
 
@@ -222,11 +222,11 @@ public class AdminFundService {
         if (currentFund == null) {
             throw new IllegalArgumentException("펀드를 찾을 수 없습니다: " + fundCode);
         }
-        
+
         // 데이터베이스의 현재 시간 사용 (fundOperateReserveJob과 동일하게)
         LocalDateTime now = adminFundMapper.selectCurrentDbTime();
         System.out.println("setFundReserveTime: FUND_CODE=" + fundCode + ", 예약시간=" + date + ", 현재시간(DB)=" + now);
-        
+
         // 미래 시간으로 예약하는 경우: 배치가 처리하도록 예약 시간만 설정하고 종료
         // 현재 시간보다 1초 이상 미래인 경우만 미래로 판단 (초 단위 오차 방지)
         if (date.isAfter(now.plusSeconds(1))) {
@@ -234,14 +234,15 @@ public class AdminFundService {
             adminFundMapper.setFundReserveTime(fundCode, date);
             return; // 배치가 처리하도록 revision은 그대로 유지
         }
-        
+
         // 과거 또는 현재 시간으로 예약하는 경우: 즉시 적용
-        System.out.println("setFundReserveTime: 과거/현재 시간으로 예약 - 즉시 적용");
-        adminFundMapper.setFundReserveTime(fundCode, date);
+        System.out.println("setFundReserveTime: 과거/현재 시간으로 예약 - 즉시 적용 (DB SYSDATE 직접 사용)");
+        // 즉시 반영인 경우 DB SYSDATE를 직접 사용하여 예약 시간 설정
+        adminFundMapper.setFundReserveTimeWithSysdate(fundCode);
         
         FundMasterRevisionDTO completedRevision = fundMasterRevisionMapper.selectCompletedRevision(fundCode);
         System.out.println("setFundReserveTime: '수정완료' 상태인 revision 조회 결과: " + (completedRevision != null ? "있음 (REV_ID: " + completedRevision.getRevId() + ")" : "없음"));
-        
+
         if (completedRevision != null) {
             Long revId = completedRevision.getRevId();
             System.out.println("setFundReserveTime: revision 즉시 적용 시작 - REV_ID: " + revId);

@@ -598,37 +598,6 @@
                 reserveDateTime = `${reserveDate} ${reserveTime}:00`;
             }
             
-            // TODO: 반영예약 API 호출
-            // 예시:
-            // const headers = {
-            //     'Content-Type': 'application/json'
-            // };
-            // if (csrfToken && csrfHeader) {
-            //     headers[csrfHeader] = csrfToken;
-            // }
-            // 
-            // fetch('/admin/product/reserve', {
-            //     method: 'POST',
-            //     headers,
-            //     body: JSON.stringify({
-            //         productCode,
-            //         productName,
-            //         status,
-            //         reserveDateTime,
-            //         immediateApply
-            //     })
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     alert(immediateApply ? '즉시 반영이 완료되었습니다.' : '반영예약이 완료되었습니다.');
-            //     closeReserveModal();
-            //     location.reload();
-            // })
-            // .catch(error => {
-            //     console.error(error);
-            //     alert('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
-            // });
-            
             // 폼 데이터 설정 후 제출
             console.log('>>> 폼 제출 시작 - fundCode:', productCode, ', date:', reserveDateTime);
             document.getElementById('reserveFormFundCode').value = productCode;

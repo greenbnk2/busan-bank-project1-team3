@@ -65,6 +65,9 @@ public interface AdminFundMapper {
     void setFundReserveTime(@Param("fundCode") String fundCode,
                             @Param("operStartAt") LocalDateTime operStartAt);
 
+    void setFundReserveTimeWithSysdate(@Param("fundCode") String fundCode);
+
+
     // 상태를 운용대기로 변경 (등록완료일 때만)
     void updateStatusToPending(@Param("fundCode") String fundCode);
     

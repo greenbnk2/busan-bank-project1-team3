@@ -7,9 +7,6 @@ import kr.co.bnk.bnk_project.mapper.admin.FundMasterRevisionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -29,7 +26,9 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableScheduling
 @RequiredArgsConstructor
@@ -42,9 +41,8 @@ public class ReserveBatchConfig {
     private final AdminFundMapper adminFundMapper;
     private final FundMasterRevisionMapper fundMasterRevisionMapper;
 
-
     /**
-     * 1. Job 정의 - 예약된 펀드를 운용중으로 바꾸는 Job
+     * 1. Job 정의 - 예약된 펀드를 운용상태로 변경하는 Job
      */
     @Bean
     public Job fundOperateReserveJob() {
@@ -73,35 +71,64 @@ public class ReserveBatchConfig {
     public ItemReader<AdminFundMasterDTO> fundOperateReserveReader() {
         return new ItemReader<>() {
             private Iterator<AdminFundMasterDTO> iterator;
-            private boolean isFirstRead = true;
 
             @Override
             public AdminFundMasterDTO read() {
-                if (iterator == null) {
-                    List<AdminFundMasterDTO> list = adminFundMapper.selectFundsForOperateReserve();
-                    iterator = list != null ? list.iterator() : null;
-                    isFirstRead = true;
+                if (iterator == null || !iterator.hasNext()) {
+                    log.info("[fundOperateReserveReader] ===== 데이터 조회 시작 =====");
+                    log.info("[fundOperateReserveReader] selectFundsForOperateReserve() 호출 전");
+                    try {
+                        List<AdminFundMasterDTO> list = adminFundMapper.selectFundsForOperateReserve();
+                        log.info("[fundOperateReserveReader] selectFundsForOperateReserve() 호출 완료");
+                        int count = list != null ? list.size() : 0;
+                        log.info("[fundOperateReserveReader] 예약 대상 펀드 조회 결과: {}건", count);
+
+                        if (list != null && !list.isEmpty()) {
+                            log.info("[fundOperateReserveReader] 조회된 펀드 목록:");
+                            for (AdminFundMasterDTO fund : list) {
+                                log.info("[fundOperateReserveReader]   - FUND_CODE={}, OPER_STATUS={}, OPER_START_AT={}",
+                                        fund.getFundCode(), fund.getOperStatus(), fund.getOperStartAt());
+                            }
+                        }
+
+                        if (list == null || list.isEmpty()) {
+                            log.info("[fundOperateReserveReader] 조회 결과 없음 - Reader 종료 예정");
+                            iterator = null;
+                            return null;
+                        }
+
+                        iterator = list.iterator();
+                        log.info("[fundOperateReserveReader] ===== 데이터 조회 완료 =====");
+                    } catch (Exception e) {
+                        log.error("[fundOperateReserveReader] 데이터 조회 중 오류 발생", e);
+                        throw e;
+                    }
                 }
-                
+
                 if (iterator != null && iterator.hasNext()) {
                     AdminFundMasterDTO fund = iterator.next();
-                    isFirstRead = false;
+                    log.info("[fundOperateReserveReader] 펀드 읽기: FUND_CODE={}, OPER_STATUS={}",
+                            fund.getFundCode(), fund.getOperStatus());
                     return fund;
                 }
-                
+
+                log.info("[fundOperateReserveReader] 읽을 데이터 없음 - 조회 완료");
                 return null;
             }
         };
     }
 
     /**
-     * 4. Processor - 상태 값만 변경 (실제 DB 반영은 Writer에서)
+     * 4. Processor - 검증/필터링만 수행 (상태 변경은 Writer에서 처리)
      */
     @Bean
     public ItemProcessor<AdminFundMasterDTO, AdminFundMasterDTO> fundOperateReserveProcessor() {
         return fund -> {
-            fund.setOperStatus("운용중");
-            fund.setReserveYn("N");
+            if (fund == null || fund.getFundCode() == null) {
+                log.warn("[fundOperateReserveProcessor] 유효하지 않은 펀드 데이터 스킵");
+                return null;
+            }
+            // 여기서는 상태를 변경하지 않고, 그대로 Writer로 전달만 한다.
             return fund;
         };
     }
@@ -112,31 +139,41 @@ public class ReserveBatchConfig {
     @Bean
     public ItemWriter<AdminFundMasterDTO> fundOperateReserveWriter() {
         return items -> {
+            log.info("[fundOperateReserveWriter] 처리 시작: {}건", items.size());
             for (AdminFundMasterDTO fund : items) {
                 try {
                     if (fund == null || fund.getFundCode() == null) {
+                        log.warn("[fundOperateReserveWriter] 유효하지 않은 펀드 데이터 스킵");
                         continue;
                     }
-                    
+
                     String fundCode = fund.getFundCode();
-                    String operStatus = fund.getOperStatus();
-                    
+                    String operStatus = fund.getOperStatus(); // Reader에서 조회된 '원래 상태' 기준
+
                     // 등록완료 상태인 경우: 운용대기로 변경
                     if ("등록완료".equals(operStatus)) {
+                        log.info("[fundOperateReserveWriter] 등록완료 → 운용대기: FUND_CODE={}", fundCode);
                         adminFundMapper.updateStatusToPending(fundCode);
                         adminFundMapper.clearReserveTime(fundCode);
-                    } 
+                    }
                     // 운용대기 상태인 경우: 운용중으로 변경
                     else if ("운용대기".equals(operStatus)) {
+                        log.info("[fundOperateReserveWriter] 운용대기 → 운용중: FUND_CODE={}", fundCode);
                         adminFundMapper.updateOperStatusToRunning(
                                 fundCode,
                                 "batch_system"
                         );
+                    } else {
+                        log.info("[fundOperateReserveWriter] 상태 변경 대상 아님: FUND_CODE={}, OPER_STATUS={}",
+                                fundCode, operStatus);
                     }
                 } catch (Exception e) {
+                    log.error("[fundOperateReserveWriter] 펀드 처리 중 오류 발생: FUND_CODE={}",
+                            fund != null ? fund.getFundCode() : "null", e);
                     throw e;
                 }
             }
+            log.info("[fundOperateReserveWriter] 처리 완료");
         };
     }
 
@@ -145,56 +182,61 @@ public class ReserveBatchConfig {
      */
     @Scheduled(cron = "0 * * * * *")
     public void runFundOperateReserveJob() {
+        log.info("[runFundOperateReserveJob] 스케줄러 실행 시작");
         try {
             Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions("fundOperateReserveJob");
             if (runningExecutions != null && !runningExecutions.isEmpty()) {
-                long currentTime = System.currentTimeMillis();
+                log.info("[runFundOperateReserveJob] 실행 중인 Job 확인: {}건", runningExecutions.size());
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                long timeoutMs = 5 * 60 * 1000; // 5분
                 boolean hasRunningJob = false;
-                
+
                 for (JobExecution execution : runningExecutions) {
                     if (execution.isRunning()) {
-                        long startTime = currentTime;
-                        if (execution.getStartTime() != null) {
-                            if (execution.getStartTime() instanceof java.time.LocalDateTime) {
-                                startTime = ((java.time.LocalDateTime) execution.getStartTime())
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .toInstant()
-                                    .toEpochMilli();
+                        LocalDateTime startDateTime = execution.getStartTime();
+                        if (startDateTime != null) {
+                            long elapsedTime = java.time.Duration.between(startDateTime, currentDateTime).toMillis();
+                            if (elapsedTime > timeoutMs) {
+                                log.warn("[runFundOperateReserveJob] 타임아웃된 작업 감지: executionId={}, elapsed={}ms",
+                                        execution.getId(), elapsedTime);
+                                // 타임아웃된 작업은 무시하고 새 Job 실행 계속 진행
+                            } else {
+                                log.info("[runFundOperateReserveJob] 아직 진행 중인 Job 존재: executionId={}, elapsed={}ms",
+                                        execution.getId(), elapsedTime);
+                                hasRunningJob = true;
                             }
-                        }
-                        long elapsedTime = currentTime - startTime;
-                        long timeoutMs = 5 * 60 * 1000; // 5분
-                        
-                        if (elapsedTime > timeoutMs) {
-                            // 타임아웃된 작업은 무시하고 계속 진행
                         } else {
+                            // startTime이 없는 이상한 경우는 실행 중으로 간주
                             hasRunningJob = true;
                         }
                     }
                 }
-                
+
                 if (hasRunningJob) {
+                    log.info("[runFundOperateReserveJob] 실행 중인 Job이 있어 스킵");
                     return;
                 }
             }
 
-            List<AdminFundMasterDTO> fundsToOperate = adminFundMapper.selectFundsForOperateReserve();
-            
-            if (fundsToOperate == null || fundsToOperate.isEmpty()) {
-                return;
-            }
+            // Reader에서 알아서 대상이 없으면 바로 종료되므로 여기서는 Job만 실행
+            log.info("[runFundOperateReserveJob] fundOperateReserveJob 실행 시작");
+            Job job = fundOperateReserveJob();
+            org.springframework.batch.core.JobParameters params =
+                    new org.springframework.batch.core.JobParametersBuilder()
+                            .addLong("time", System.currentTimeMillis())
+                            .toJobParameters();
 
-            JobParameters params = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis())
-                    .toJobParameters();
-
-            jobLauncher.run(fundOperateReserveJob(), params);
+            jobLauncher.run(job, params);
+            log.info("[runFundOperateReserveJob] fundOperateReserveJob 실행 완료");
         } catch (Exception e) {
-            // 에러 발생 시 무시
+            log.error("[runFundOperateReserveJob] Job 실행 중 오류 발생", e);
         }
     }
 
-    // 새로운 배치 Job 추가 - revision 적용 배치
+    // ==========================
+    //  Revision 적용 배치 Job
+    // ==========================
+
     @Bean
     public Job applyRevisionJob() {
         return new JobBuilder("applyRevisionJob", jobRepository)
@@ -221,12 +263,19 @@ public class ReserveBatchConfig {
             public FundMasterRevisionDTO read() {
                 if (iterator == null || !iterator.hasNext()) {
                     List<FundMasterRevisionDTO> list = fundMasterRevisionMapper.selectRevisionsToApply();
+                    log.info("[applyRevisionReader] 적용 대상 revision 조회: {}건", list != null ? list.size() : 0);
 
                     if (list != null && !list.isEmpty()) {
+                        int beforeSize = list.size();
                         list.removeIf(rev -> rev == null || rev.getRevId() == null);
+                        if (beforeSize != list.size()) {
+                            log.warn("[applyRevisionReader] 유효하지 않은 revision 제거: {}건 → {}건", beforeSize, list.size());
+                        }
                     }
 
                     if (list == null || list.isEmpty()) {
+                        log.debug("[applyRevisionReader] 적용 대상 revision 없음");
+                        iterator = null;
                         return null;
                     }
 
@@ -235,13 +284,17 @@ public class ReserveBatchConfig {
 
                 if (iterator.hasNext()) {
                     FundMasterRevisionDTO revision = iterator.next();
-                    
+
                     if (revision == null || revision.getRevId() == null) {
+                        log.warn("[applyRevisionReader] 유효하지 않은 revision 데이터 스킵");
                         return null;
                     }
-                    
+
+                    log.debug("[applyRevisionReader] revision 읽기: REV_ID={}, FUND_CODE={}",
+                            revision.getRevId(), revision.getFundCode());
                     return revision;
                 }
+                log.debug("[applyRevisionReader] 읽을 데이터 없음");
                 return null;
             }
         };
@@ -260,73 +313,94 @@ public class ReserveBatchConfig {
     @Bean
     public ItemWriter<FundMasterRevisionDTO> applyRevisionWriter() {
         return items -> {
+            log.info("[applyRevisionWriter] 처리 시작: {}건", items.size());
             for (FundMasterRevisionDTO revision : items) {
                 try {
                     if (revision == null || revision.getRevId() == null) {
+                        log.warn("[applyRevisionWriter] 유효하지 않은 revision 데이터 스킵");
                         continue;
                     }
-                    
+
                     Long revId = revision.getRevId();
                     String fundCode = revision.getFundCode();
-                    
+
+                    log.info("[applyRevisionWriter] revision 적용 시작: REV_ID={}, FUND_CODE={}", revId, fundCode);
+
                     // revision 내용을 FUND_MASTER에 업데이트
                     fundMasterRevisionMapper.applyRevisionToMaster(revId);
-                    
+                    log.debug("[applyRevisionWriter] FUND_MASTER 업데이트 완료: REV_ID={}", revId);
+
                     // revision 상태를 '적용완료'로 변경
                     fundMasterRevisionMapper.updateRevisionStatusToApplied(revId);
-                    
+                    log.debug("[applyRevisionWriter] revision 상태 변경 완료: REV_ID={}", revId);
+
                     // 예약 시간 초기화
                     adminFundMapper.clearReserveTime(fundCode);
-                    
+                    log.debug("[applyRevisionWriter] 예약 시간 초기화 완료: FUND_CODE={}", fundCode);
+
                     // 반영예약 완료 후 revision 삭제
                     fundMasterRevisionMapper.deleteRevision(revId);
+                    log.info("[applyRevisionWriter] revision 적용 및 삭제 완료: REV_ID={}, FUND_CODE={}", revId, fundCode);
                 } catch (Exception e) {
+                    log.error("[applyRevisionWriter] revision 처리 중 오류 발생: REV_ID={}",
+                            revision != null ? revision.getRevId() : "null", e);
                     throw e;
                 }
             }
+            log.info("[applyRevisionWriter] 처리 완료");
         };
     }
 
     @Scheduled(cron = "0 * * * * *")
     public void runApplyRevisionJob() {
+        log.info("[runApplyRevisionJob] 스케줄러 실행 시작");
         try {
             Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions("applyRevisionJob");
             if (runningExecutions != null && !runningExecutions.isEmpty()) {
-                long currentTime = System.currentTimeMillis();
+                log.info("[runApplyRevisionJob] 실행 중인 Job 확인: {}건", runningExecutions.size());
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                long timeoutMs = 5 * 60 * 1000; // 5분
+
                 for (JobExecution execution : runningExecutions) {
                     if (execution.isRunning()) {
-                        long startTime = currentTime;
-                        if (execution.getStartTime() != null) {
-                            if (execution.getStartTime() instanceof java.time.LocalDateTime) {
-                                startTime = ((java.time.LocalDateTime) execution.getStartTime())
-                                    .atZone(java.time.ZoneId.systemDefault())
-                                    .toInstant()
-                                    .toEpochMilli();
+                        LocalDateTime startDateTime = execution.getStartTime();
+                        if (startDateTime != null) {
+                            long elapsedTime = java.time.Duration.between(startDateTime, currentDateTime).toMillis();
+                            if (elapsedTime > timeoutMs) {
+                                log.warn("[runApplyRevisionJob] 타임아웃된 작업 감지: executionId={}, elapsed={}ms",
+                                        execution.getId(), elapsedTime);
+                                // 타임아웃된 작업은 무시하고 계속 진행
+                            } else {
+                                log.info("[runApplyRevisionJob] 실행 중인 Job이 있어 스킵: executionId={}, elapsed={}ms",
+                                        execution.getId(), elapsedTime);
+                                return;
                             }
-                        }
-                        long elapsedTime = currentTime - startTime;
-                        long timeoutMs = 5 * 60 * 1000; // 5분
-                        
-                        if (elapsedTime > timeoutMs) {
-                            // 타임아웃된 작업은 무시하고 계속 진행
                         } else {
+                            // startTime이 없으면 실행 중으로 간주
+                            log.info("[runApplyRevisionJob] 실행 중인 Job이 있어 스킵: executionId={}", execution.getId());
                             return;
                         }
                     }
                 }
             }
-            
-            JobParameters params = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis())
-                    .toJobParameters();
 
+            org.springframework.batch.core.JobParameters params =
+                    new org.springframework.batch.core.JobParametersBuilder()
+                            .addLong("time", System.currentTimeMillis())
+                            .toJobParameters();
+
+            log.info("[runApplyRevisionJob] Job 실행 시작");
             jobLauncher.run(applyRevisionJob(), params);
+            log.info("[runApplyRevisionJob] Job 실행 완료");
         } catch (Exception e) {
-            // 에러 발생 시 무시
+            log.error("[runApplyRevisionJob] Job 실행 중 오류 발생", e);
         }
     }
 
-    // 적용완료된 revision 정리 배치 Job
+    // ==========================
+    //  적용완료된 revision 정리 배치 Job
+    // ==========================
+
     @Bean
     public Job cleanupAppliedRevisionJob() {
         return new JobBuilder("cleanupAppliedRevisionJob", jobRepository)
@@ -353,12 +427,19 @@ public class ReserveBatchConfig {
             public FundMasterRevisionDTO read() {
                 if (iterator == null || !iterator.hasNext()) {
                     List<FundMasterRevisionDTO> list = fundMasterRevisionMapper.selectAppliedRevisions();
+                    log.info("[cleanupAppliedRevisionReader] 적용완료된 revision 조회: {}건", list != null ? list.size() : 0);
 
                     if (list != null && !list.isEmpty()) {
+                        int beforeSize = list.size();
                         list.removeIf(rev -> rev == null || rev.getRevId() == null);
+                        if (beforeSize != list.size()) {
+                            log.warn("[cleanupAppliedRevisionReader] 유효하지 않은 revision 제거: {}건 → {}건", beforeSize, list.size());
+                        }
                     }
 
                     if (list == null || list.isEmpty()) {
+                        log.debug("[cleanupAppliedRevisionReader] 정리 대상 revision 없음");
+                        iterator = null;
                         return null;
                     }
 
@@ -367,13 +448,16 @@ public class ReserveBatchConfig {
 
                 if (iterator.hasNext()) {
                     FundMasterRevisionDTO revision = iterator.next();
-                    
+
                     if (revision == null || revision.getRevId() == null) {
+                        log.warn("[cleanupAppliedRevisionReader] 유효하지 않은 revision 데이터 스킵");
                         return null;
                     }
-                    
+
+                    log.debug("[cleanupAppliedRevisionReader] revision 읽기: REV_ID={}", revision.getRevId());
                     return revision;
                 }
+                log.debug("[cleanupAppliedRevisionReader] 읽을 데이터 없음");
                 return null;
             }
         };
@@ -392,36 +476,49 @@ public class ReserveBatchConfig {
     @Bean
     public ItemWriter<FundMasterRevisionDTO> cleanupAppliedRevisionWriter() {
         return items -> {
+            log.info("[cleanupAppliedRevisionWriter] 처리 시작: {}건", items.size());
             for (FundMasterRevisionDTO revision : items) {
                 try {
                     if (revision == null || revision.getRevId() == null) {
+                        log.warn("[cleanupAppliedRevisionWriter] 유효하지 않은 revision 데이터 스킵");
                         continue;
                     }
-                    
+
                     Long revId = revision.getRevId();
+                    log.info("[cleanupAppliedRevisionWriter] 적용완료된 revision 삭제: REV_ID={}", revId);
                     // 적용완료 상태인 revision 삭제
                     fundMasterRevisionMapper.deleteRevision(revId);
+                    log.debug("[cleanupAppliedRevisionWriter] revision 삭제 완료: REV_ID={}", revId);
                 } catch (Exception e) {
+                    log.error("[cleanupAppliedRevisionWriter] revision 삭제 중 오류 발생: REV_ID={}",
+                            revision != null ? revision.getRevId() : "null", e);
                     throw e;
                 }
             }
+            log.info("[cleanupAppliedRevisionWriter] 처리 완료");
         };
     }
 
     @Scheduled(cron = "0 0 * * * *") // 매 시간마다 실행
     public void runCleanupAppliedRevisionJob() {
+        log.info("[runCleanupAppliedRevisionJob] 스케줄러 실행 시작");
         try {
             Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions("cleanupAppliedRevisionJob");
             if (runningExecutions != null && !runningExecutions.isEmpty()) {
+                log.info("[runCleanupAppliedRevisionJob] 실행 중인 Job이 있어 스킵");
                 return;
             }
 
-            JobParameters params = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis())
-                    .toJobParameters();
+            org.springframework.batch.core.JobParameters params =
+                    new org.springframework.batch.core.JobParametersBuilder()
+                            .addLong("time", System.currentTimeMillis())
+                            .toJobParameters();
 
+            log.info("[runCleanupAppliedRevisionJob] Job 실행 시작");
             jobLauncher.run(cleanupAppliedRevisionJob(), params);
+            log.info("[runCleanupAppliedRevisionJob] Job 실행 완료");
         } catch (Exception e) {
+            log.error("[runCleanupAppliedRevisionJob] Job 실행 중 오류 발생(무시)", e);
             // 에러 발생 시 무시
         }
     }

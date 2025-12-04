@@ -450,6 +450,12 @@
         WHERE FUND_CODE = #{fundCode}
     </update>
 
+    <update id="setFundReserveTimeWithSysdate">
+        UPDATE FUND_MASTER
+        SET OPER_START_AT = SYSDATE,
+            RESERVE_YN    = 'Y'
+        WHERE FUND_CODE = #{fundCode}
+    </update>
     <!-- 예약 시간이 지난 모든 펀드 조회 (revision 적용 배치용) -->
     <select id="selectFundsWithExpiredReserveTime"
             resultType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
