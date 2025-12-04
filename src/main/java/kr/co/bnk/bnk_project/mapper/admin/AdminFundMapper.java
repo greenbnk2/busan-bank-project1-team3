@@ -2,6 +2,7 @@ package kr.co.bnk.bnk_project.mapper.admin;
 
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
+import kr.co.bnk.bnk_project.dto.admin.FundDocumentDTO;
 import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -66,6 +67,20 @@ public interface AdminFundMapper {
     
     // 예약 시간 초기화 (revision 적용 후)
     void clearReserveTime(@Param("fundCode") String fundCode);
+
+
+    // 문서 (약관, 투자설명서, 간이투자설명서)
+
+    // 문서 (등록/수정 공통)
+    void insertFundDocument(FundDocumentDTO dto);
+
+    // 문서 조회
+    List<FundDocumentDTO> selectFundDocuments(@Param("fundCode") String fundCode);
+
+    // 문서 삭제 (펀드 + 타입 기준, 새 파일로 교체할 때)
+    void deleteFundDocumentsByType(@Param("fundCode") String fundCode,
+                                   @Param("docType") String docType);
+
 
 }
 

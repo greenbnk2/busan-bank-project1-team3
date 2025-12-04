@@ -22,7 +22,7 @@
                 </header>
 
                 <!-- 펀드 수정 폼 -->
-                <form th:action="@{/admin/product/edit}" method="post">
+                <form th:action="@{/admin/product/edit}" method="post" enctype="multipart/form-data">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" id="fundCode" th:value="${fund != null ? fund.fundCode : ''}"/>
                     <input type="hidden" id="sessionId" th:value="${sessionId != null ? sessionId : ''}"/>
@@ -169,11 +169,13 @@
                             <div class="form-label">약관</div>
                             <div class="form-input-wrapper">
                                 <!-- 기존 파일 목록 -->
-                                <div class="existing-files">
+                                <div class="existing-files" th:if="${termsDoc != null}">
                                     <div class="file-item">
-                                        <span class="file-item-name">약관_2024_01.pdf</span>
+                                        <span class="file-item-name" th:text="${termsDoc.docFileName}">약관.pdf</span>
                                         <div class="file-actions">
-                                            <a href="#" class="file-download" title="다운로드">
+                                            <a class="file-download" title="다운로드"
+                                               th:href="@{${termsDoc.docUrl}}"
+                                               target="_blank">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                                 </svg>
@@ -187,23 +189,31 @@
                                     </div>
                                 </div>
                                 <!-- 새 파일 업로드 -->
-                                <div class="file-upload" id="termsDocUpload">
-                                    <input type="file" id="termsDoc" accept=".pdf,.doc,.docx" style="display: none;">
-                                    <button type="button" class="btn btn-secondary" id="termsDocButton" onclick="document.getElementById('termsDoc').click()">파일 선택</button>
+                                <div class="file-upload">
+                                    <input type="file" id="termsDoc" name="termsDoc"
+                                           accept=".pdf,.doc,.docx" style="display: none;">
+                                    <button type="button" class="btn btn-secondary"
+                                            onclick="document.getElementById('termsDoc').click()">
+                                        새 파일 선택
+                                    </button>
+                                    <div id="termsDocList" class="file-list"></div>
+                                    <small class="file-help">
+                                        새 파일을 선택하면 기존 약관 문서가 대체됩니다. (PDF, DOC, DOCX)
+                                    </small>
                                 </div>
-                                <div id="termsDocList" class="file-list"></div>
-                                <small class="file-help">PDF, DOC, DOCX 파일만 업로드 가능합니다.</small>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-label">투자설명서</div>
                             <div class="form-input-wrapper">
                                 <!-- 기존 파일 목록 -->
-                                <div class="existing-files">
+                                <div class="existing-files" th:if="${investDoc != null}">
                                     <div class="file-item">
-                                        <span class="file-item-name">투자설명서_2024_01.pdf</span>
+                                        <span class="file-item-name" th:text="${investDoc.docFileName}">투자설명서.pdf</span>
                                         <div class="file-actions">
-                                            <a href="#" class="file-download" title="다운로드">
+                                            <a class="file-download" title="다운로드"
+                                               th:href="@{${investDoc.docUrl}}"
+                                               target="_blank">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                                 </svg>
@@ -217,23 +227,31 @@
                                     </div>
                                 </div>
                                 <!-- 새 파일 업로드 -->
-                                <div class="file-upload" id="investmentDocUpload">
-                                    <input type="file" id="investmentDoc" accept=".pdf,.doc,.docx" style="display: none;">
-                                    <button type="button" class="btn btn-secondary" id="investmentDocButton" onclick="document.getElementById('investmentDoc').click()">파일 선택</button>
+                                <div class="file-upload">
+                                    <input type="file" id="investmentDoc" name="investmentDoc"
+                                           accept=".pdf,.doc,.docx" style="display: none;">
+                                    <button type="button" class="btn btn-secondary"
+                                            onclick="document.getElementById('investmentDoc').click()">
+                                        새 파일 선택
+                                    </button>
+                                    <div id="investmentDocList" class="file-list"></div>
+                                    <small class="file-help">
+                                        새 파일을 선택하면 기존 투자설명서 문서가 대체됩니다.
+                                    </small>
                                 </div>
-                                <div id="investmentDocList" class="file-list"></div>
-                                <small class="file-help">PDF, DOC, DOCX 파일만 업로드 가능합니다.</small>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-label">간이 투자 설명서</div>
                             <div class="form-input-wrapper">
                                 <!-- 기존 파일 목록 -->
-                                <div class="existing-files">
+                                <div class="existing-files" th:if="${summaryDoc != null}">
                                     <div class="file-item">
-                                        <span class="file-item-name">간이투자설명서_2024_01.pdf</span>
+                                        <span class="file-item-name" th:text="${summaryDoc.docFileName}">간이투자설명서.pdf</span>
                                         <div class="file-actions">
-                                            <a href="#" class="file-download" title="다운로드">
+                                            <a class="file-download" title="다운로드"
+                                               th:href="@{${summaryDoc.docUrl}}"
+                                               target="_blank">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="download-icon">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                                 </svg>
@@ -247,12 +265,18 @@
                                     </div>
                                 </div>
                                 <!-- 새 파일 업로드 -->
-                                <div class="file-upload" id="simpleInvestmentDocUpload">
-                                    <input type="file" id="simpleInvestmentDoc" accept=".pdf,.doc,.docx" style="display: none;">
-                                    <button type="button" class="btn btn-secondary" id="simpleInvestmentDocButton" onclick="document.getElementById('simpleInvestmentDoc').click()">파일 선택</button>
+                                <div class="file-upload">
+                                    <input type="file" id="simpleInvestmentDoc" name="simpleInvestmentDoc"
+                                           accept=".pdf,.doc,.docx" style="display: none;">
+                                    <button type="button" class="btn btn-secondary"
+                                            onclick="document.getElementById('simpleInvestmentDoc').click()">
+                                        새 파일 선택
+                                    </button>
+                                    <div id="simpleInvestmentDocList" class="file-list"></div>
+                                    <small class="file-help">
+                                        새 파일을 선택하면 기존 간이투자설명서 문서가 대체됩니다.
+                                    </small>
                                 </div>
-                                <div id="simpleInvestmentDocList" class="file-list"></div>
-                                <small class="file-help">PDF, DOC, DOCX 파일만 업로드 가능합니다.</small>
                             </div>
                         </div>
                     </div>
@@ -278,38 +302,44 @@
         }*/
 
         // 약관 파일 업로드
-        document.getElementById('termsDoc').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                addFileToList('termsDocList', file, 'termsDoc');
-                // 파일 선택 버튼 숨기기
-                document.getElementById('termsDocUpload').style.display = 'none';
-            }
-        });
+        const termsInput = document.getElementById('termsDoc');
+        if (termsInput) {
+            termsInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    addFileToList('termsDocList', file);
+                }
+            });
+        }
 
         // 투자설명서 파일 업로드
-        document.getElementById('investmentDoc').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                addFileToList('investmentDocList', file, 'investmentDoc');
-                // 파일 선택 버튼 숨기기
-                document.getElementById('investmentDocUpload').style.display = 'none';
-            }
-        });
+        const investInput = document.getElementById('investmentDoc');
+        if (investInput) {
+            investInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    addFileToList('investmentDocList', file);
+                }
+            });
+        }
 
         // 간이 투자 설명서 파일 업로드
-        document.getElementById('simpleInvestmentDoc').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                addFileToList('simpleInvestmentDocList', file, 'simpleInvestmentDoc');
-                // 파일 선택 버튼 숨기기
-                document.getElementById('simpleInvestmentDocUpload').style.display = 'none';
-            }
-        });
+        const summaryInput = document.getElementById('simpleInvestmentDoc');
+        if (summaryInput) {
+            summaryInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    addFileToList('simpleInvestmentDocList', file);
+                }
+            });
+        }
 
         // 파일 목록에 추가
         function addFileToList(listId, file, inputId) {
             const fileList = document.getElementById(listId);
+            if (!fileList) return;
+
+            fileList.innerHTML = '';
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
             fileItem.innerHTML = `
@@ -327,7 +357,6 @@
                     </button>
                 </div>
             `;
-            fileList.innerHTML = '';
             fileList.appendChild(fileItem);
         }
 
