@@ -5,12 +5,13 @@ import kr.co.bnk.bnk_project.dto.FundPeriodDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.sql.Date;
 import java.util.List;
 
 @Mapper
 public interface FundMapper {
     ProductDTO findProductDetail(String fundcode);
-    List<ProductDTO> find_ProductList();
+    List<ProductDTO> find_ProductList(int userGrade);
     List<ProductDTO> findALL();
     List<ProductDTO> findFundDocuments();
 
@@ -39,5 +40,19 @@ public interface FundMapper {
     List<FundChartDTO> selectFundNavLast3Months(String fundCode);
 
     FundPeriodDTO selectFundPeriodYield(String fundCode);
+
+    // 최신 NAV (가장 최근 trade_date)
+    ProductDTO getLatestNav(Long fundId);
+
+    // 1개월 전 NAV (trade_date <= 오늘 -1개월 중 가장 최근 데이터)
+    ProductDTO getOneMonthAgoNav(
+            @Param("fundId") Long fundId,
+            @Param("todayDate") Date todayDate
+    );
+
+    List<ProductDTO> selectFundYieldBest();
+
+
 }
+
 

@@ -25,16 +25,100 @@
     </select>
 
     <!-- 목록 조회 -->
-    <select id="find_ProductList" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+    <select id="find_ProductList" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+    <![CDATA[
         SELECT
-            fund_code AS fundcode,
-            fund_name AS fundNm,
-            fund_short_code AS fundshortcode,
-            overview,
-            fund_feature AS fundfeature,
-            invest_grade AS investgrade
-        FROM FUND_MASTER
-    </select>
+            m.fund_code           AS fundcode,
+            m.fund_name           AS fundNm,
+            m.fund_short_code     AS fundshortcode,
+            m.overview,
+            m.fund_feature        AS fundfeature,
+            m.invest_grade        AS investgrade,
+
+            ------------------------------------------------------------------------------
+            --  최신 NAV (NAV_PER_UNIT)
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS current_nav,
+
+            ------------------------------------------------------------------------------
+            --  1개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -1)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_1m,
+
+            ------------------------------------------------------------------------------
+            -- 3개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -3)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_3m,
+
+            ------------------------------------------------------------------------------
+            --  6개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -6)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_6m,
+
+            ------------------------------------------------------------------------------
+            --  12개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -12)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_12m
+
+        FROM FUND_MASTER m
+
+        WHERE
+            (CASE
+                -- REPLACE를 사용해 '검사할 때만' 모든 공백을 제거하고 비교합니다.
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '매우높은위험' THEN 1
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '높은위험'     THEN 2
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '중간위험'     THEN 3
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '낮은위험'     THEN 4
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '매우낮은위험' THEN 5
+
+                -- 매칭되지 않는 데이터(오타 등)는 0으로 처리하여
+                -- 0 >= 2 (False)가 되게 만들어 화면에서 숨깁니다.
+                 ELSE 0
+                END) >= #{userGrade}
+
+        ORDER BY m.fund_code
+        ]]>
+</select>
 
     <select id="findFundDocuments" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
             SELECT
@@ -255,58 +339,103 @@
         ORDER BY
             TRADE_DATE ASC
         ]]>
-</select>
+    </select>
 
-    <select id="selectFundPeriodYield"
-            parameterType="string"
-            resultType="kr.co.bnk.bnk_project.dto.FundPeriodDTO">
-
+    <select id="getLatestNav" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
     <![CDATA[
-        SELECT
-            #{fundCode} AS fundCode,
+        SELECT *
+        FROM fund_daily_history
+        WHERE fund_id = #{fundId}
+        ORDER BY trade_date DESC
+            FETCH FIRST 1 ROW ONLY
+        ]]>
+    </select>
 
-            /* 현재 NAV */
-            (SELECT NAV_PER_UNIT
-             FROM FUND_DAILY_HISTORY
-             WHERE FUND_CODE = #{fundCode}
-             ORDER BY TRADE_DATE DESC
-                 FETCH FIRST 1 ROW ONLY) AS currentNav,
-
-            /* 1개월 NAV */
-            (SELECT NAV_PER_UNIT
-             FROM FUND_DAILY_HISTORY
-             WHERE FUND_CODE = #{fundCode}
-               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -1)
-             ORDER BY TRADE_DATE DESC
-                 FETCH FIRST 1 ROW ONLY) AS nav1M,
-
-            /* 3개월 NAV */
-            (SELECT NAV_PER_UNIT
-             FROM FUND_DAILY_HISTORY
-             WHERE FUND_CODE = #{fundCode}
-               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -3)
-             ORDER BY TRADE_DATE DESC
-                 FETCH FIRST 1 ROW ONLY) AS nav3M,
-
-            /* 6개월 NAV */
-            (SELECT NAV_PER_UNIT
-             FROM FUND_DAILY_HISTORY
-             WHERE FUND_CODE = #{fundCode}
-               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -6)
-             ORDER BY TRADE_DATE DESC
-                 FETCH FIRST 1 ROW ONLY) AS nav6M,
-
-            /* 12개월 NAV */
-            (SELECT NAV_PER_UNIT
-             FROM FUND_DAILY_HISTORY
-             WHERE FUND_CODE = #{fundCode}
-               AND TRADE_DATE <= ADD_MONTHS(TRUNC(SYSDATE), -12)
-             ORDER BY TRADE_DATE DESC
-                 FETCH FIRST 1 ROW ONLY) AS nav12M
-
-        FROM DUAL
+    <select id="getOneMonthAgoNav" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+    <![CDATA[
+        SELECT *
+        FROM fund_daily_history
+        WHERE fund_id = #{fundId}
+          AND trade_date <= ADD_MONTHS(#{todayDate}, -1)
+        ORDER BY trade_date DESC
+            FETCH FIRST 1 ROW ONLY
         ]]>
 </select>
+
+    <select id="selectFundYieldBest" resultType="kr.co.bnk.bnk_project.dto.ProductDTO">
+        <![CDATA[
+                SELECT
+                    t.*,
+                    /* 수익률 계산 */
+                    ROUND((t.current_nav / t.nav_1m - 1) * 100, 2) AS perf_1m,
+                    ROUND((t.current_nav / t.nav_3m - 1) * 100, 2) AS perf_3m,
+                    ROUND((t.current_nav / t.nav_6m - 1) * 100, 2) AS perf_6m,
+                    ROUND((t.current_nav / t.nav_12m - 1) * 100, 2) AS perf_12m
+                FROM (
+                         SELECT
+                             m.fund_code AS fundcode,
+                             m.fund_name AS fundNm,
+                             m.fund_short_code AS fundshortcode,
+                             m.fund_feature AS fundfeature,
+                             m.invest_grade AS investgrade,
+
+                             /* 최신 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS current_nav,
+
+                             /* 1개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -1)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_1m,
+
+                             /* 3개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -3)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_3m,
+
+                             /* 6개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -6)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_6m,
+
+                             /* 12개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -12)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_12m
+
+                         FROM FUND_MASTER m
+                     ) t
+                ORDER BY perf_1m DESC NULLS LAST
+        ]]>
+    </select>
+
 
 
 </mapper>

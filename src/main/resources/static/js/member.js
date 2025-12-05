@@ -72,8 +72,8 @@ function initRegisterPage() {
     addBlurValidation(form, 'birthdate', validateBirthdate);
     addBlurValidation(form, 'zipcode', validateAddress); // 주소는 우편번호 기준
     addBlurValidation(form, 'address2', validateAddress); // 상세주소
-    addBlurValidation(form, 'accountNumber', validateAccountNumber);
-    addBlurValidation(form, 'accountPassword', validateAccountPassword);
+    //addBlurValidation(form, 'accountNumber', validateAccountNumber);
+    //addBlurValidation(form, 'accountPassword', validateAccountPassword);
 
     // 이메일은 ID와 Domain 필드 모두에 검증 연결
     addBlurValidation(form, 'emailId', validateEmail);

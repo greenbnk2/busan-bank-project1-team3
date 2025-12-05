@@ -2,23 +2,29 @@ package kr.co.bnk.bnk_project.service.admin;
 
 import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.PageResponseDTO;
-import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
-import kr.co.bnk.bnk_project.dto.admin.ApprovalDTO;
-import kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO;
-import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
+import kr.co.bnk.bnk_project.dto.admin.*;
 import kr.co.bnk.bnk_project.mapper.admin.AdminFundMapper;
 import kr.co.bnk.bnk_project.mapper.admin.FundMasterRevisionMapper;
 import kr.co.bnk.bnk_project.mapper.admin.ApprovalMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AdminFundService {
+
+    @Value("${file.path}")
+    private String filePath;
 
     private final AdminFundMapper adminFundMapper;
     private final FundMasterRevisionMapper fundMasterRevisionMapper;
@@ -69,6 +75,113 @@ public class AdminFundService {
         // 업데이트된 행이 1개 이상이면 성공
         return updatedRows > 0;
     }
+
+
+    /*
+        문서 3종 (약관, 투자설명서, 간이투자설명서)
+     */
+
+    @Transactional
+    public void registerFundDocuments(String fundCode,
+                                      MultipartFile termsDoc,
+                                      MultipartFile investmentDoc,
+                                      MultipartFile simpleInvestmentDoc) {
+
+        if (fundCode == null || fundCode.isBlank()) {
+            throw new IllegalArgumentException("fundCode 가 없습니다.");
+        }
+
+        // 신규든 다시 등록이든, 항상 "해당 타입을 삭제 후 다시 저장" 형태로 통일
+        updateFundDocuments(fundCode, termsDoc, investmentDoc, simpleInvestmentDoc);
+    }
+
+    /**
+     * 실제 파일 저장 + FUND_DOCUMENTS INSERT
+     * @param fundCode 펀드코드
+     * @param docType  'TERMS' / 'INVEST' / 'SUMMARY'
+     * @param subDir   실제 폴더명 (terms, invest, summary)
+     */
+
+    private void saveDocumentAndInsert(String fundCode,
+                                       String docType,
+                                       String subDir,
+                                       MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return; // 파일 안 올라왔으면 스킵
+        }
+
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+
+            if (originalFilename != null) {
+                int dotIdx = originalFilename.lastIndexOf('.');
+                if (dotIdx != -1) {
+                    extension = originalFilename.substring(dotIdx); // ".pdf" 이런 거
+                }
+            }
+
+            // ★ docType 에 따라 파일명에 붙일 한글 레이블 결정
+            String label;
+            switch (docType) {
+                case "TERMS":   // 약관
+                    label = "약관";
+                    break;
+                case "INVEST":  // 투자설명서
+                    label = "투자설명서";
+                    break;
+                case "SUMMARY": // 간이 투자 설명서
+                    label = "간이투자설명서";
+                    break;
+                default:
+                    label = "문서";
+            }
+
+
+            // 저장 파일명: 펀드코드_구분.확장자   ex) K55210E01418_terms.pdf
+            String storedFileName = fundCode + "_" + label + extension;
+
+            // ====== 여기 바로 아래에 println 추가 ======
+            System.out.println("=== filePath = " + filePath);
+            System.out.println("=== subDir   = " + subDir);
+            System.out.println("=== uploadDir = " + Paths.get(filePath, subDir).toAbsolutePath());
+            System.out.println("=== storedFileName = " + storedFileName);
+
+            // 저장 디렉토리: filePath/terms, /invest, /summary ...
+            Path uploadDir = Paths.get(filePath, subDir)
+                    .toAbsolutePath()
+                    .normalize();
+            Files.createDirectories(uploadDir);
+
+            Path targetPath = uploadDir.resolve(storedFileName);
+
+            // 실제 파일 저장
+            file.transferTo(targetPath.toFile());
+
+            // DB 에 넣을 URL (상대 경로 기준)
+            // ex) "terms/K55210E01418_terms.pdf"
+            String docUrl = "/upload/" + subDir + "/" + storedFileName;
+
+            FundDocumentDTO docDTO = FundDocumentDTO.builder()
+                    .fundCode(fundCode)
+                    .docType(docType)
+                    .docUrl(docUrl)
+                    .docFileName(originalFilename)
+                    .build();
+
+            adminFundMapper.insertFundDocument(docDTO);
+
+        } catch (IOException e) {
+            // 필요하면 로거로 바꿔도 됨
+            throw new RuntimeException("문서 저장 중 오류 발생 : " + docType, e);
+        }
+    }
+
+
+
+
+
 
     /*---------------------수정-----------------------------*/
 
@@ -218,6 +331,9 @@ public class AdminFundService {
 
     }
 
+
+
+
     //예약시간 넣기 및 상태 변경
     public void setFundReserveTime(String fundCode, LocalDateTime date) {
         AdminFundMasterDTO currentFund = adminFundMapper.selectPendingFundEdit(fundCode);
@@ -259,4 +375,86 @@ public class AdminFundService {
             adminFundMapper.updateStatusToPending(fundCode);
         }
     }
+
+    /* ======================== 문서 3종 조회 ======================== */
+    public List<FundDocumentDTO> getFundDocuments(String fundCode) {
+        if (fundCode == null || fundCode.isBlank()) {
+            return List.of();
+        }
+        return adminFundMapper.selectFundDocuments(fundCode);
+    }
+
+    /* ======================== 문서 3종 업데이트 (수정 화면용) ======================== */
+    /**
+     * 수정 화면에서 문서 3종 업데이트
+     * - 새 파일이 올라온 docType만 기존 문서를 삭제 후 새로 저장
+     * - 아무 파일도 안 올리면 기존 문서 유지 (조회 전용)
+     */
+    @Transactional
+    public void updateFundDocuments(String fundCode,
+                                    MultipartFile termsDoc,
+                                    MultipartFile investmentDoc,
+                                    MultipartFile simpleInvestmentDoc) {
+
+        if (fundCode == null || fundCode.isBlank()) return;
+
+        // 1) 약관
+        if (termsDoc != null && !termsDoc.isEmpty()) {
+            // 기존 DB & 파일 삭제 후 새로 저장
+            deleteFundDocumentByTypeWithFile(fundCode, "TERMS");
+            saveDocumentAndInsert(fundCode, "TERMS", "terms", termsDoc);
+        }
+
+        // 2) 투자설명서
+        if (investmentDoc != null && !investmentDoc.isEmpty()) {
+            deleteFundDocumentByTypeWithFile(fundCode, "INVEST");
+            saveDocumentAndInsert(fundCode, "INVEST", "invest", investmentDoc);
+        }
+
+        // 3) 간이투자설명서
+        if (simpleInvestmentDoc != null && !simpleInvestmentDoc.isEmpty()) {
+            deleteFundDocumentByTypeWithFile(fundCode, "SUMMARY");
+            saveDocumentAndInsert(fundCode, "SUMMARY", "summary", simpleInvestmentDoc);
+        }
+    }
+
+    /**
+     * 기존 문서를 DB + 파일 둘 다 삭제
+     */
+    private void deleteFundDocumentByTypeWithFile(String fundCode, String docType) {
+        // 기존 문서 조회
+        List<FundDocumentDTO> docs = adminFundMapper.selectFundDocuments(fundCode);
+        for (FundDocumentDTO d : docs) {
+            if (docType.equals(d.getDocType())) {
+                deleteDocumentFileIfExists(d);
+            }
+        }
+        // DB 삭제
+        adminFundMapper.deleteFundDocumentsByType(fundCode, docType);
+    }
+
+    /**
+     * 기존 문서 파일 삭제 (있으면)
+     */
+    private void deleteDocumentFileIfExists(FundDocumentDTO doc) {
+        if (doc == null) return;
+
+        String url = doc.getDocUrl();
+        if (url == null || !url.startsWith("/upload/")) return;
+
+        // "/upload/terms/..." → "terms/..."
+        String relative = url.substring("/upload/".length());
+
+        Path path = Paths.get(filePath, relative)
+                .toAbsolutePath()
+                .normalize();
+
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            // 로그 정도만 찍고 무시
+            System.err.println("기존 문서 파일 삭제 실패: " + path + " - " + e.getMessage());
+        }
+    }
+
 }

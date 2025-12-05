@@ -29,16 +29,22 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         // IP 주소 추출 (프록시/로드밸런서 고려)
         String ip = getClientIp(request);
 
-        // DTO 생성 및 데이터 세팅
+        // DTO 생성 및 데이터 세팅 , DB저장
         LoginHistoryDTO history = new LoginHistoryDTO();
         history.setCustNo(user.getCustNo());
         history.setIpAddr(ip);
-
-        // DB 저장
         loginHistoryMapper.insertLoginHistory(history);
 
-        // 로그인 성공 후 이동할 페이지 (기존 defaultSuccessUrl("/") 역할)
-        response.sendRedirect("/bnk");
+        // login.html의 hidden input에서 보낸 'redirectURL' 파라미터를 가져옴
+        String redirectURL = request.getParameter("redirectURL");
+
+        // redirectURL 값이 존재하고 비어있지 않다면 그곳으로 이동
+        if (redirectURL != null && !redirectURL.isEmpty()) {
+            response.sendRedirect(redirectURL);
+        } else {
+            // 값이 없다면 기존대로 메인 페이지("/bnk")로 이동
+            response.sendRedirect("/bnk");
+        }
     }
 
     // 클라이언트 IP 추출 유틸 메서드

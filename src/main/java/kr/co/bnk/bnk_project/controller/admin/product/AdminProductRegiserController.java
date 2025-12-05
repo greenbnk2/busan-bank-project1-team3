@@ -5,6 +5,7 @@ import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
 import kr.co.bnk.bnk_project.dto.admin.ApprovalDTO;
+import kr.co.bnk.bnk_project.dto.admin.FundDocumentDTO;
 import kr.co.bnk.bnk_project.dto.admin.ProductListDTO;
 import kr.co.bnk.bnk_project.security.AdminUserDetails;
 import kr.co.bnk.bnk_project.service.admin.AdminFundService;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/admin/product")
@@ -154,6 +156,22 @@ public class AdminProductRegiserController {
 
         // 등록 성공 - 펀드 관리 페이지로 이동
         redirectAttributes.addFlashAttribute("successMessage", "펀드가 성공적으로 등록되었습니다.");
+    public String registerFund(AdminFundMasterDTO formDto,
+                               @RequestParam(value = "termsDoc", required = false) MultipartFile termsDoc,
+                               @RequestParam(value = "investmentDoc", required = false) MultipartFile investmentDoc,
+                               @RequestParam(value = "simpleInvestmentDoc", required = false) MultipartFile simpleInvestmentDoc) {
+
+        // 1) 기존 펀드 기본정보 저장 (지금 쓰고 있는 로직 그대로 유지)
+        adminFundService.updateFundAndChangeStatus(formDto);
+
+        // 2) 문서 3종만 따로 처리
+        adminFundService.registerFundDocuments(
+                formDto.getFundCode(),
+                termsDoc,
+                investmentDoc,
+                simpleInvestmentDoc
+        );
+
         return "redirect:/admin/product/pending";
     }
 
@@ -239,6 +257,26 @@ public class AdminProductRegiserController {
         model.addAttribute("fund", fund);
         model.addAttribute("sessionId", sessionId);
         populateCategories(model);
+
+        // === 문서 3종 조회해서 모델에 담기 (조회용) ===
+        List<FundDocumentDTO> docs = adminFundService.getFundDocuments(fundCode);
+        FundDocumentDTO termsDoc = null;
+        FundDocumentDTO investDoc = null;
+        FundDocumentDTO summaryDoc = null;
+
+        for (FundDocumentDTO d : docs) {
+            if ("TERMS".equals(d.getDocType())) {
+                termsDoc = d;
+            } else if ("INVEST".equals(d.getDocType())) {
+                investDoc = d;
+            } else if ("SUMMARY".equals(d.getDocType())) {
+                summaryDoc = d;
+            }
+        }
+
+        model.addAttribute("termsDoc", termsDoc);
+        model.addAttribute("investDoc", investDoc);
+        model.addAttribute("summaryDoc", summaryDoc);
         
         // 잠금 시도
         String lockResult = editLockService.tryLock(fundCode, sessionId, userId);
@@ -255,7 +293,12 @@ public class AdminProductRegiserController {
     }
 
     @PostMapping("/edit")
-    public String updateFund(AdminFundMasterDTO formDto, HttpSession session) {
+    public String updateFund(AdminFundMasterDTO formDto,
+                             @RequestParam(required = false) MultipartFile termsDoc,
+                             @RequestParam(required = false) MultipartFile investmentDoc,
+                             @RequestParam(required = false) MultipartFile simpleInvestmentDoc,
+                             HttpSession session) {
+
         String fundCode = formDto.getFundCode();
         String sessionId = session.getId();
 
@@ -276,6 +319,14 @@ public class AdminProductRegiserController {
 
         // 수정 저장 (FUND_MASTER_REVISION에 INSERT)
         adminFundService.updateFund(formDto, userId);
+
+        // 2) ★ 문서 3종 교체 (파일 올라온 것만)
+        adminFundService.updateFundDocuments(
+                formDto.getFundCode(),
+                termsDoc,
+                investmentDoc,
+                simpleInvestmentDoc
+        );
 
         // 잠금 해제
         editLockService.unlock(fundCode, sessionId);

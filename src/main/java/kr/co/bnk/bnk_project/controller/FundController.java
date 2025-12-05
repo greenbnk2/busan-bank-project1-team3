@@ -1,9 +1,13 @@
 package kr.co.bnk.bnk_project.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import kr.co.bnk.bnk_project.dto.KeywordDTO;
 import kr.co.bnk.bnk_project.dto.ProductDTO;
+import kr.co.bnk.bnk_project.security.MyUserDetails;
 import kr.co.bnk.bnk_project.service.FundService;
+import kr.co.bnk.bnk_project.service.InvestmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +21,7 @@ import java.util.List;
 public class FundController {
 
     private final FundService productService;
-
+    private final InvestmentService investmentService;
 
     @GetMapping("/depositGuide")
     public String depositGuide() {
@@ -30,10 +34,33 @@ public class FundController {
     }
 
     @GetMapping("/productList")
-    public String productList(Model model) {
-        List<ProductDTO> list = productService.getProductList();
-        model.addAttribute("productList", list);
-        return "productList";
+    public String productList(Model model, Authentication authentication, HttpServletResponse response) throws Exception {
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+            Long custNo = userDetails.getUserDTO().getCustNo();
+
+            // 1. 유효성 체크
+            boolean isValid = investmentService.isRiskTestValid(custNo);
+            if (!isValid) {
+                // (알림창 띄우는 기존 코드 유지...)
+                return null;
+            }
+
+            // 2. 유저의 투자성향 텍스트 가져오기 (예: "공격투자형")
+            String userRiskType = investmentService.getUserRiskType(custNo);
+
+            // 3. 성향에 맞는 상품만 조회하도록 서비스 호출
+            List<ProductDTO> list = productService.getProductListByRisk(userRiskType);
+
+            model.addAttribute("productList", list);
+            model.addAttribute("userRiskType", userRiskType); // 화면 표시용
+
+            return "productList";
+        }
+
+        // 비로그인 처리
+        return "redirect:/member/login";
     }
 
 

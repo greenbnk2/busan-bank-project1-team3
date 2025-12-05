@@ -64,11 +64,11 @@ public class BnkUserDTO {
     private String emailSms;          // 이메일수신거부
 
     // 계좌정보
-    @NotEmpty(message = "계좌번호는 필수 항목입니다.")
+    //@NotEmpty(message = "계좌번호는 필수 항목입니다.")
     private String accountNumber;     // 계좌번호
 
-    @NotEmpty(message = "계좌비밀번호는 필수 항목입니다.")
-    @Pattern(regexp = "^\\d{4}$", message = "계좌비밀번호는 4자리 숫자입니다.")
+    //@NotEmpty(message = "계좌비밀번호는 필수 항목입니다.")
+    //@Pattern(regexp = "^\\d{4}$", message = "계좌비밀번호는 4자리 숫자입니다.")
     private String accountPassword;   // 계좌비밀번호
 
     // 직장정보
@@ -94,7 +94,7 @@ public class BnkUserDTO {
     @NotEmpty(message = "주택종류는 필수 항목입니다.")
     private String houseType;         // 주택종류
 
-    @NotEmpty(message = "자동차소유 여부는 필수 항목입니다.")
+    //@NotEmpty(message = "자동차소유 여부는 필수 항목입니다.")
     private String hasCar;            // 자동차소유
     private String carNumber;         // 차량번호
 

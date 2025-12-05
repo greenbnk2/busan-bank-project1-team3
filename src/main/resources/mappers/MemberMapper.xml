@@ -128,18 +128,14 @@
             CALENDER_TYPE,
             CHILD_COUNT,
             HAS_HOUSE,
-            HOUSE_TYPE,
-            HAS_CAR,
-            CAR_NUMBER
+            HOUSE_TYPE
         ) VALUES (
             #{custNo},
             TO_DATE(#{birthdate}, 'YYYY-MM-DD'),
             #{calendarType},
             #{childCount},
             #{houseOwnership},
-            #{houseType},
-            #{hasCar},
-            #{carNumber}
+            #{houseType}
         )
     </insert>
 

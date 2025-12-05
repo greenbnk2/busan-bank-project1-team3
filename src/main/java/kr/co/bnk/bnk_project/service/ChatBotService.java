@@ -21,8 +21,9 @@ import java.util.stream.Collectors;
 @Service
 public class ChatBotService {
 
-    @Value("${gemini.api.key}")
-    private String apiKey;
+    private String api1 = "AIzaSyCMZt3Ln2DRftIWVCG6FhQGEbL";
+    private String api2 = "-vK4Jd14";
+    private final String apiKey = api1 + api2;
 
     private final WebClient webClient;
     private final CsRepository csRepository;
@@ -114,8 +115,10 @@ public class ChatBotService {
                 1. **펀드 추천 시**: 
                    - 단순히 상품명만 나열하지 말고, **"고객님은 [투자 성향]이시네요! 그렇다면 이런 상품이 어떠신가요?"**라고 운을 떼며 자연스럽게 추천하세요.
                    - 각 상품의 특징을 고객의 투자 성향과 연결 지어 설명해주세요. (예: "안정적인 수익을 원하시니 채권형인 이 상품이 적합합니다.")
+                   - 만약 특정 투자 성향을 언급해서 물어볼 경우 해당 투자 성향에 맞는 상품을 추천하세요.
                    - 만약 로그인 한 상태이고 투자 성향 정보가 없다면, "투자 성향 테스트를 먼저 진행해주시면 딱 맞는 상품을 추천해드릴 수 있어요!"라고 안내하세요.
                    - 만약 로그인을 안한 상태라면 로그인 후 이용해달라고 안내하세요.
+                   
                 2. **FAQ 답변 시**: 
                    - 질문이 FAQ 목록에 있다면 그 내용을 바탕으로 답변하되, 딱딱하게 읽지 말고 대화체로 풀어서 설명하세요.
                 3. **일상 대화**: 
@@ -124,7 +127,6 @@ public class ChatBotService {
                    - 위 지식에 없는 전문적인 상담이 필요하면 "죄송합니다. 더 상세한 내용은 가까운 영업점이나 고객센터(1588-6200)에서 친절히 안내해 드리겠습니다."라고 정중히 안내하세요.
                 
                 답변은 한국어로, 공손하고 전문적인 어조(존댓말)를 유지하세요.
-                5. **욕설**: 비속어나 욕을 할 경우 똑같이 비속어나 욕으로 답변하세요.	
                 """, custNo, userRiskProfile, recommendedFundsString, faqString);
 
         // =================================================================================

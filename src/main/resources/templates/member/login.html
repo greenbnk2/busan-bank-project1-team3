@@ -7,6 +7,7 @@
     <!-- 홈페이지 회원 -->
     <div id="homepage" class="tab-content center-content">
         <form class="login-form" th:action="@{/login}" method="post">
+            <input type="hidden" name="redirectURL" th:if="${param.redirectURL}" th:value="${param.redirectURL}">
             <input type="text" name="userid" placeholder="아이디를 입력해주세요" required>
 
             <input type="password" name="userpw" id="passwordInput" placeholder="비밀번호를 입력해주세요" required>

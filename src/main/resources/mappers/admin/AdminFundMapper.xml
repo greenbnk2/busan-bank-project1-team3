@@ -517,5 +517,33 @@
           AND OPER_START_AT IS NOT NULL
         ORDER BY OPER_START_AT
     </select>
+    <!-- 문서(약관, 투자설명서, 간이투자설명서)조회 -->
+    <select id="selectFundDocuments" parameterType="string"
+            resultType="kr.co.bnk.bnk_project.dto.admin.FundDocumentDTO">
+        SELECT FUND_CODE    AS fundCode,
+               DOC_TYPE     AS docType,
+               DOC_URL      AS docUrl,
+               DOC_FILE_NAME AS docFileName,
+               REG_DATE     AS regDate
+        FROM FUND_DOCUMENTS
+        WHERE FUND_CODE = #{fundCode}
+        ORDER BY DOC_TYPE
+    </select>
+
+    <!-- 문서(약관, 투자설명서, 간이투자설명서) 등록 -->
+    <insert id="insertFundDocument"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.FundDocumentDTO">
+        INSERT INTO FUND_DOCUMENTS
+            (FUND_CODE, DOC_TYPE, DOC_URL, DOC_FILE_NAME, REG_DATE)
+        VALUES
+            (#{fundCode}, #{docType}, #{docUrl}, #{docFileName}, SYSDATE)
+    </insert>
+
+    <!-- 문서 삭제 (펀드 + 타입 기준, 새 파일로 교체할 때) -->
+    <delete id="deleteFundDocumentsByType">
+        DELETE FROM FUND_DOCUMENTS
+        WHERE FUND_CODE = #{fundCode}
+          AND DOC_TYPE  = #{docType}
+    </delete>
 
 </mapper>

@@ -44,12 +44,12 @@ spring:
 
   devtools:
     livereload:
-      enabled: true
+      enabled: false
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
@@ -87,7 +87,3 @@ file:
   path: /home/rsa-key-20251117/upload
   upload:
     path: upload
-
-gemini:
-  api:
-    key: AIzaSyA3pQLIYB_cWAJGIE2RssHXJzpvNubS0yM

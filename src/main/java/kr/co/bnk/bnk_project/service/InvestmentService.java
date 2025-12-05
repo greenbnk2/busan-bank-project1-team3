@@ -128,4 +128,13 @@ public class InvestmentService {
         RiskTestResultDTO result = riskTestMapper.findValidTestByCustNo(custNo);
         return result != null;
     }
+
+    @Transactional(readOnly = true)
+    public String getUserRiskType(Long custNo) {
+        RiskTestResultDTO result = riskTestMapper.findValidTestByCustNo(custNo);
+        if (result != null) {
+            return result.getRiskType(); // 예: "공격투자형", "위험중립형" 등
+        }
+        return null;
+    }
 }
