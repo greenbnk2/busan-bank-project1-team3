@@ -5,6 +5,8 @@ import kr.co.bnk.bnk_project.dto.PageRequestDTO;
 import kr.co.bnk.bnk_project.dto.PageResponseDTO;
 import kr.co.bnk.bnk_project.dto.admin.ApprovalDTO;
 import kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO;
+import kr.co.bnk.bnk_project.dto.admin.FundMasterRevisionDTO;
+import kr.co.bnk.bnk_project.dto.admin.FieldChangeDTO;
 import kr.co.bnk.bnk_project.mapper.admin.ApprovalMapper;
 import kr.co.bnk.bnk_project.mapper.admin.FundMasterRevisionMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -96,6 +100,94 @@ public class ApprovalService {
         }
         
         adminFundService.updateStatusAfterApproval(approvalDTO.getFundCode(), approvalDTO.getStatus());
+    }
+
+    /**
+     * 결재 상세 조회 (변경사항 포함)
+     */
+    public ApprovalDTO getApprovalDetail(Long apprNo) {
+        return approvalMapper.selectApprovalByNo(apprNo);
+    }
+
+    /**
+     * 수정일 때 변경사항 비교 (FUND_MASTER_REVISION vs FUND_MASTER)
+     */
+    public List<FieldChangeDTO> compareRevisionWithMaster(String fundCode) {
+        List<FieldChangeDTO> changes = new ArrayList<>();
+
+        // FUND_MASTER 현재 데이터 조회
+        FundMasterRevisionDTO currentMaster = fundMasterRevisionMapper.selectFundMasterForRevision(fundCode);
+        if (currentMaster == null) {
+            return changes;
+        }
+
+        // FUND_MASTER_REVISION 대기 중인 수정 데이터 조회
+        FundMasterRevisionDTO revision = fundMasterRevisionMapper.selectPendingRevision(fundCode);
+        if (revision == null) {
+            return changes;
+        }
+
+        // 각 필드 비교
+        compareField(changes, "펀드단축코드", currentMaster.getFundShortCode(), revision.getFundShortCode());
+        compareField(changes, "펀드명", currentMaster.getFundName(), revision.getFundName());
+        compareField(changes, "자산운용사ID", currentMaster.getAssetManagerId(), revision.getAssetManagerId());
+        compareField(changes, "설립일자", formatDate(currentMaster.getSetupDate()), formatDate(revision.getSetupDate()));
+        compareField(changes, "초기NAV", formatNumber(currentMaster.getInitialNav()), formatNumber(revision.getInitialNav()));
+        compareField(changes, "펀드유형", currentMaster.getFundType(), revision.getFundType());
+        compareField(changes, "투자지역", currentMaster.getInvestRegion(), revision.getInvestRegion());
+        compareField(changes, "분류코드", currentMaster.getClassifyCode(), revision.getClassifyCode());
+        compareField(changes, "공사구분", currentMaster.getPublicPrivateType(), revision.getPublicPrivateType());
+        compareField(changes, "수탁회사", currentMaster.getTrusteeCompany(), revision.getTrusteeCompany());
+        compareField(changes, "판매회사", currentMaster.getSalesCompany(), revision.getSalesCompany());
+        compareField(changes, "관리회사", currentMaster.getAdminCompany(), revision.getAdminCompany());
+        compareField(changes, "운용기간유형", currentMaster.getOperPeriodType(), revision.getOperPeriodType());
+        compareField(changes, "단위형태", currentMaster.getIsUnitType(), revision.getIsUnitType());
+        compareField(changes, "투자등급", currentMaster.getInvestGrade(), revision.getInvestGrade());
+        compareField(changes, "펀드특징", currentMaster.getFundFeature(), revision.getFundFeature());
+        compareField(changes, "클래스명", currentMaster.getClassName(), revision.getClassName());
+        compareField(changes, "개요", currentMaster.getOverview(), revision.getOverview());
+        compareField(changes, "환매방법", currentMaster.getRedemptionMethod(), revision.getRedemptionMethod());
+        compareField(changes, "거래방법", currentMaster.getTradeMethod(), revision.getTradeMethod());
+        compareField(changes, "가입경로", currentMaster.getSubscriptionMethod(), revision.getSubscriptionMethod());
+        compareField(changes, "신탁관리", currentMaster.getTrustManagement(), revision.getTrustManagement());
+        compareField(changes, "지급ID", currentMaster.getPaymentId(), revision.getPaymentId());
+        compareField(changes, "공지사항1", currentMaster.getNotice1(), revision.getNotice1());
+        compareField(changes, "공지사항2", currentMaster.getNotice2(), revision.getNotice2());
+        compareField(changes, "지역유형", currentMaster.getRgnType(), revision.getRgnType());
+        compareField(changes, "성과유형", currentMaster.getPrfmType(), revision.getPrfmType());
+
+        return changes;
+    }
+
+    private void compareField(List<FieldChangeDTO> changes, String fieldName, Object oldValue, Object newValue) {
+        if (!Objects.equals(oldValue, newValue)) {
+            changes.add(FieldChangeDTO.builder()
+                    .fieldName(fieldName)
+                    .oldValue(formatValue(oldValue))
+                    .newValue(formatValue(newValue))
+                    .build());
+        }
+    }
+
+    private String formatValue(Object value) {
+        if (value == null) {
+            return "";
+        }
+        return value.toString();
+    }
+
+    private String formatDate(java.time.LocalDate date) {
+        if (date == null) {
+            return "";
+        }
+        return date.toString();
+    }
+
+    private String formatNumber(java.math.BigDecimal number) {
+        if (number == null) {
+            return "";
+        }
+        return number.toString();
     }
 
 }

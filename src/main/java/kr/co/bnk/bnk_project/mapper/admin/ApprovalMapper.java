@@ -21,4 +21,6 @@ public interface ApprovalMapper {
     int selectApprovalHistoryTotal(@Param("pageRequestDTO") PageRequestDTO pageRequestDTO);
 
     void approvalFund(ApprovalDTO approvalDTO);
+
+    ApprovalDTO selectApprovalByNo(@Param("apprNo") Long apprNo);
 }

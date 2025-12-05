@@ -14,6 +14,7 @@
         <result property="fundType"        column="FUND_TYPE"/>
         <result property="investGrade"     column="INVEST_GRADE"/>
         <result property="fundFeature"     column="FUND_FEATURE"/>
+        <result property="subscriptionMethod" column="SUBCRIPTION_METHOD"/>
         <result property="operStatus"      column="OPER_STATUS"/>
         <result property="updateStat"      column="UPDATE_STAT"/>
 
@@ -43,18 +44,59 @@
         fm.FUND_TYPE,
         fm.INVEST_GRADE,
         fm.FUND_FEATURE,
+        fm.SUBCRIPTION_METHOD,
         fm.OPER_STATUS,
         fm.ASSET_MANAGER_ID,
         am.OPERATOR_NAME,
         fc.CATEGORY_NAME AS FUND_TYPE_NAME,
         fm.NOTICE_1,
         fm.NOTICE_2
-        FROM BNK.FUND_MASTER fm
-        LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
+        FROM FUND_MASTER fm
+        LEFT JOIN ASSET_MANAGEMENT_COMPANY am
         ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
-        LEFT JOIN BNK.FUND_CATEGORY fc
+        LEFT JOIN FUND_CATEGORY fc
         ON fm.FUND_TYPE = fc.CATEGORY_CODE
         WHERE 1 = 1
+        and oper_status = '대기'
+        <choose>
+            <!-- 펀드코드 검색: 정확히 일치 (대소문자 무시) -->
+            <when test="searchType == null or searchType == '' or searchType == 'code'">
+                AND UPPER(fm.FUND_CODE) = UPPER(#{keyword})
+            </when>
+
+            <!-- 펀드명 검색: 정확히 일치 (LIKE 아님, 대소문자 무시) -->
+            <when test="searchType == 'name'">
+                AND UPPER(fm.FUND_NAME) = UPPER(#{keyword})
+            </when>
+        </choose>
+    </select>
+
+    <!-- 이미 등록된 펀드 확인 (oper_status != '대기') -->
+    <select id="selectRegisteredFund"
+            parameterType="map"
+            resultMap="FundMasterResultMap">
+
+        SELECT
+        fm.FUND_CODE,
+        fm.FUND_SHORT_CODE,
+        fm.FUND_NAME,
+        fm.FUND_TYPE,
+        fm.INVEST_GRADE,
+        fm.FUND_FEATURE,
+        fm.SUBCRIPTION_METHOD,
+        fm.OPER_STATUS,
+        fm.ASSET_MANAGER_ID,
+        am.OPERATOR_NAME,
+        fc.CATEGORY_NAME AS FUND_TYPE_NAME,
+        fm.NOTICE_1,
+        fm.NOTICE_2
+        FROM FUND_MASTER fm
+        LEFT JOIN ASSET_MANAGEMENT_COMPANY am
+        ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
+        LEFT JOIN FUND_CATEGORY fc
+        ON fm.FUND_TYPE = fc.CATEGORY_CODE
+        WHERE 1 = 1
+        AND fm.OPER_STATUS &lt;&gt; '대기'
         <choose>
             <!-- 펀드코드 검색: 정확히 일치 (대소문자 무시) -->
             <when test="searchType == null or searchType == '' or searchType == 'code'">
@@ -85,16 +127,17 @@
         fm.FUND_TYPE,
         fm.INVEST_GRADE,
         fm.FUND_FEATURE,
+        fm.SUBCRIPTION_METHOD,
         fm.OPER_STATUS,
         fm.ASSET_MANAGER_ID,
         am.OPERATOR_NAME,
         fc.CATEGORY_NAME AS FUND_TYPE_NAME,
         fm.NOTICE_1,
         fm.NOTICE_2
-        FROM BNK.FUND_MASTER fm
-        LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
+        FROM FUND_MASTER fm
+        LEFT JOIN ASSET_MANAGEMENT_COMPANY am
         ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
-        LEFT JOIN BNK.FUND_CATEGORY fc
+        LEFT JOIN FUND_CATEGORY fc
         ON fm.FUND_TYPE = fc.CATEGORY_CODE
         WHERE 1 = 1
           and oper_status = '대기'
@@ -124,16 +167,35 @@
     <update id="updateFundForRegister"
             parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
 
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET
             FUND_NAME     = #{fundName},
             INVEST_GRADE  = #{investGrade},
             FUND_FEATURE  = #{fundFeature},
+            SUBCRIPTION_METHOD = #{subscriptionMethod},
             NOTICE_1      =#{notice1},
             NOTICE_2      =#{notice2},
             OPER_STATUS   = '등록',            -- 상태 변경
             LAST_UPD_DATE = SYSDATE
         WHERE FUND_CODE = #{fundCode}
+          and oper_status = '대기'
+    </update>
+
+    <update id="updateFundForRegisterWithResult"
+            parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
+
+        UPDATE FUND_MASTER
+        SET
+            FUND_NAME     = #{fundName},
+            INVEST_GRADE  = #{investGrade},
+            FUND_FEATURE  = #{fundFeature},
+            SUBCRIPTION_METHOD = #{subscriptionMethod},
+            NOTICE_1      =#{notice1},
+            NOTICE_2      =#{notice2},
+            OPER_STATUS   = '등록',            -- 상태 변경
+            LAST_UPD_DATE = SYSDATE
+        WHERE FUND_CODE = #{fundCode}
+          and oper_status = '대기'
     </update>
 
 
@@ -153,6 +215,7 @@
         fm.FUND_TYPE,
         fm.INVEST_GRADE,
         fm.FUND_FEATURE,
+        fm.SUBCRIPTION_METHOD,
         fm.OPER_STATUS,
         NVL(rev.REV_STATUS, '') AS UPDATE_STAT,
         fm.ASSET_MANAGER_ID,
@@ -160,14 +223,14 @@
         fc.CATEGORY_NAME AS FUND_TYPE_NAME,
         fm.NOTICE_1,
         fm.NOTICE_2
-        FROM BNK.FUND_MASTER fm
-        LEFT JOIN BNK.ASSET_MANAGEMENT_COMPANY am
+        FROM FUND_MASTER fm
+        LEFT JOIN ASSET_MANAGEMENT_COMPANY am
         ON fm.ASSET_MANAGER_ID = am.OPERATOR_ID
-        LEFT JOIN BNK.FUND_CATEGORY fc
+        LEFT JOIN FUND_CATEGORY fc
         ON fm.FUND_TYPE = fc.CATEGORY_CODE
         LEFT JOIN (
             SELECT FUND_CODE, REV_STATUS, ROW_NUMBER() OVER (PARTITION BY FUND_CODE ORDER BY CREATED_AT DESC) AS rn
-            FROM BNK.FUND_MASTER_REVISION
+            FROM FUND_MASTER_REVISION
             WHERE REV_STATUS IN ('대기', '승인완료')
         ) rev ON fm.FUND_CODE = rev.FUND_CODE AND rev.rn = 1
         WHERE fm.FUND_CODE = #{fundCode}
@@ -176,7 +239,7 @@
     <update id="updateFundForEdit"
             parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
 
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET
             INVEST_GRADE  = #{investGrade,jdbcType=VARCHAR},
             FUND_FEATURE  = #{fundFeature,jdbcType=CLOB},
@@ -190,7 +253,7 @@
     <update id="stopFund"
             parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
 
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET
             OPER_STATUS   = '운용중단',            -- 상태 변경
             LAST_UPD_DATE = SYSDATE
@@ -200,7 +263,7 @@
     <update id="resumeFund"
             parameterType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
 
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET
             OPER_STATUS   = '운용중',            -- 상태 변경
             LAST_UPD_DATE = SYSDATE
@@ -253,7 +316,7 @@
                               AND rev.REV_STATUS = #{pageRequestDTO.status}
                               AND rev.REV_ID = (
                                   SELECT MAX(REV_ID) 
-                                  FROM BNK.FUND_MASTER_REVISION 
+                                  FROM FUND_MASTER_REVISION
                                   WHERE FUND_CODE = fm.fund_code
                               )
                         )
@@ -315,7 +378,7 @@
     </select>
 
     <update id="updateOperStatus">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET
             OPER_STATUS   = '등록대기'
         WHERE FUND_CODE = #{fundCode}
@@ -323,13 +386,13 @@
 
 
     <update id="updateStatus">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET LAST_UPD_DATE = SYSDATE
         WHERE FUND_CODE = #{fundCode}
     </update>
 
     <update id="updateStatusAfterApproval">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET
             OPER_STATUS = CASE
                               WHEN OPER_STATUS='등록대기'
@@ -349,16 +412,21 @@
         OPER_STATUS,
         RESERVE_YN,
         OPER_START_AT
-        FROM BNK.FUND_MASTER
-        WHERE OPER_STATUS = '운용대기'
+        FROM FUND_MASTER
+        WHERE OPER_STATUS IN ('운용대기', '등록완료')
         AND RESERVE_YN = 'Y'
         AND OPER_START_AT IS NOT NULL
         AND OPER_START_AT &lt;= SYSDATE
+        AND NOT EXISTS (
+            SELECT 1 FROM FUND_MASTER_REVISION rev
+            WHERE rev.FUND_CODE = FUND_MASTER.FUND_CODE
+              AND rev.REV_STATUS = '수정완료'
+        )
     </select>
 
     <!-- 운용 상태를 '운용중'으로 업데이트 -->
     <update id="updateOperStatusToRunning">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET OPER_STATUS   = '운용중',
             RESERVE_YN    = 'N',
             OPER_START_AT = NULL
@@ -367,7 +435,7 @@
 
     <!-- 상태를 운용대기로 변경 (등록완료일 때만) -->
     <update id="updateStatusToPending">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET OPER_STATUS = '운용대기',
             LAST_UPD_DATE = SYSDATE
         WHERE FUND_CODE = #{fundCode}
@@ -376,12 +444,18 @@
 
     <!-- 예약시간 설정 (등록완료 → 운용대기 예약용) -->
     <update id="setFundReserveTime">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET OPER_START_AT = #{operStartAt},
             RESERVE_YN    = 'Y'
         WHERE FUND_CODE = #{fundCode}
     </update>
 
+    <update id="setFundReserveTimeWithSysdate">
+        UPDATE FUND_MASTER
+        SET OPER_START_AT = SYSDATE,
+            RESERVE_YN    = 'Y'
+        WHERE FUND_CODE = #{fundCode}
+    </update>
     <!-- 예약 시간이 지난 모든 펀드 조회 (revision 적용 배치용) -->
     <select id="selectFundsWithExpiredReserveTime"
             resultType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
@@ -390,7 +464,7 @@
                OPER_STATUS AS operStatus,
                RESERVE_YN AS reserveYn,
                OPER_START_AT AS operStartAt
-        FROM BNK.FUND_MASTER
+        FROM FUND_MASTER
         WHERE OPER_START_AT IS NOT NULL
           AND OPER_START_AT &lt;= SYSDATE
           AND RESERVE_YN = 'Y'
@@ -398,12 +472,51 @@
 
     <!-- 예약 시간 초기화 (revision 적용 후) -->
     <update id="clearReserveTime">
-        UPDATE BNK.FUND_MASTER
+        UPDATE FUND_MASTER
         SET RESERVE_YN    = 'N',
             OPER_START_AT = NULL
         WHERE FUND_CODE = #{fundCode}
     </update>
 
+    <!-- 데이터베이스의 현재 시간 조회 (SYSDATE) -->
+    <select id="selectCurrentDbTime" resultType="java.time.LocalDateTime">
+        SELECT SYSDATE FROM DUAL
+    </select>
+
+    <!-- 디버깅용: 예약 조건별 펀드 개수 조회 -->
+    <select id="countFundsByOperStatus" resultType="int">
+        SELECT COUNT(*) FROM FUND_MASTER
+        WHERE OPER_STATUS = #{operStatus}
+    </select>
+    
+    <select id="countFundsByReserveYn" resultType="int">
+        SELECT COUNT(*) FROM FUND_MASTER
+        WHERE RESERVE_YN = #{reserveYn}
+    </select>
+    
+    <select id="countFundsWithOperStartAt" resultType="int">
+        SELECT COUNT(*) FROM FUND_MASTER
+        WHERE OPER_START_AT IS NOT NULL
+    </select>
+    
+    <select id="countFundsWithExpiredOperStartAt" resultType="int">
+        SELECT COUNT(*) FROM FUND_MASTER
+        WHERE OPER_START_AT IS NOT NULL
+          AND OPER_START_AT &lt;= SYSDATE
+    </select>
+    
+    <!-- 디버깅용: 예약된 펀드 목록 조회 (RESERVE_YN='Y' AND OPER_START_AT IS NOT NULL) -->
+    <select id="selectReservedFunds" resultType="kr.co.bnk.bnk_project.dto.admin.AdminFundMasterDTO">
+        SELECT FUND_CODE AS fundCode,
+               FUND_NAME AS fundName,
+               OPER_STATUS AS operStatus,
+               RESERVE_YN AS reserveYn,
+               OPER_START_AT AS operStartAt
+        FROM FUND_MASTER
+        WHERE RESERVE_YN = 'Y'
+          AND OPER_START_AT IS NOT NULL
+        ORDER BY OPER_START_AT
+    </select>
     <!-- 문서(약관, 투자설명서, 간이투자설명서)조회 -->
     <select id="selectFundDocuments" parameterType="string"
             resultType="kr.co.bnk.bnk_project.dto.admin.FundDocumentDTO">

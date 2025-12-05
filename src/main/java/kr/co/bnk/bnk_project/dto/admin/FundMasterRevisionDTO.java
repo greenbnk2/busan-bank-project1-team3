@@ -50,4 +50,6 @@ public class FundMasterRevisionDTO {
     private String createdBy;              // CREATED_BY
     private LocalDateTime approvedAt;      // APPROVED_AT
     private String approvedBy;             // APPROVED_BY
+    private LocalDateTime operStartAt;     // OPER_START_AT (FUND_MASTER에서 조인)
+    private String reserveYn;              // RESERVE_YN (FUND_MASTER에서 조인)
 }

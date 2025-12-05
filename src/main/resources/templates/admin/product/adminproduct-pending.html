@@ -370,9 +370,13 @@
                             <th>반영일시</th>
                             <td>
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                                         <input type="date" class="form-input" id="reserveDate" style="width: 200px;">
-                                        <input type="time" class="form-input" id="reserveTime" style="width: 150px;">
+                                        <select class="form-input" id="reservePeriod" style="width: 80px;" onchange="updateTimeOptions()">
+                                            <option value="AM">오전</option>
+                                            <option value="PM">오후</option>
+                                        </select>
+                                        <select class="form-input" id="reserveTime" style="width: 100px;"></select>
                                     </div>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                         <input type="checkbox" id="immediateApply" onchange="toggleReserveDateTime()">
@@ -523,33 +527,99 @@
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const hours = now.getHours();
+            // 30분 단위로 반올림
+            const minutes = Math.round(now.getMinutes() / 30) * 30;
             
             document.getElementById('reserveDate').value = `${year}-${month}-${day}`;
-            document.getElementById('reserveTime').value = `${hours}:${minutes}`;
+            
+            // 오전/오후 및 시간 드롭다운 초기화 및 현재 시간 선택
+            const reservePeriod = document.getElementById('reservePeriod');
+            const reserveTimeSelect = document.getElementById('reserveTime');
+            
+            // 현재 시간에 맞춰 오전/오후 설정
+            let period = 'AM';
+            let displayHour = hours;
+            if (hours === 0) {
+                period = 'AM';
+                displayHour = 12;
+            } else if (hours === 12) {
+                period = 'PM';
+                displayHour = 12;
+            } else if (hours > 12) {
+                period = 'PM';
+                displayHour = hours - 12;
+            } else {
+                period = 'AM';
+                displayHour = hours;
+            }
+            
+            reservePeriod.value = period;
+            populateTimeOptions(reserveTimeSelect, period);
+            const currentTimeValue = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            reserveTimeSelect.value = currentTimeValue;
+            
             document.getElementById('immediateApply').checked = false;
             
             // 모달 표시
             document.getElementById('reserveProductModal').classList.add('active');
         }
 
+        // 오전/오후에 따라 시간 옵션을 생성하는 함수 (1시~12시, 30분 단위)
+        function populateTimeOptions(selectElement, period) {
+            selectElement.innerHTML = '<option value="">시간 선택</option>';
+            // 오전: 12시, 1시~11시, 오후: 12시, 1시~11시
+            const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+            for (let hour of hours) {
+                for (let minute = 0; minute < 60; minute += 30) {
+                    // 24시간 형식으로 변환 (value용)
+                    let hour24;
+                    if (period === 'AM') {
+                        hour24 = hour === 12 ? 0 : hour; // 오전 12시는 0시
+                    } else {
+                        hour24 = hour === 12 ? 12 : hour + 12; // 오후 12시는 12시, 나머지는 +12
+                    }
+                    const timeValue = `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    const timeLabel = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    const option = document.createElement('option');
+                    option.value = timeValue;
+                    option.textContent = timeLabel;
+                    selectElement.appendChild(option);
+                }
+            }
+        }
+        
+        // 오전/오후 선택 변경 시 시간 드롭다운 업데이트
+        function updateTimeOptions() {
+            const reservePeriod = document.getElementById('reservePeriod');
+            const reserveTime = document.getElementById('reserveTime');
+            if (reservePeriod && reserveTime) {
+                const period = reservePeriod.value;
+                populateTimeOptions(reserveTime, period);
+                reserveTime.value = ''; // 선택 초기화
+            }
+        }
+
         // 즉시 반영 체크박스 토글
         function toggleReserveDateTime() {
             const immediateApply = document.getElementById('immediateApply');
             const reserveDate = document.getElementById('reserveDate');
+            const reservePeriod = document.getElementById('reservePeriod');
             const reserveTime = document.getElementById('reserveTime');
             const immediateApplyNotice = document.getElementById('immediateApplyNotice');
             
             if (immediateApply.checked) {
                 // 즉시 반영이 체크되면 날짜/시간 입력 필드 비활성화
+                // (서버에서 DB SYSDATE를 사용하므로 클라이언트 시간 설정 불필요)
                 reserveDate.disabled = true;
+                reservePeriod.disabled = true;
                 reserveTime.disabled = true;
                 // 안내 문구 표시
                 immediateApplyNotice.style.display = 'block';
             } else {
                 // 체크 해제되면 날짜/시간 입력 필드 활성화
                 reserveDate.disabled = false;
+                reservePeriod.disabled = false;
                 reserveTime.disabled = false;
                 // 안내 문구 숨김
                 immediateApplyNotice.style.display = 'none';
@@ -583,51 +653,14 @@
                 }
             }
             
-            // 날짜와 시간을 합쳐서 datetime 형식으로 변환 (즉시 반영이면 현재 시간)
+            // 날짜와 시간을 합쳐서 datetime 형식으로 변환 (즉시 반영이면 과거 시간 전송 - 서버에서 DB SYSDATE 사용)
             let reserveDateTime;
             if (immediateApply) {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                reserveDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                // 즉시 반영인 경우 과거 시간을 전송하여 서버에서 DB SYSDATE를 사용하도록 함
+                reserveDateTime = '1970-01-01 00:00:00';
             } else {
                 reserveDateTime = `${reserveDate} ${reserveTime}:00`;
             }
-            
-            // TODO: 반영예약 API 호출
-            // 예시:
-            // const headers = {
-            //     'Content-Type': 'application/json'
-            // };
-            // if (csrfToken && csrfHeader) {
-            //     headers[csrfHeader] = csrfToken;
-            // }
-            // 
-            // fetch('/admin/product/reserve', {
-            //     method: 'POST',
-            //     headers,
-            //     body: JSON.stringify({
-            //         productCode,
-            //         productName,
-            //         status,
-            //         reserveDateTime,
-            //         immediateApply
-            //     })
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     alert(immediateApply ? '즉시 반영이 완료되었습니다.' : '반영예약이 완료되었습니다.');
-            //     closeReserveModal();
-            //     location.reload();
-            // })
-            // .catch(error => {
-            //     console.error(error);
-            //     alert('요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.');
-            // });
             
             // 폼 데이터 설정 후 제출
             console.log('>>> 폼 제출 시작 - fundCode:', productCode, ', date:', reserveDateTime);
@@ -690,6 +723,22 @@
                         alert('요청사유를 입력해주세요.');
                         return false;
                     }
+                });
+            }
+        });
+
+        // 시간 드롭다운 초기화 및 오전/오후 변경 이벤트 (페이지 로드 시)
+        document.addEventListener('DOMContentLoaded', function() {
+            const reservePeriod = document.getElementById('reservePeriod');
+            const reserveTimeSelect = document.getElementById('reserveTime');
+            
+            if (reservePeriod && reserveTimeSelect) {
+                // 초기 시간 옵션 설정 (기본값: 오전)
+                populateTimeOptions(reserveTimeSelect, 'AM');
+                
+                // 오전/오후 변경 시 시간 드롭다운 업데이트
+                reservePeriod.addEventListener('change', function() {
+                    updateTimeOptions();
                 });
             }
         });
@@ -899,19 +948,33 @@
         // 잠금 상태 업데이트 함수
         function updateLockStatus(lockStatusMap) {
             if (!lockStatusMap || Object.keys(lockStatusMap).length === 0) {
+                console.log('updateLockStatus: lockStatusMap이 비어있습니다.');
                 return; // 잠금 상태 정보가 없으면 업데이트하지 않음
             }
             
+            console.log('updateLockStatus: lockStatusMap =', lockStatusMap);
             const rows = document.querySelectorAll('.product-table tbody tr');
+            console.log('updateLockStatus: 조회된 행 개수 =', rows.length);
+            
             rows.forEach(row => {
                 const fundCode = row.getAttribute('data-fund-code') || 
                                 row.querySelector('.action-btn.edit')?.getAttribute('data-fund-code');
                 
-                if (!fundCode) return;
+                if (!fundCode) {
+                    console.log('updateLockStatus: fundCode를 찾을 수 없습니다.');
+                    return;
+                }
                 
                 const isLocked = lockStatusMap[fundCode] === true;
+                console.log('updateLockStatus: FUND_CODE=' + fundCode + ', isLocked=' + isLocked);
+                
                 const editBtn = row.querySelector('.action-btn.edit');
                 const statusCell = row.querySelector('td:nth-child(5)'); // 최근수정일시 컬럼 (5번째)
+                
+                if (!statusCell) {
+                    console.log('updateLockStatus: statusCell을 찾을 수 없습니다. (FUND_CODE=' + fundCode + ')');
+                    return;
+                }
                 
                 // 수정 버튼 비활성화/활성화 (운용대기, 운용중, 운용중단일 때만 활성화)
                 if (editBtn) {
@@ -922,23 +985,23 @@
                 }
                 
                 // 수정상태 표시 업데이트
-                if (statusCell) {
-                    // 기존 수정중 표시 제거
-                    const existingLockStatus = statusCell.querySelector('span[data-lock-status]');
-                    if (existingLockStatus) {
-                        existingLockStatus.remove();
-                    }
-                    
-                    // 잠금 상태일 때 수정중 표시 추가
-                    if (isLocked) {
-                        const lockStatusSpan = document.createElement('span');
-                        lockStatusSpan.setAttribute('data-lock-status', 'true');
-                        lockStatusSpan.style.marginLeft = '10px';
-                        lockStatusSpan.style.color = '#cd1317';
-                        lockStatusSpan.style.fontWeight = '600';
-                        lockStatusSpan.textContent = '[수정중]';
-                        statusCell.appendChild(lockStatusSpan);
-                    }
+                // 기존 수정중 표시 제거 (서버에서 렌더링된 것과 JavaScript로 추가된 것 모두)
+                const existingLockStatus = statusCell.querySelector('span[data-lock-status]');
+                if (existingLockStatus) {
+                    existingLockStatus.remove();
+                    console.log('updateLockStatus: 기존 수정중 표시 제거 (FUND_CODE=' + fundCode + ')');
+                }
+                
+                // 잠금 상태일 때 수정중 표시 추가
+                if (isLocked) {
+                    const lockStatusSpan = document.createElement('span');
+                    lockStatusSpan.setAttribute('data-lock-status', 'true');
+                    lockStatusSpan.style.marginLeft = '10px';
+                    lockStatusSpan.style.color = '#cd1317';
+                    lockStatusSpan.style.fontWeight = '600';
+                    lockStatusSpan.textContent = '[수정중]';
+                    statusCell.appendChild(lockStatusSpan);
+                    console.log('updateLockStatus: 수정중 표시 추가 (FUND_CODE=' + fundCode + ')');
                 }
             });
         }

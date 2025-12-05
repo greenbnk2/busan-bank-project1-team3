@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminFundService {
 
-    @Value("${file.path}")
+    @Value("${file.doc-path}")
     private String filePath;
 
     private final AdminFundMapper adminFundMapper;
@@ -46,6 +46,17 @@ public class AdminFundService {
         return adminFundMapper.selectPendingFund(pageRequestDTO);
     }
 
+    /* 이미 등록된 펀드 확인 */
+    public AdminFundMasterDTO getRegisteredFund(String searchType, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return null;
+        }
+        if (searchType == null || searchType.isBlank()) {
+            searchType = "code";
+        }
+        return adminFundMapper.selectRegisteredFund(searchType, keyword);
+    }
+
 
     public List<AdminFundMasterDTO> getFundSuggestions(String searchType, String keyword) {
         if (keyword == null || keyword.isBlank()) {
@@ -58,9 +69,11 @@ public class AdminFundService {
 
     }
 
-    public void updateFundAndChangeStatus(AdminFundMasterDTO dto) {
-
-        adminFundMapper.updateFundForRegister(dto);
+    public boolean updateFundAndChangeStatus(AdminFundMasterDTO dto) {
+        // 업데이트 시도 (oper_status = '대기'인 경우에만 업데이트됨)
+        int updatedRows = adminFundMapper.updateFundForRegisterWithResult(dto);
+        // 업데이트된 행이 1개 이상이면 성공
+        return updatedRows > 0;
     }
 
 
@@ -178,7 +191,36 @@ public class AdminFundService {
         if (fundCode == null || fundCode.isBlank()) {
             return null;
         }
-        return adminFundMapper.selectPendingFundEdit(fundCode);
+
+        // 1. FUND_MASTER 데이터 조회
+        AdminFundMasterDTO fund = adminFundMapper.selectPendingFundEdit(fundCode);
+        if (fund == null) {
+            return null;
+        }
+
+        // 2. revision이 있으면 revision의 내용으로 덮어쓰기 (수정 가능한 필드만)
+        FundMasterRevisionDTO revision = fundMasterRevisionMapper.selectPendingRevision(fundCode);
+        if (revision != null && (revision.getRevStatus() != null &&
+                (revision.getRevStatus().equals("대기") || revision.getRevStatus().equals("수정완료")))) {
+            // revision의 수정 가능한 필드들을 fund에 반영
+            if (revision.getInvestGrade() != null) {
+                fund.setInvestGrade(revision.getInvestGrade());
+            }
+            if (revision.getFundFeature() != null) {
+                fund.setFundFeature(revision.getFundFeature());
+            }
+            if (revision.getSubscriptionMethod() != null) {
+                fund.setSubscriptionMethod(revision.getSubscriptionMethod());
+            }
+            if (revision.getNotice1() != null) {
+                fund.setNotice1(revision.getNotice1());
+            }
+            if (revision.getNotice2() != null) {
+                fund.setNotice2(revision.getNotice2());
+            }
+        }
+
+        return fund;
     }
 
     @Transactional
@@ -197,6 +239,9 @@ public class AdminFundService {
         if (dto.getFundFeature() != null) {
             revision.setFundFeature(dto.getFundFeature());
         }
+        if (dto.getSubscriptionMethod() != null && !dto.getSubscriptionMethod().isBlank()) {
+            revision.setSubscriptionMethod(dto.getSubscriptionMethod());
+        }
         if (dto.getNotice1() != null) {
             revision.setNotice1(dto.getNotice1());
         }
@@ -210,15 +255,17 @@ public class AdminFundService {
         // 4. FUND_MASTER_REVISION에 INSERT
         fundMasterRevisionMapper.insertRevision(revision);
 
-        // 5. APPROVAL_HISTORY에 INSERT (승인 요청)
-        ApprovalDTO approvalDTO = ApprovalDTO.builder()
-                .apprType("수정")
-                .fundCode(dto.getFundCode())
-                .requester(createdBy)
-                .requestReason("펀드 정보 수정 요청")
-                .build();
-        approvalMapper.insertApproval(approvalDTO);
-    }
+        // // 5. APPROVAL_HISTORY에 INSERT (승인 요청)
+        // ApprovalDTO approvalDTO = ApprovalDTO.builder()
+        //         .apprType("수정")
+        //         .fundCode(dto.getFundCode())
+        //         .requester(createdBy)
+        //         .requestReason("펀드 정보 수정 요청")
+        //         .build();
+        // approvalMapper.insertApproval(approvalDTO);
+        
+  
+        }
 
 
     /*중지 재개*/
@@ -293,18 +340,39 @@ public class AdminFundService {
         if (currentFund == null) {
             throw new IllegalArgumentException("펀드를 찾을 수 없습니다: " + fundCode);
         }
-        
-        adminFundMapper.setFundReserveTime(fundCode, date);
+
+        // 데이터베이스의 현재 시간 사용 (fundOperateReserveJob과 동일하게)
+        LocalDateTime now = adminFundMapper.selectCurrentDbTime();
+        System.out.println("setFundReserveTime: FUND_CODE=" + fundCode + ", 예약시간=" + date + ", 현재시간(DB)=" + now);
+
+        // 미래 시간으로 예약하는 경우: 배치가 처리하도록 예약 시간만 설정하고 종료
+        // 현재 시간보다 1초 이상 미래인 경우만 미래로 판단 (초 단위 오차 방지)
+        if (date.isAfter(now.plusSeconds(1))) {
+            System.out.println("setFundReserveTime: 미래 시간으로 예약 - 배치가 처리하도록 예약 시간만 설정");
+            adminFundMapper.setFundReserveTime(fundCode, date);
+            return; // 배치가 처리하도록 revision은 그대로 유지
+        }
+
+        // 과거 또는 현재 시간으로 예약하는 경우: 즉시 적용
+        System.out.println("setFundReserveTime: 과거/현재 시간으로 예약 - 즉시 적용 (DB SYSDATE 직접 사용)");
+        // 즉시 반영인 경우 DB SYSDATE를 직접 사용하여 예약 시간 설정
+        adminFundMapper.setFundReserveTimeWithSysdate(fundCode);
         
         FundMasterRevisionDTO completedRevision = fundMasterRevisionMapper.selectCompletedRevision(fundCode);
-        
-        if (date.isBefore(LocalDateTime.now()) || date.isEqual(LocalDateTime.now())) {
-            if (completedRevision != null) {
-                fundMasterRevisionMapper.applyRevisionToMaster(completedRevision.getRevId());
-                fundMasterRevisionMapper.updateRevisionStatusToApplied(completedRevision.getRevId());
-            } else {
-                adminFundMapper.updateStatusToPending(fundCode);
-            }
+        System.out.println("setFundReserveTime: '수정완료' 상태인 revision 조회 결과: " + (completedRevision != null ? "있음 (REV_ID: " + completedRevision.getRevId() + ")" : "없음"));
+
+        if (completedRevision != null) {
+            Long revId = completedRevision.getRevId();
+            System.out.println("setFundReserveTime: revision 즉시 적용 시작 - REV_ID: " + revId);
+            fundMasterRevisionMapper.applyRevisionToMaster(revId);
+            fundMasterRevisionMapper.updateRevisionStatusToApplied(revId);
+            adminFundMapper.clearReserveTime(fundCode);
+            // 반영예약 완료 후 revision 삭제 (즉시 적용된 경우에만)
+            fundMasterRevisionMapper.deleteRevision(revId);
+            System.out.println("setFundReserveTime: revision 즉시 적용 완료 및 삭제 - REV_ID: " + revId);
+        } else {
+            System.out.println("setFundReserveTime: '수정완료' 상태인 revision이 없어 상태만 변경");
+            adminFundMapper.updateStatusToPending(fundCode);
         }
     }
 

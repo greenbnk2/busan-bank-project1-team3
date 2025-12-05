@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Value("${file.path}")
+    @Value("${file.doc-path}")
     private String filePath;
     private final FundAccessInterceptor fundAccessInterceptor;
 
@@ -25,15 +25,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         // 약관(terms)
         registry.addResourceHandler("/upload/terms/**")
-                .addResourceLocations("file:///home/rsa-key-20251117/upload/terms/");
+                .addResourceLocations("file:" + filePath + "/terms/");
 
         // 투자설명서(invest)
         registry.addResourceHandler("/upload/invest/**")
-                .addResourceLocations("file:///home/rsa-key-20251117/upload/invest/");
+                .addResourceLocations("file:" + filePath + "/invest/");
 
         // 간이설명서(summary)
         registry.addResourceHandler("/upload/summary/**")
-                .addResourceLocations("file:///home/rsa-key-20251117/upload/summary/");
+                .addResourceLocations("file:" + filePath + "/summary/");
 
         // 로고 전용 경로(logo)
         registry.addResourceHandler("/upload/logo/**")

@@ -187,6 +187,10 @@
                             <span class="detail-label">요청 사유</span>
                             <span class="detail-desc" id="detailReason">신규 BNK 스마트 적금 상품 출시 결재 요청입니다.</span>
                         </div>
+                        <div class="detail-item span-2" id="changesSection" style="display: none;">
+                            <span class="detail-label">변경사항</span>
+                            <div id="changesList" class="changes-list" style="margin-top: 10px;"></div>
+                        </div>
                     </div>
                     <form id="approvalForm" th:action="@{/admin/approval/approve}" method="post">
                         <input type="hidden" id="approvalApprNo" name="apprNo">
@@ -244,7 +248,7 @@
             rejected: document.querySelector('[data-metric="rejected"]')
         };
 
-        function setDetail(row) {
+        async function setDetail(row) {
             rows.forEach((r) => r.classList.remove('selected'));
             row.classList.add('selected');
 
@@ -276,8 +280,51 @@
             commentField.value = '';
             errorBox.textContent = '';
             
+            // 수정일 때 변경사항 조회
+            const apprType = row.dataset.type || '';
+            if (apprType === '수정') {
+                await loadChanges(row.dataset.id);
+            } else {
+                document.getElementById('changesSection').style.display = 'none';
+            }
+            
             // 모달 표시
             document.getElementById('approvalDetailModal').classList.add('active');
+        }
+
+        async function loadChanges(apprNo) {
+            try {
+                const response = await fetch(`/bnk/admin/approval/detail/${apprNo}`);
+                const data = await response.json();
+                
+                const changesSection = document.getElementById('changesSection');
+                const changesList = document.getElementById('changesList');
+                
+                if (data.changes && data.changes.length > 0) {
+                    changesSection.style.display = 'block';
+                    changesList.innerHTML = data.changes.map(change => `
+                        <div class="change-item" style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <div class="change-field" style="font-weight: bold; margin-bottom: 8px; color: #333;">${change.fieldName}</div>
+                            <div class="change-values" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div class="change-old" style="flex: 1; min-width: 200px;">
+                                    <span class="change-label" style="color: #666; font-size: 12px;">변경 전:</span>
+                                    <div style="margin-top: 4px; padding: 5px; background-color: #f5f5f5; border-radius: 3px; word-break: break-word;">${change.oldValue || '(없음)'}</div>
+                                </div>
+                                <div class="change-arrow" style="font-size: 20px; color: #999;">→</div>
+                                <div class="change-new" style="flex: 1; min-width: 200px;">
+                                    <span class="change-label" style="color: #666; font-size: 12px;">변경 후:</span>
+                                    <div style="margin-top: 4px; padding: 5px; background-color: #e8f5e9; border-radius: 3px; word-break: break-word;">${change.newValue || '(없음)'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    changesSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('변경사항 조회 실패:', error);
+                document.getElementById('changesSection').style.display = 'none';
+            }
         }
 
         function closeApprovalDetailModal() {

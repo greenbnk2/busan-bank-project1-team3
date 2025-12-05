@@ -25,6 +25,7 @@ public class AdminFundMasterDTO {
     private String investRegion;    // INVEST_REGION
     private String investGrade;     // INVEST_GRADE
     private String fundFeature;     // FUND_FEATURE (CLOB -> String)
+    private String subscriptionMethod; // SUBCRIPTION_METHOD (가입경로)
 
     private String operStatus;      // OPER_STATUS
     private String updateStat;      // OPER_STATUS

@@ -55,14 +55,20 @@
 
                         <!-- 자동완성 리스트 박스 -->
                         <div id="searchSuggestions"
-                             style="position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid #ddd; border-top:none; z-index:1000; display:none; max-height:200px; overflow-y:auto;">
+                             style="position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid #ddd; border-top:none; z-index:1000; display:none; max-height:200px; overflow-y:auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         </div>
                     </div>
                 </div>
             </form>
+            
+            <!-- 에러 메시지 표시 (.product-classification-bar 밑) -->
+            <div th:if="${errorMessage != null}" 
+                 style="margin-bottom: 10px; padding: 10px; background-color: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c33;">
+                <span th:text="${errorMessage}">이미 등록된 펀드입니다.</span>
+            </div>
 
             <!-- 펀드 등록/수정 (POST) -->
-            <form th:action="@{/admin/product/register}" method="post" enctype="multipart/form-data">
+            <form id="registerForm" th:action="@{/admin/product/register}" method="post" enctype="multipart/form-data">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <!-- 필수정보 -->
@@ -141,6 +147,25 @@
                                     <label class="radio-label">
                                         <input type="radio" name="investGrade" value="매우 높은 위험"
                                                th:checked="${fund != null and fund.investGrade == '매우 높은 위험'}"> 매우 높은 위험
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 가입경로  -->
+                        <div class="form-row">
+                            <div class="form-label">가입경로</div>
+                            <div class="form-input-wrapper">
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="subscriptionMethod" value="인터넷, 스마트폰"
+                                               th:checked="${fund != null and (fund.subscriptionMethod == '인터넷, 스마트폰' or fund.subscriptionMethod == '인터넷, 스마트폰')}"
+                                               required> 인터넷, 스마트폰
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="subscriptionMethod" value="오프라인"
+                                               th:checked="${fund != null and fund.subscriptionMethod == '오프라인'}"
+                                               required> 오프라인
                                     </label>
                                 </div>
                             </div>
@@ -264,7 +289,231 @@
     document.addEventListener('DOMContentLoaded', function() {
 
         // ==========================
-        // 1. 파일 업로드 관련
+        // 0. 등록 폼 제출 전 중복 확인
+        // ==========================
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // 기본 제출 동작 막기
+
+                const fundCode = document.getElementById('productCode')?.value || '';
+                const fundName = document.getElementById('productName')?.value || '';
+
+                // 펀드코드나 펀드명이 없으면 그냥 제출
+                if (!fundCode && !fundName) {
+                    registerForm.submit();
+                    return;
+                }
+
+                // 중복 확인 API 호출
+                try {
+                    const csrfToken = document.querySelector('input[name="_csrf"]')?.value || '';
+                    
+                    const formData = new FormData();
+                    if (fundCode) formData.append('fundCode', fundCode);
+                    if (fundName) formData.append('fundName', fundName);
+                    formData.append('_csrf', csrfToken);
+
+                    const checkUrl = /*[[@{/admin/product/check-duplicate}]]*/ '';
+                    console.log('중복 확인 API 호출:', checkUrl, {fundCode, fundName});
+
+                    const response = await fetch(checkUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        console.error('서버 응답 오류:', response.status, response.statusText);
+                        throw new Error('서버 응답 오류: ' + response.status);
+                    }
+
+                    const result = await response.json();
+                    console.log('중복 확인 결과:', result);
+
+                    if (result.duplicate === true) {
+                        // 이미 등록된 펀드면 팝업 표시하고 제출 중단 (페이지에 그대로 머물러 있음)
+                        alert('이미 등록된 펀드입니다.');
+                        return false; // 폼 제출 중단
+                    } else {
+                        // 중복이 아니면 폼 제출 (등록 후 같은 페이지로 리다이렉트됨)
+                        registerForm.submit();
+                    }
+                } catch (error) {
+                    console.error('중복 확인 중 오류 발생:', error);
+                    // 오류 발생 시에도 제출 (서버 측에서 다시 확인)
+                    registerForm.submit();
+                }
+            });
+        }
+
+        // ==========================
+        // 0-1. 성공/에러 메시지 팝업 표시
+        // ==========================
+        const successMessage = /*[[${successMessage}]]*/ null;
+        if (successMessage) {
+            alert(successMessage);
+        }
+
+        const errorMessage = /*[[${errorMessage}]]*/ null;
+        const showPopup = /*[[${showPopup}]]*/ false;
+        if (errorMessage && showPopup) {
+            alert(errorMessage);
+        }
+
+        // ==========================
+        // 1. 펀드 자동완성 (코드/이름 모두 지원)
+        // ==========================
+        const searchTypeSelect = document.getElementById('searchType');
+        const searchInput = document.getElementById('searchKeyword');
+        const suggestionBox = document.getElementById('searchSuggestions');
+
+        if (searchTypeSelect && searchInput && suggestionBox) {
+            let suggestionTimer = null;
+            let activeIndex = -1;
+
+            function clearSuggestions() {
+                suggestionBox.style.display = 'none';
+                suggestionBox.innerHTML = '';
+                activeIndex = -1;
+            }
+
+            function applyActiveState(items) {
+                items.forEach((item, idx) => {
+                    if (idx === activeIndex) {
+                        item.style.backgroundColor = '#f0f4ff';
+                        item.style.fontWeight = '600';
+                    } else {
+                        item.style.backgroundColor = '#ffffff';
+                        item.style.fontWeight = 'normal';
+                    }
+                });
+            }
+
+            function selectSuggestion(item) {
+                const fundCode = item.getAttribute('data-fund-code');
+                const fundName = item.getAttribute('data-fund-name');
+                const currentType = searchTypeSelect.value; // 'code' or 'name'
+
+                if (currentType === 'code') {
+                    searchInput.value = fundCode;
+                } else {
+                    searchInput.value = fundName;
+                }
+
+                clearSuggestions();
+                searchInput.form.submit();
+            }
+
+            const autocompleteUrl = /*[[@{/admin/product/autocomplete}]]*/ '';
+
+            searchInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                const searchType = searchTypeSelect.value;
+
+                if (keyword.length < 1) {
+                    clearSuggestions();
+                    return;
+                }
+
+                if (suggestionTimer) {
+                    clearTimeout(suggestionTimer);
+                }
+
+                suggestionTimer = setTimeout(() => {
+                    fetch(`${autocompleteUrl}?searchType=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error('API 호출 실패');
+                            }
+                            return res.json();
+                        })
+                        .then(data => {
+                            if (!data || data.length === 0) {
+                                clearSuggestions();
+                                return;
+                            }
+
+                            suggestionBox.innerHTML = '';
+
+                            data.forEach((item, idx) => {
+                                const div = document.createElement('div');
+                                div.className = 'suggestion-item';
+                                div.style.padding = '10px 12px';
+                                div.style.cursor = 'pointer';
+                                div.style.fontSize = '14px';
+                                div.style.borderBottom = '1px solid #eee';
+                                div.style.transition = 'background-color 0.2s';
+
+                                div.textContent = `${item.fundCode} - ${item.fundName}`;
+
+                                div.setAttribute('data-fund-code', item.fundCode);
+                                div.setAttribute('data-fund-name', item.fundName);
+
+                                div.addEventListener('mouseenter', () => {
+                                    activeIndex = idx;
+                                    applyActiveState([...suggestionBox.children]);
+                                });
+
+                                div.addEventListener('mouseleave', () => {
+                                    activeIndex = -1;
+                                    applyActiveState([...suggestionBox.children]);
+                                });
+
+                                div.addEventListener('click', () => {
+                                    selectSuggestion(div);
+                                });
+
+                                suggestionBox.appendChild(div);
+                            });
+
+                            suggestionBox.style.display = 'block';
+                            activeIndex = -1;
+                        })
+                        .catch(err => {
+                            console.error('자동완성 에러:', err);
+                            clearSuggestions();
+                        });
+                }, 200);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                const items = [...suggestionBox.children];
+
+                if (items.length === 0 || suggestionBox.style.display === 'none') {
+                    return;
+                }
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex + 1) % items.length;
+                    applyActiveState(items);
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex - 1 + items.length) % items.length;
+                    applyActiveState(items);
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'Enter') {
+                    if (activeIndex >= 0 && activeIndex < items.length) {
+                        e.preventDefault();
+                        selectSuggestion(items[activeIndex]);
+                    }
+                } else if (e.key === 'Escape') {
+                    clearSuggestions();
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!suggestionBox.contains(e.target) &&
+                    e.target !== searchInput &&
+                    e.target !== searchTypeSelect) {
+                    clearSuggestions();
+                }
+            });
+        }
+
+        // ==========================
+        // 2. 파일 업로드 관련
         // ==========================
         const termsInput = document.getElementById('termsDoc');
         const investmentInput = document.getElementById('investmentDoc');
@@ -345,162 +594,6 @@
             }
         };
 
-        // ==========================
-        // 2. 펀드 자동완성 (코드/이름 모두 지원)
-        // ==========================
-        const searchTypeSelect = document.getElementById('searchType');
-        const searchInput = document.getElementById('searchKeyword');
-        const suggestionBox = document.getElementById('searchSuggestions');
-
-        if (!searchTypeSelect || !searchInput || !suggestionBox) {
-            console.error('자동완성에 필요한 요소를 찾을 수 없습니다.');
-            return;
-        }
-
-        let suggestionTimer = null;
-        let activeIndex = -1;
-
-        function clearSuggestions() {
-            suggestionBox.style.display = 'none';
-            suggestionBox.innerHTML = '';
-            activeIndex = -1;
-        }
-
-        function applyActiveState(items) {
-            items.forEach((item, idx) => {
-                if (idx === activeIndex) {
-                    item.style.backgroundColor = '#f0f4ff';
-                    item.style.fontWeight = '600';
-                } else {
-                    item.style.backgroundColor = '#ffffff';
-                    item.style.fontWeight = 'normal';
-                }
-            });
-        }
-
-        function selectSuggestion(item) {
-            const fundCode = item.getAttribute('data-fund-code');
-            const fundName = item.getAttribute('data-fund-name');
-            const currentType = searchTypeSelect.value; // 'code' or 'name'
-
-            if (currentType === 'code') {
-                searchInput.value = fundCode;
-            } else {
-                searchInput.value = fundName;
-            }
-
-            clearSuggestions();
-            searchInput.form.submit();
-        }
-
-        const autocompleteUrl = /*[[@{/admin/product/autocomplete}]]*/ '';
-
-        searchInput.addEventListener('input', function() {
-            const keyword = this.value.trim();
-            const searchType = searchTypeSelect.value;
-
-            if (keyword.length < 1) {
-                clearSuggestions();
-                return;
-            }
-
-            if (suggestionTimer) {
-                clearTimeout(suggestionTimer);
-            }
-
-            suggestionTimer = setTimeout(() => {
-                fetch(`${autocompleteUrl}?searchType=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`)
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error('API 호출 실패');
-                        }
-                        return res.json();
-                    })
-                    .then(data => {
-                        console.log('자동완성 응답:', data);
-
-                        if (!data || data.length === 0) {
-                            clearSuggestions();
-                            return;
-                        }
-
-                        suggestionBox.innerHTML = '';
-
-                        data.forEach((item, idx) => {
-                            const div = document.createElement('div');
-                            div.className = 'suggestion-item';
-                            div.style.padding = '10px 12px';
-                            div.style.cursor = 'pointer';
-                            div.style.fontSize = '14px';
-                            div.style.borderBottom = '1px solid #eee';
-                            div.style.transition = 'background-color 0.2s';
-
-                            div.textContent = `${item.fundCode} - ${item.fundName}`;
-
-                            div.setAttribute('data-fund-code', item.fundCode);
-                            div.setAttribute('data-fund-name', item.fundName);
-
-                            div.addEventListener('mouseenter', () => {
-                                activeIndex = idx;
-                                applyActiveState([...suggestionBox.children]);
-                            });
-
-                            div.addEventListener('mouseleave', () => {
-                                activeIndex = -1;
-                                applyActiveState([...suggestionBox.children]);
-                            });
-
-                            div.addEventListener('click', () => {
-                                selectSuggestion(div);
-                            });
-
-                            suggestionBox.appendChild(div);
-                        });
-
-                        suggestionBox.style.display = 'block';
-                        activeIndex = -1;
-                    })
-                    .catch(err => {
-                        console.error('자동완성 에러:', err);
-                        clearSuggestions();
-                    });
-            }, 200);
-        });
-
-        searchInput.addEventListener('keydown', function(e) {
-            const items = [...suggestionBox.children];
-
-            if (items.length === 0 || suggestionBox.style.display === 'none') {
-                return;
-            }
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                activeIndex = (activeIndex + 1) % items.length;
-                applyActiveState(items);
-                items[activeIndex].scrollIntoView({ block: 'nearest' });
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                activeIndex = (activeIndex - 1 + items.length) % items.length;
-                applyActiveState(items);
-                items[activeIndex].scrollIntoView({ block: 'nearest' });
-            } else if (e.key === 'Enter') {
-                if (activeIndex >= 0 && activeIndex < items.length) {
-                    e.preventDefault();
-                    selectSuggestion(items[activeIndex]);
-                }
-            } else if (e.key === 'Escape') {
-                clearSuggestions();
-            }
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!suggestionBox.contains(e.target) &&
-                e.target !== searchInput &&
-                e.target !== searchTypeSelect) {
-                clearSuggestions();
-            }
-        });
 
     });
     /*]]>*/

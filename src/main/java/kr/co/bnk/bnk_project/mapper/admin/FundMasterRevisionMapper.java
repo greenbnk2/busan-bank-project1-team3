@@ -49,4 +49,13 @@ public interface FundMasterRevisionMapper {
     
     // 수정완료된 revision 조회 (예약용)
     FundMasterRevisionDTO selectCompletedRevision(@Param("fundCode") String fundCode);
+    
+    // revision 삭제 (반영예약 완료 후)
+    void deleteRevision(@Param("revId") Long revId);
+    
+    // 적용완료 상태인 revision 조회 (정리용)
+    List<FundMasterRevisionDTO> selectAppliedRevisions();
+    
+    // 디버깅용: '수정완료' 상태인 revision 조회 (조건 없이)
+    List<FundMasterRevisionDTO> selectCompletedRevisionsForDebug();
 }

@@ -104,6 +104,26 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 가입경로  -->
+                        <div class="form-row">
+                            <div class="form-label">가입경로</div>
+                            <div class="form-input-wrapper">
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="subscriptionMethod" value="인터넷, 스마트폰"
+                                               th:checked="${fund != null and (fund.subscriptionMethod == '인터넷, 스마트폰' or fund.subscriptionMethod == '인터넷, 스마트폰')}"
+                                               required> 인터넷, 스마트폰
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="subscriptionMethod" value="오프라인"
+                                               th:checked="${fund != null and fund.subscriptionMethod == '오프라인'}"
+                                               required> 오프라인
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-row">
                             <div class="form-label">운용사</div>
                             <div class="form-input-wrapper">

@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -47,10 +48,36 @@ public class AdminProductRegiserController {
     @GetMapping("/register")
     public String showFundRegister(PageRequestDTO pageRequestDTO, Model model) {
 
-        AdminFundMasterDTO fund = adminFundService.getPendingFund(pageRequestDTO);
+        // 검색어가 있는 경우
+        if (pageRequestDTO.getKeyword() != null && !pageRequestDTO.getKeyword().isBlank()) {
+            // searchType 기본값 세팅
+            if (pageRequestDTO.getSearchType() == null || pageRequestDTO.getSearchType().isBlank()) {
+                pageRequestDTO.setSearchType("code");
+            }
+
+            // 먼저 이미 등록된 펀드인지 확인
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund(
+                    pageRequestDTO.getSearchType(), 
+                    pageRequestDTO.getKeyword()
+            );
+
+            if (registeredFund != null) {
+                // 이미 등록된 펀드인 경우
+                model.addAttribute("errorMessage", "이미 등록된 펀드입니다.");
+                model.addAttribute("pageRequestDTO", pageRequestDTO);
+                model.addAttribute("fund", null);
+                populateCategories(model);
+                return "admin/product/adminproduct-register";
+            }
+
+            // 대기 상태인 펀드 조회
+            AdminFundMasterDTO fund = adminFundService.getPendingFund(pageRequestDTO);
+            model.addAttribute("fund", fund);
+        } else {
+            model.addAttribute("fund", null);
+        }
 
         model.addAttribute("pageRequestDTO", pageRequestDTO);
-        model.addAttribute("fund", fund);
         populateCategories(model);
 
         return "admin/product/adminproduct-register";
@@ -58,6 +85,77 @@ public class AdminProductRegiserController {
 
 
     @PostMapping("/register")
+    public String registerFund(AdminFundMasterDTO formDto, RedirectAttributes redirectAttributes) {
+
+        // 등록 전에 이미 등록된 펀드인지 확인
+        if (formDto.getFundCode() != null && !formDto.getFundCode().isBlank()) {
+            // 펀드코드로 이미 등록된 펀드 확인
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("code", formDto.getFundCode());
+            if (registeredFund != null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
+                redirectAttributes.addFlashAttribute("showPopup", true); // 팝업 표시 플래그
+                // URL 파라미터로 검색 정보 전달
+                redirectAttributes.addAttribute("searchType", "code");
+                redirectAttributes.addAttribute("keyword", formDto.getFundCode());
+                return "redirect:/admin/product/register";
+            }
+        }
+
+        // 펀드명으로도 확인 (펀드명이 있는 경우)
+        if (formDto.getFundName() != null && !formDto.getFundName().isBlank()) {
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("name", formDto.getFundName());
+            if (registeredFund != null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
+                redirectAttributes.addFlashAttribute("showPopup", true); // 팝업 표시 플래그
+                // URL 파라미터로 검색 정보 전달
+                redirectAttributes.addAttribute("searchType", "name");
+                redirectAttributes.addAttribute("keyword", formDto.getFundName());
+                return "redirect:/admin/product/register";
+            }
+        }
+
+        // 등록 시도 전에 다시 한 번 중복 확인 (이중 체크)
+        if (formDto.getFundCode() != null && !formDto.getFundCode().isBlank()) {
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("code", formDto.getFundCode());
+            if (registeredFund != null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
+                redirectAttributes.addFlashAttribute("showPopup", true);
+                redirectAttributes.addAttribute("searchType", "code");
+                redirectAttributes.addAttribute("keyword", formDto.getFundCode());
+                return "redirect:/admin/product/register";
+            }
+        }
+
+        if (formDto.getFundName() != null && !formDto.getFundName().isBlank()) {
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("name", formDto.getFundName());
+            if (registeredFund != null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
+                redirectAttributes.addFlashAttribute("showPopup", true);
+                redirectAttributes.addAttribute("searchType", "name");
+                redirectAttributes.addAttribute("keyword", formDto.getFundName());
+                return "redirect:/admin/product/register";
+            }
+        }
+
+        // 등록 시도 (oper_status = '대기'인 경우에만 업데이트됨)
+        boolean success = adminFundService.updateFundAndChangeStatus(formDto);
+
+        if (!success) {
+            // 등록 실패 (이미 등록된 펀드)
+            redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
+            redirectAttributes.addFlashAttribute("showPopup", true);
+            if (formDto.getFundCode() != null && !formDto.getFundCode().isBlank()) {
+                redirectAttributes.addAttribute("searchType", "code");
+                redirectAttributes.addAttribute("keyword", formDto.getFundCode());
+            } else if (formDto.getFundName() != null && !formDto.getFundName().isBlank()) {
+                redirectAttributes.addAttribute("searchType", "name");
+                redirectAttributes.addAttribute("keyword", formDto.getFundName());
+            }
+            return "redirect:/admin/product/register";
+        }
+
+        // 등록 성공 - 펀드 관리 페이지로 이동
+        redirectAttributes.addFlashAttribute("successMessage", "펀드가 성공적으로 등록되었습니다.");
     public String registerFund(AdminFundMasterDTO formDto,
                                @RequestParam(value = "termsDoc", required = false) MultipartFile termsDoc,
                                @RequestParam(value = "investmentDoc", required = false) MultipartFile investmentDoc,
@@ -96,6 +194,40 @@ public class AdminProductRegiserController {
                     return m;
                 })
                 .toList();
+    }
+
+    /* 펀드 중복 확인 API (등록 전 확인용) */
+    @PostMapping("/check-duplicate")
+    @ResponseBody
+    public Map<String, Object> checkDuplicateFund(
+            @RequestParam(required = false) String fundCode,
+            @RequestParam(required = false) String fundName) {
+
+        Map<String, Object> response = new HashMap<>();
+        
+        // 펀드코드로 확인
+        if (fundCode != null && !fundCode.isBlank()) {
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("code", fundCode);
+            if (registeredFund != null) {
+                response.put("duplicate", true);
+                response.put("message", "이미 등록된 펀드입니다.");
+                return response;
+            }
+        }
+
+        // 펀드명으로 확인
+        if (fundName != null && !fundName.isBlank()) {
+            AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("name", fundName);
+            if (registeredFund != null) {
+                response.put("duplicate", true);
+                response.put("message", "이미 등록된 펀드입니다.");
+                return response;
+            }
+        }
+
+        response.put("duplicate", false);
+        response.put("message", "등록 가능한 펀드입니다.");
+        return response;
     }
 
 /*
