@@ -85,7 +85,11 @@ public class AdminProductRegiserController {
 
 
     @PostMapping("/register")
-    public String registerFund(AdminFundMasterDTO formDto, RedirectAttributes redirectAttributes) {
+    public String registerFund(AdminFundMasterDTO formDto,
+                               @RequestParam(value = "termsDoc", required = false) MultipartFile termsDoc,
+                               @RequestParam(value = "investmentDoc", required = false) MultipartFile investmentDoc,
+                               @RequestParam(value = "simpleInvestmentDoc", required = false) MultipartFile simpleInvestmentDoc,
+                               RedirectAttributes redirectAttributes) {
 
         // 등록 전에 이미 등록된 펀드인지 확인
         if (formDto.getFundCode() != null && !formDto.getFundCode().isBlank()) {
@@ -93,8 +97,7 @@ public class AdminProductRegiserController {
             AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("code", formDto.getFundCode());
             if (registeredFund != null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
-                redirectAttributes.addFlashAttribute("showPopup", true); // 팝업 표시 플래그
-                // URL 파라미터로 검색 정보 전달
+                redirectAttributes.addFlashAttribute("showPopup", true);
                 redirectAttributes.addAttribute("searchType", "code");
                 redirectAttributes.addAttribute("keyword", formDto.getFundCode());
                 return "redirect:/admin/product/register";
@@ -106,8 +109,7 @@ public class AdminProductRegiserController {
             AdminFundMasterDTO registeredFund = adminFundService.getRegisteredFund("name", formDto.getFundName());
             if (registeredFund != null) {
                 redirectAttributes.addFlashAttribute("errorMessage", "이미 등록된 펀드입니다.");
-                redirectAttributes.addFlashAttribute("showPopup", true); // 팝업 표시 플래그
-                // URL 파라미터로 검색 정보 전달
+                redirectAttributes.addFlashAttribute("showPopup", true);
                 redirectAttributes.addAttribute("searchType", "name");
                 redirectAttributes.addAttribute("keyword", formDto.getFundName());
                 return "redirect:/admin/product/register";
@@ -154,17 +156,7 @@ public class AdminProductRegiserController {
             return "redirect:/admin/product/register";
         }
 
-        // 등록 성공 - 펀드 관리 페이지로 이동
-        redirectAttributes.addFlashAttribute("successMessage", "펀드가 성공적으로 등록되었습니다.");
-    public String registerFund(AdminFundMasterDTO formDto,
-                               @RequestParam(value = "termsDoc", required = false) MultipartFile termsDoc,
-                               @RequestParam(value = "investmentDoc", required = false) MultipartFile investmentDoc,
-                               @RequestParam(value = "simpleInvestmentDoc", required = false) MultipartFile simpleInvestmentDoc) {
-
-        // 1) 기존 펀드 기본정보 저장 (지금 쓰고 있는 로직 그대로 유지)
-        adminFundService.updateFundAndChangeStatus(formDto);
-
-        // 2) 문서 3종만 따로 처리
+        // 문서 3종 처리
         adminFundService.registerFundDocuments(
                 formDto.getFundCode(),
                 termsDoc,
@@ -172,6 +164,8 @@ public class AdminProductRegiserController {
                 simpleInvestmentDoc
         );
 
+        // 등록 성공 - 펀드 관리 페이지로 이동
+        redirectAttributes.addFlashAttribute("successMessage", "펀드가 성공적으로 등록되었습니다.");
         return "redirect:/admin/product/pending";
     }
 
