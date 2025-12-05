@@ -222,8 +222,28 @@
           AND NVL(status, '대기') = '대기'
     </update>
 
-
-
-    
+    <select id="selectApprovalByNo" resultMap="approvalResultMap">
+        SELECT
+            ah.APPR_NO,
+            ah.APPR_TYPE,
+            ah.FUND_CODE,
+            fm.FUND_NAME,
+            ah.REQUESTER,
+            ah.REQUEST_REASON,
+            ah.REQUEST_TIME,
+            NVL(ah.STATUS, '대기') AS STATUS,
+            ah.APPROVER,
+            ah.APPROVAL_TIME,
+            ah.REMARKS,
+            NVL(rev.REV_STATUS, '') AS UPDATE_STAT
+        FROM APPROVAL_HISTORY ah
+        JOIN FUND_MASTER fm ON fm.FUND_CODE = ah.FUND_CODE
+        LEFT JOIN (
+            SELECT FUND_CODE, REV_STATUS, ROW_NUMBER() OVER (PARTITION BY FUND_CODE ORDER BY CREATED_AT DESC) AS rn
+            FROM BNK.FUND_MASTER_REVISION
+            WHERE REV_STATUS IN ('대기', '승인완료', '수정완료')
+        ) rev ON fm.FUND_CODE = rev.FUND_CODE AND rev.rn = 1
+        WHERE ah.APPR_NO = #{apprNo}
+    </select>
 
 </mapper>

@@ -142,15 +142,17 @@ public class AdminFundService {
         // 4. FUND_MASTER_REVISION에 INSERT
         fundMasterRevisionMapper.insertRevision(revision);
 
-        // 5. APPROVAL_HISTORY에 INSERT (승인 요청)
-        ApprovalDTO approvalDTO = ApprovalDTO.builder()
-                .apprType("수정")
-                .fundCode(dto.getFundCode())
-                .requester(createdBy)
-                .requestReason("펀드 정보 수정 요청")
-                .build();
-        approvalMapper.insertApproval(approvalDTO);
-    }
+        // // 5. APPROVAL_HISTORY에 INSERT (승인 요청)
+        // ApprovalDTO approvalDTO = ApprovalDTO.builder()
+        //         .apprType("수정")
+        //         .fundCode(dto.getFundCode())
+        //         .requester(createdBy)
+        //         .requestReason("펀드 정보 수정 요청")
+        //         .build();
+        // approvalMapper.insertApproval(approvalDTO);
+        
+  
+        }
 
 
     /*중지 재개*/
