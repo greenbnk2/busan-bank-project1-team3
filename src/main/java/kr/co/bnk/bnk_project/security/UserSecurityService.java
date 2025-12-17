@@ -12,15 +12,19 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserSecurityService implements UserDetailsService {
 
-    private final MemberMapper memberMapper;
+    private final MemberMapper userMapper; // or Repository
 
     @Override
-    public UserDetails loadUserByUsername(String custId) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String userId)
+            throws UsernameNotFoundException {
 
-        BnkUserDTO user = memberMapper.findByCustId(custId);
+        System.out.println("loadUserByUsername : " + userId);
+
+
+        BnkUserDTO user = userMapper.findByCustId(userId);
 
         if (user == null) {
-            throw new UsernameNotFoundException("사용자 아이디를 찾을 수 없습니다: " + custId);
+            throw new UsernameNotFoundException("사용자 없음");
         }
 
         return new MyUserDetails(user);
