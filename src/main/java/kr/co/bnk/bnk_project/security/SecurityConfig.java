@@ -93,7 +93,7 @@ public class SecurityConfig {
 
                 // 챗봇 용도 (필터 무시)
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/chatbot/ask")
+                        .ignoringRequestMatchers("/api/chatbot/ask", "/api/mock/**")
                 )
 
                 // 경로별 권한 설정 (⭐️ 순서가 중요 ⭐️)
@@ -101,6 +101,9 @@ public class SecurityConfig {
 
                         // 1순위: /admin/** 경로는 이 필터체인에서 무조건 거부. (adminFilterChain이 담당)
                         .requestMatchers("/admin/**").denyAll()
+
+                        // 모의투자 API는 로그인 없이도 접근 가능하게 허용 (테스트 용도)
+                        .requestMatchers("/api/mock/**").permitAll()
 
                         // 2순위: 인증이 필요한 사용자 전용 페이지 (예: 마이페이지, 펀드 가입 신청 등)
                         .requestMatchers("/my/**", "/fund/**", "/user/profile/**","/api/session/extend", "/member/survey/**").authenticated() // USER ROLE이 따로 없어서 로그인 하면 허용
@@ -132,9 +135,9 @@ public class SecurityConfig {
 
                 // 동시 접속 제어 설정
                 .sessionManagement(session -> session
-                        .maximumSessions(1)               // 최대 허용 세션 수 (1로 설정 중복 로그인 방지)
-                        .maxSessionsPreventsLogin(false)  // false: 기존 사용자 로그아웃(팅김), true: 신규 로그인 차단
-                        .expiredUrl("/member/login?expired=true") // 중복 로그인으로 팅겼을 때 이동할 페이지
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                        .expiredUrl("/member/login?expired=true")
                 );
 
         return http.build();
