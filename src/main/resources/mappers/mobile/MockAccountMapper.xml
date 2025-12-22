@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.bnk.bnk_project.mapper.mobile.MockAccountMapper">
+
+    <select id="findByCustNo" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.mobile.MockAccountDTO">
+        SELECT * FROM MOCK_ACCOUNT WHERE CUST_NO = #{custNo} AND STATUS_CODE = 'ACTIVE'
+    </select>
+
+    <select id="findRiskTypeByCustNo" parameterType="long" resultType="string">
+        SELECT RISK_TYPE
+        FROM (
+                 SELECT RISK_TYPE
+                 FROM RISK_TEST_RESULT
+                 WHERE CUST_NO = #{custNo}
+                 ORDER BY TEST_DATE DESC
+             )
+        WHERE ROWNUM = 1
+    </select>
+
+    <insert id="insertMockAccount" parameterType="kr.co.bnk.bnk_project.dto.mobile.MockAccountDTO">
+        INSERT INTO MOCK_ACCOUNT (
+            MOCK_ACCT_NO, CUST_NO, ACCT_PASS, BALANCE, TOTAL_ASSET, REG_DATE, STATUS_CODE
+        ) VALUES (
+                     #{mockAcctNo}, #{custNo}, #{acctPass}, 10000000, 10000000, SYSDATE, 'ACTIVE'
+                 )
+    </insert>
+
+    <select id="getDashboardSummary" parameterType="long" resultType="map">
+        SELECT
+            BALANCE as "totalAsset",
+            0 as "profitRate" -- 처음에는 수익률 0으로 설정
+        FROM MOCK_ACCOUNT
+        WHERE CUST_NO = #{custNo} AND STATUS_CODE = 'ACTIVE'
+    </select>
+
+    <select id="getHoldingsByCustNo" parameterType="long" resultType="map">
+        SELECT
+            m.FUND_CODE as "code",
+            f.FUND_NAME as "name",
+            0 as "ratio", -- 비중 계산 로직 필요
+            0 as "profit" -- 수익률 계산 로직 필요
+        FROM MOCK_FUND_TRANSACTION m
+                 JOIN FUND_MASTER f ON m.FUND_CODE = f.FUND_CODE
+        WHERE m.MOCK_ACCT_NO = (SELECT MOCK_ACCT_NO FROM MOCK_ACCOUNT WHERE CUST_NO = #{custNo})
+    </select>
+
+</mapper>
