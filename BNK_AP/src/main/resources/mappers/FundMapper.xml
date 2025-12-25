@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ap.mapper.FundMapper">
+
+    <!-- 상세페이지 조회 -->
+    <select id="findProductDetail" parameterType="string"
+            resultType="com.ap.dto.ProductDTO">
+        SELECT
+            fund_code AS fundcode,
+            fund_name AS fundName,
+            fund_short_code AS fundshortcode,
+            overview AS overview,
+            fund_feature AS fundfeature,
+            invest_grade AS investGrade,
+            reg_date AS regdate,
+            admin_company AS admincompany,
+            asset_manager_id as asset,
+            class_name as classname
+        FROM FUND_MASTER
+        WHERE fund_code = #{fundcode}
+
+    </select>
+
+    <!-- 목록 조회 -->
+    <select id="find_ProductList" parameterType="int" resultType="com.ap.dto.ProductDTO">
+    <![CDATA[
+        SELECT
+            m.fund_code           AS fundcode,
+            m.fund_name           AS fundNm,
+            m.fund_short_code     AS fundshortcode,
+            m.overview,
+            m.fund_feature        AS fundfeature,
+            m.invest_grade        AS investgrade,
+
+            ------------------------------------------------------------------------------
+            --  최신 NAV (NAV_PER_UNIT)
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS current_nav,
+
+            ------------------------------------------------------------------------------
+            --  1개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -1)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_1m,
+
+            ------------------------------------------------------------------------------
+            -- 3개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -3)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_3m,
+
+            ------------------------------------------------------------------------------
+            --  6개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -6)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_6m,
+
+            ------------------------------------------------------------------------------
+            --  12개월 전 NAV
+            ------------------------------------------------------------------------------
+            (SELECT NAV_PER_UNIT
+             FROM FUND_DAILY_HISTORY
+             WHERE FUND_CODE = m.fund_code
+               AND TRADE_DATE <= ADD_MONTHS(
+                     (SELECT MAX(TRADE_DATE)
+                      FROM FUND_DAILY_HISTORY
+                      WHERE FUND_CODE = m.fund_code),
+                     -12)
+             ORDER BY TRADE_DATE DESC
+                 FETCH FIRST 1 ROW ONLY) AS nav_12m
+
+        FROM FUND_MASTER m
+
+        WHERE
+            (CASE
+                -- REPLACE를 사용해 '검사할 때만' 모든 공백을 제거하고 비교합니다.
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '매우높은위험' THEN 1
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '높은위험'     THEN 2
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '중간위험'     THEN 3
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '낮은위험'     THEN 4
+                 WHEN REPLACE(m.invest_grade, ' ', '') = '매우낮은위험' THEN 5
+
+                -- 매칭되지 않는 데이터(오타 등)는 0으로 처리하여
+                -- 0 >= 2 (False)가 되게 만들어 화면에서 숨깁니다.
+                 ELSE 0
+                END) >= #{userGrade}
+
+        ORDER BY m.fund_code
+        ]]>
+</select>
+
+    <select id="findFundDocuments" resultType="com.ap.dto.ProductDTO">
+            SELECT
+                fund_code AS fundcode,
+                doc_type AS doctype,
+                doc_url AS docurl,
+                doc_file_name AS docfile,
+                reg_date AS regdate
+            FROM FUND_DOCUMENTS
+            ORDER BY fund_code DESC
+    </select>
+
+    <!-- 마이페이지 - 회원별 펀드 정보 -->
+    <select id="selectMyFundList" parameterType="long" resultType="com.ap.dto.UserFundDTO">
+        SELECT
+            H.FUND_CODE             AS fundCode,
+            M.FUND_NAME             AS fundName,
+            H.ACCT_NO               AS acctNo,
+            H.PURCHASE_AMOUNT       AS purchaseAmount,
+            H.CURRENT_EVAL_AMT      AS currentEvalAmount,
+            -- 수익률 계산: (평가 - 원금) / 원금 * 100
+            ROUND((H.CURRENT_EVAL_AMT - H.PURCHASE_AMOUNT) / H.PURCHASE_AMOUNT * 100, 2) AS yieldPct,
+            -- 상태 판별
+            CASE
+                WHEN H.CURRENT_EVAL_AMT > H.PURCHASE_AMOUNT THEN '수익'
+                WHEN H.CURRENT_EVAL_AMT <![CDATA[ < ]]>  H.PURCHASE_AMOUNT THEN '손실'
+                ELSE '보합'
+                END                     AS status
+        FROM
+            USER_FUND_HOLDINGS H
+                JOIN
+            FUND_MASTER M ON H.FUND_CODE = M.FUND_CODE
+                JOIN
+            BNK_ACCOUNT A ON H.ACCT_NO = A.ACCT_NO -- 회원번호 연결을 위해 조인
+        WHERE
+            A.CUST_NO = #{custNo}  -- 로그인한 회원의 PK
+        ORDER BY
+            H.CURRENT_EVAL_AMT DESC
+    </select>
+
+    <!-- 마이페이지 - 기준가격조회 -->
+    <select id="selectFundPriceHistory" resultType="com.ap.dto.FundPriceDTO">
+        SELECT
+            TRADE_DATE          AS tradeDate,
+            NAV_PER_UNIT        AS navPerUnit,
+            TAX_BASE_NAV        AS taxBaseNav,
+            SETUP_ORIGIN_AMOUNT AS setupOriginAmount,
+            -- (오늘 기준가 - 어제 기준가)로 등락폭 계산 (LAG 함수 사용) 조회 기간의 첫날은 어제 데이터가 없으므로 0으로 나올 수 있음
+            NAV_PER_UNIT - LAG(NAV_PER_UNIT, 1, NAV_PER_UNIT) OVER (ORDER BY TRADE_DATE) AS changeAmount
+        FROM
+            FUND_DAILY_HISTORY
+        WHERE
+            FUND_CODE = #{fundCode}
+        AND TRADE_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+        ORDER BY
+            TRADE_DATE DESC
+    </select>
+
+    <!--모든 펀드 목록-->
+    <select id="selectAllFundList" resultType="com.ap.dto.FundMasterDTO">
+        SELECT
+            FUND_CODE   AS fundCode,
+            FUND_NAME   AS fundName,
+            FUND_TYPE   AS fundType
+        FROM
+            FUND_MASTER
+        ORDER BY
+            FUND_NAME ASC
+    </select>
+
+    <!--펀드 수익률 조회-->
+    <select id="selectFundYieldList" parameterType="com.ap.dto.FundSearchDTO" resultType="com.ap.dto.UserFundDTO">
+        <if test='searchType == "hold" or searchType == null'>
+            SELECT
+            -- 1. 가입일 (UserFundDTO.regDate)
+            TO_CHAR(BA.REG_DATE, 'YYYY-MM-DD')      AS regDate,
+
+            -- 2. 펀드명 (UserFundDTO.fundName)
+            FM.FUND_NAME                            AS fundName,
+
+            -- 3. 계좌번호 (UserFundDTO.acctNo)
+            BA.ACCT_NO                              AS acctNo,
+
+            -- 4. 투자원금 (UserFundDTO.purchaseAmount)
+            FH.PURCHASE_AMOUNT                      AS purchaseAmount,
+
+            -- 5. 평가금액 (UserFundDTO.currentEvalAmount)
+            FH.CURRENT_EVAL_AMT                     AS currentEvalAmount,
+
+            -- 6. 평가손익 (UserFundDTO.profitAmount)
+            (FH.CURRENT_EVAL_AMT - FH.PURCHASE_AMOUNT) AS profitAmount,
+
+            -- 7. 수익률 (UserFundDTO.yieldPct)
+            CASE
+            WHEN FH.PURCHASE_AMOUNT = 0 THEN 0
+            ELSE ROUND(((FH.CURRENT_EVAL_AMT - FH.PURCHASE_AMOUNT) / FH.PURCHASE_AMOUNT) * 100, 2)
+            END                                     AS yieldPct
+
+            FROM
+            BNK_ACCOUNT BA
+            INNER JOIN
+            USER_FUND_HOLDINGS FH ON BA.ACCT_NO = FH.ACCT_NO
+            INNER JOIN
+            FUND_MASTER FM ON FH.FUND_CODE = FM.FUND_CODE
+
+            WHERE
+            BA.CUST_NO = #{custNo}
+            <if test="fundCode != null and fundCode != ''">
+                AND FH.FUND_CODE = #{fundCode}
+            </if>
+            <if test="startDate != null and endDate != null">
+                AND BA.REG_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD')
+                AND TO_DATE(#{endDate}, 'YYYY-MM-DD') + 0.99999
+            </if>
+            ORDER BY
+            BA.REG_DATE DESC
+        </if>
+
+        <if test='searchType == "all"'>
+            SELECT
+            FM.FUND_NAME                            AS fundName,
+
+            -- 전체조회 시 사용하지 않는 필드는 0 또는 null 처리
+            NULL                                    AS regDate,
+            NULL                                    AS acctNo,
+            0                                       AS purchaseAmount,
+            0                                       AS currentEvalAmount,
+            0                                       AS profitAmount,
+            0                                       AS yieldPct,
+
+            -- 기간 수익률 관련 필드 (DTO에 추가한 필드명과 일치시켜야 함)
+            START_H.NAV_PER_UNIT                    AS startNav,
+            END_H.NAV_PER_UNIT                      AS endNav,
+
+            CASE
+            WHEN START_H.NAV_PER_UNIT IS NULL OR START_H.NAV_PER_UNIT = 0 THEN 0
+            ELSE ROUND(((END_H.NAV_PER_UNIT - START_H.NAV_PER_UNIT) / START_H.NAV_PER_UNIT) * 100, 2)
+            END                                     AS periodYieldPct
+
+            FROM FUND_MASTER FM
+            LEFT JOIN FUND_DAILY_HISTORY START_H
+            ON FM.FUND_CODE = START_H.FUND_CODE
+            AND START_H.TRADE_DATE = TO_DATE(#{startDate}, 'YYYY-MM-DD')
+            LEFT JOIN FUND_DAILY_HISTORY END_H
+            ON FM.FUND_CODE = END_H.FUND_CODE
+            AND END_H.TRADE_DATE = TO_DATE(#{endDate}, 'YYYY-MM-DD')
+
+            WHERE 1=1
+            <if test="fundCode != null and fundCode != ''">
+                AND FM.FUND_CODE = #{fundCode}
+            </if>
+        </if>
+
+    </select>
+
+    <select id="selectRandomKeywords" resultType="com.ap.dto.KeywordDTO">
+        SELECT * FROM (
+                          SELECT KEYWORD_NAME as keywordName, RELATED_WORDS as relatedWords
+                          FROM KEYWORD
+                          ORDER BY DBMS_RANDOM.VALUE
+                      ) WHERE ROWNUM &lt;= 5
+    </select>
+
+    <select id="selectRelatedKeywords" resultType="String">
+        SELECT RELATED_WORDS
+        FROM KEYWORD
+        WHERE KEYWORD_NAME LIKE '%' || #{searchWord} || '%'
+           OR RELATED_WORDS LIKE '%' || #{searchWord} || '%'
+    </select>
+
+    <select id="selectFundsBySearch" resultType="com.ap.dto.ProductDTO">
+        SELECT
+        FUND_CODE as fundcode,
+        INVEST_GRADE as investgrade,
+
+        FUND_NAME as fundName,
+        TRUST_MANAGEMENT as trustManagement,
+        INVEST_REGION as investRegion,
+        FUND_TYPE as fundType,
+        ASSET_MANAGER_ID as assetManagerId,
+        REG_DATE as regdate
+        FROM FUND_MASTER
+        WHERE
+        (
+        FUND_NAME LIKE '%' || #{searchWord} || '%'
+        OR FUND_CODE LIKE '%' || #{searchWord} || '%'
+        OR TRUST_MANAGEMENT LIKE '%' || #{searchWord} || '%'
+        )
+        <if test="expandedList != null and expandedList.size() > 0">
+            OR (
+            <foreach collection="expandedList" item="word" separator=" OR ">
+                FUND_NAME LIKE '%' || #{word} || '%'
+                OR TRUST_MANAGEMENT LIKE '%' || #{word} || '%'
+            </foreach>
+            )
+        </if>
+        ORDER BY
+        CASE
+        WHEN FUND_NAME LIKE '%' || #{searchWord} || '%' THEN 1
+        ELSE 2
+        END,
+        REG_DATE DESC
+    </select>
+
+    <select id="selectFundNavLast3Months"
+            parameterType="string"
+            resultType="com.ap.dto.FundChartDTO">
+    <![CDATA[
+        SELECT
+            TO_CHAR(TRADE_DATE, 'YYYY-MM-DD') AS baseDate,
+            NAV_PER_UNIT AS navPerUnit
+        FROM
+            FUND_DAILY_HISTORY
+        WHERE
+            FUND_CODE = #{fundCode}
+          AND TRADE_DATE >= ADD_MONTHS(TRUNC(SYSDATE), -3)
+        ORDER BY
+            TRADE_DATE ASC
+        ]]>
+    </select>
+
+    <select id="getLatestNav" resultType="com.ap.dto.ProductDTO">
+    <![CDATA[
+        SELECT *
+        FROM fund_daily_history
+        WHERE fund_id = #{fundId}
+        ORDER BY trade_date DESC
+            FETCH FIRST 1 ROW ONLY
+        ]]>
+    </select>
+
+    <select id="getOneMonthAgoNav" resultType="com.ap.dto.ProductDTO">
+    <![CDATA[
+        SELECT *
+        FROM fund_daily_history
+        WHERE fund_id = #{fundId}
+          AND trade_date <= ADD_MONTHS(#{todayDate}, -1)
+        ORDER BY trade_date DESC
+            FETCH FIRST 1 ROW ONLY
+        ]]>
+</select>
+
+    <select id="selectFundYieldBest" resultType="com.ap.dto.ProductDTO">
+        <![CDATA[
+                SELECT
+                    t.*,
+                    /* 수익률 계산 */
+                    ROUND((t.current_nav / t.nav_1m - 1) * 100, 2) AS perf_1m,
+                    ROUND((t.current_nav / t.nav_3m - 1) * 100, 2) AS perf_3m,
+                    ROUND((t.current_nav / t.nav_6m - 1) * 100, 2) AS perf_6m,
+                    ROUND((t.current_nav / t.nav_12m - 1) * 100, 2) AS perf_12m
+                FROM (
+                         SELECT
+                             m.fund_code AS fundcode,
+                             m.fund_name AS fundNm,
+                             m.fund_short_code AS fundshortcode,
+                             m.fund_feature AS fundfeature,
+                             m.invest_grade AS investgrade,
+
+                             /* 최신 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS current_nav,
+
+                             /* 1개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -1)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_1m,
+
+                             /* 3개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -3)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_3m,
+
+                             /* 6개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -6)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_6m,
+
+                             /* 12개월 전 NAV */
+                             (SELECT NAV_PER_UNIT
+                              FROM FUND_DAILY_HISTORY
+                              WHERE FUND_CODE = m.fund_code
+                                AND TRADE_DATE <= ADD_MONTHS(
+                                      (SELECT MAX(TRADE_DATE)
+                                       FROM FUND_DAILY_HISTORY
+                                       WHERE FUND_CODE = m.fund_code), -12)
+                              ORDER BY TRADE_DATE DESC
+                                  FETCH FIRST 1 ROW ONLY) AS nav_12m
+
+                         FROM FUND_MASTER m
+                     ) t
+                ORDER BY perf_1m DESC NULLS LAST
+        ]]>
+    </select>
+
+    <select id="getYearNav" resultType="com.ap.dto.ProductDTO">
+        SELECT
+            TO_CHAR(trade_date, 'YYYY-MM') AS label,
+            AVG(nav_per_unit) AS value
+        FROM FUND_DAILY_HISTORY
+        WHERE fund_code = #{fundCode}
+          AND TRADE_DATE >= ADD_MONTHS(SYSDATE, -12)
+        GROUP BY TO_CHAR(trade_date, 'YYYY-MM')
+        ORDER BY label
+    </select>
+
+
+</mapper>
