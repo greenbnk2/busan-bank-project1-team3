@@ -111,7 +111,7 @@
             FROM USER_FUND_ORDER
             WHERE CUST_NO = #{custNo}
               AND FUND_CODE = #{fundCode}
-              AND STATUS IN ('REQUESTED', 'PROCESSING', 'COMPLETED')
+              AND STATUS IN ('REQUESTED', 'FIXED', 'STARTED')
         )
     </select>
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.mobile.FundPositionMapper">
+
+    <!-- 포지션 조회 -->
+    <select id="getPosition" resultType="kr.co.bnk.bnk_project.dto.mobile.FundPositionDTO">
+        SELECT
+            CUST_NO AS custNo,
+            FUND_CODE AS fundCode,
+            HOLD_UNIT AS holdUnit,
+            INVESTED_AMT AS investedAmt,
+            AVG_COST_NAV AS avgCostNav,
+            UPDATED_AT AS updatedAt
+        FROM USER_FUND_POSITION
+        WHERE CUST_NO = #{custNo}
+          AND FUND_CODE = #{fundCode}
+    </select>
+
+    <!-- 포지션 INSERT (신규 보유) -->
+    <insert id="insertFundPosition" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundPositionDTO">
+        INSERT INTO USER_FUND_POSITION(
+            CUST_NO,
+            FUND_CODE,
+            HOLD_UNIT,
+            INVESTED_AMT,
+            AVG_COST_NAV,
+            UPDATED_AT
+        ) VALUES (
+            #{custNo},
+            #{fundCode},
+            #{holdUnit},
+            #{investedAmt},
+            #{avgCostNav},
+            #{updatedAt}
+        )
+    </insert>
+
+    <!-- 포지션 UPDATE (기존 보유 증가) -->
+    <update id="updateFundPosition" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundPositionDTO">
+        UPDATE USER_FUND_POSITION
+        SET HOLD_UNIT = #{holdUnit},
+            INVESTED_AMT = #{investedAmt},
+            AVG_COST_NAV = #{avgCostNav},
+            UPDATED_AT = #{updatedAt}
+        WHERE CUST_NO = #{custNo}
+          AND FUND_CODE = #{fundCode}
+    </update>
+
+    <!-- 고객의 모든 포지션 조회 -->
+    <select id="getPositionsByCustNo" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.mobile.FundPositionDTO">
+        SELECT
+            CUST_NO AS custNo,
+            FUND_CODE AS fundCode,
+            HOLD_UNIT AS holdUnit,
+            INVESTED_AMT AS investedAmt,
+            AVG_COST_NAV AS avgCostNav,
+            UPDATED_AT AS updatedAt
+        FROM USER_FUND_POSITION
+        WHERE CUST_NO = #{custNo}
+        ORDER BY UPDATED_AT DESC
+    </select>
+
+</mapper>
+

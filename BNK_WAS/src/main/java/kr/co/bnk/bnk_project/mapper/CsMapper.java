@@ -34,4 +34,11 @@ public interface CsMapper {
     void insertQna(CsDTO csDTO);
     /* QnA 삭제 */
     int deleteQna(@Param("csId") Long csId);
+
+    /* Flutter API용 */
+    /* 내 문의 내역 조회 (CATEGORY JOIN 포함) */
+    List<CsDTO> selectMyInquiries(@Param("userId") String userId);
+    
+    /* 문의 등록 (동적 CATEGORY_ID) */
+    void insertInquiry(CsDTO csDTO);
 }

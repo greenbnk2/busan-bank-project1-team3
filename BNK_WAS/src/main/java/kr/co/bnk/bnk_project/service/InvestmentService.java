@@ -20,15 +20,19 @@ public class InvestmentService {
 
     @Transactional
     public InvestmentResultDTO processAnalysis(InvestmentSurveyDTO dto, String userId) {
+        // 사용자 식별번호(PK) 조회
+        Long custNo = memberMapper.findCustNoByUserId(userId);
+        
+        // 오늘 이미 투자성향 조사를 했는지 확인
+        if (hasTodayRiskTest(custNo)) {
+            throw new IllegalStateException("오늘은 이미 투자성향 조사를 완료했습니다.");
+        }
 
         // 점수 계산
         int score = calculateTotalScore(dto);
 
         // 성향 판정 및 설명 결정
         InvestmentResultDTO resultInfo = determineRiskType(score);
-
-        // 사용자 식별번호(PK) 조회
-        Long custNo = memberMapper.findCustNoByUserId(userId);
 
         // DB 저장을 위한 DTO 변환
         RiskTestResultDTO dbDto = new RiskTestResultDTO();
@@ -136,5 +140,39 @@ public class InvestmentService {
             return result.getRiskType(); // 예: "공격투자형", "위험중립형" 등
         }
         return null;
+    }
+
+    /**
+     * 오늘 투자성향 조사를 했는지 확인
+     * @param custNo 고객번호
+     * @return 오늘 조사를 했으면 true, 안 했으면 false
+     */
+    @Transactional(readOnly = true)
+    public boolean hasTodayRiskTest(Long custNo) {
+        return riskTestMapper.hasTodayRiskTest(custNo) > 0;
+    }
+
+    /**
+     * 투자성향 조사 결과 저장 (Flutter 앱용)
+     * Flutter 앱에서 계산한 점수와 결과를 받아서 DB에 저장합니다.
+     * @param custNo 고객번호
+     * @param totalScore 총 점수
+     * @param riskType 투자 성향 타입
+     */
+    @Transactional
+    public void saveRiskTestResult(Long custNo, Integer totalScore, String riskType) {
+        // 오늘 이미 투자성향 조사를 했는지 확인
+        if (hasTodayRiskTest(custNo)) {
+            throw new IllegalStateException("오늘은 이미 투자성향 조사를 완료했습니다.");
+        }
+
+        // DB 저장을 위한 DTO 생성
+        RiskTestResultDTO dbDto = new RiskTestResultDTO();
+        dbDto.setCustNo(custNo);
+        dbDto.setTotalScore(totalScore);
+        dbDto.setRiskType(riskType);
+
+        // DB 저장
+        riskTestMapper.insertRiskTestResult(dbDto);
     }
 }

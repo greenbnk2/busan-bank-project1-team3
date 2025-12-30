@@ -28,4 +28,12 @@
              )
         WHERE ROWNUM = 1
     </select>
+
+    <!-- 오늘 투자성향 조사를 했는지 확인 (하루에 한 번만 체크) -->
+    <select id="hasTodayRiskTest" parameterType="Long" resultType="int">
+        SELECT COUNT(*)
+        FROM RISK_TEST_RESULT
+        WHERE CUST_NO = #{custNo}
+          AND TRUNC(TEST_DATE) = TRUNC(SYSDATE)
+    </select>
 </mapper>

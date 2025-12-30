@@ -9,6 +9,7 @@
     </select>
 
     <!-- 펀드 가입 INSERT -->
+    <!-- 가입 시점에는 null 필드(AMOUNT_FIX_AT, START_AT, FIX_AMOUNT, CANCEL_AT, CANCEL_REASON)는 제외 -->
     <insert id="insertFundOrder" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
         INSERT INTO USER_FUND_ORDER(
                 ORDER_ID,
@@ -22,8 +23,8 @@
                 PLAN_ID
         ) VALUES (
                 #{orderId},
-                #{custNo},           <!-- 배치에서는 plan에서 가져온 값 사용 -->
-                #{acctNo},           <!-- 배치에서는 plan에서 가져온 값 사용 -->
+                #{custNo},
+                #{acctNo},
                 #{fundCode},
                 #{type},
                 #{status},
@@ -43,15 +44,107 @@
             TYPE AS type,
             STATUS AS status,
             REQUEST_AT AS requestAt,
+            AMOUNT_FIX_AT AS amountFixAt,
+            START_AT AS startAt,
+            REQ_AMOUNT AS reqAmount,
+            FIX_AMOUNT AS fixAmount,
+            PLAN_ID AS planId,
+            CANCEL_AT AS cancelAt,
+            CANCEL_REASON AS cancelReason
+        FROM USER_FUND_ORDER
+        WHERE CUST_NO = #{custNo}
+          AND FUND_CODE = #{fundCode}
+          AND STATUS IN ('REQUESTED', 'FIXED', 'STARTED')
+        ORDER BY REQUEST_AT DESC
+        FETCH FIRST 1 ROW ONLY
+    </select>
+
+    <!-- 금액 확정: REQUESTED -> FIXED -->
+    <update id="updateOrderStatusToFixed" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
+        UPDATE USER_FUND_ORDER
+        SET STATUS = 'FIXED',
+            AMOUNT_FIX_AT = #{amountFixAt},
+            FIX_AMOUNT = #{fixAmount}
+        WHERE ORDER_ID = #{orderId}
+          AND STATUS = 'REQUESTED'
+    </update>
+
+    <!-- 투자 시작: FIXED -> STARTED -->
+    <update id="updateOrderStatusToStarted" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
+        UPDATE USER_FUND_ORDER
+        SET STATUS = 'STARTED',
+            START_AT = #{startAt}
+        WHERE ORDER_ID = #{orderId}
+          AND STATUS = 'FIXED'
+    </update>
+
+    <!-- 주문 취소 -->
+    <update id="cancelOrder" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
+        UPDATE USER_FUND_ORDER
+        SET STATUS = 'CANCELED',
+            CANCEL_AT = #{cancelAt},
+            CANCEL_REASON = #{cancelReason}
+        WHERE ORDER_ID = #{orderId}
+          AND STATUS IN ('REQUESTED', 'FIXED')
+    </update>
+
+    <!-- 금액 확정 대상 주문 조회 (REQUESTED 상태) -->
+    <select id="selectOrdersToFix" resultType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
+        SELECT
+            ORDER_ID AS orderId,
+            CUST_NO AS custNo,
+            ACCT_NO AS acctNo,
+            FUND_CODE AS fundCode,
+            TYPE AS type,
+            STATUS AS status,
+            REQUEST_AT AS requestAt,
+            REQ_AMOUNT AS reqAmount,
+            PLAN_ID AS planId
+        FROM USER_FUND_ORDER
+        WHERE STATUS = 'REQUESTED'
+          AND TRUNC(REQUEST_AT) &lt;= TRUNC(SYSDATE) - 1  -- 어제 이전에 신청한 주문
+        ORDER BY REQUEST_AT ASC
+    </select>
+
+    <!-- 투자 시작 대상 주문 조회 (FIXED 상태) -->
+    <select id="selectOrdersToStart" resultType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
+        SELECT
+            ORDER_ID AS orderId,
+            CUST_NO AS custNo,
+            ACCT_NO AS acctNo,
+            FUND_CODE AS fundCode,
+            TYPE AS type,
+            STATUS AS status,
+            REQUEST_AT AS requestAt,
+            AMOUNT_FIX_AT AS amountFixAt,
             REQ_AMOUNT AS reqAmount,
             FIX_AMOUNT AS fixAmount,
             PLAN_ID AS planId
         FROM USER_FUND_ORDER
-        WHERE CUST_NO = #{custNo}
-          AND FUND_CODE = #{fundCode}
-          AND STATUS IN ('REQUESTED', 'PROCESSING', 'COMPLETED')
-        ORDER BY REQUEST_AT DESC
-        FETCH FIRST 1 ROW ONLY
+        WHERE STATUS = 'FIXED'
+          AND TRUNC(AMOUNT_FIX_AT) &lt;= TRUNC(SYSDATE) - 1  -- 어제 이전에 확정된 주문
+        ORDER BY AMOUNT_FIX_AT ASC
+    </select>
+
+    <!-- 주문 상세 조회 (상태 포함) -->
+    <select id="getOrderById" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.mobile.FundOrderDTO">
+        SELECT
+            ORDER_ID AS orderId,
+            CUST_NO AS custNo,
+            ACCT_NO AS acctNo,
+            FUND_CODE AS fundCode,
+            TYPE AS type,
+            STATUS AS status,
+            REQUEST_AT AS requestAt,
+            AMOUNT_FIX_AT AS amountFixAt,
+            START_AT AS startAt,
+            REQ_AMOUNT AS reqAmount,
+            FIX_AMOUNT AS fixAmount,
+            PLAN_ID AS planId,
+            CANCEL_AT AS cancelAt,
+            CANCEL_REASON AS cancelReason
+        FROM USER_FUND_ORDER
+        WHERE ORDER_ID = #{orderId}
     </select>
 
 </mapper>

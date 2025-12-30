@@ -100,4 +100,14 @@ public class CsService {
     /* QNA 등록 (사용자 1:1 문의 작성) */
     public void registerInquiry(CsDTO csDTO) {csMapper.insertQna(csDTO);}
 
+    /* Flutter API용: 내 문의 내역 조회 */
+    public List<CsDTO> getMyInquiries(String userId) {
+        return csMapper.selectMyInquiries(userId);
+    }
+
+    /* Flutter API용: 문의 등록 (동적 CATEGORY_ID) */
+    public void registerInquiryFlutter(CsDTO csDTO) {
+        csMapper.insertInquiry(csDTO);
+    }
+
 }

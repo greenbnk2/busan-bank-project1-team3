@@ -14,7 +14,7 @@ import java.net.Socket;
 @Component
 public class TcpClient {
 
-    private static final String AP_SERVER_HOST = "localhost";
+    private static final String AP_SERVER_HOST = "localhost"; 
     private static final int AP_SERVER_PORT = 9091;
 
     public String sendRequest(String msg) {

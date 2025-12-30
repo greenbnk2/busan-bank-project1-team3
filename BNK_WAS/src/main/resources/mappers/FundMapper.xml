@@ -446,5 +446,17 @@
         ORDER BY label
     </select>
 
+    <!-- 현재 NAV 조회 (최신 기준가) -->
+    <select id="getCurrentNav" parameterType="string" resultType="double">
+        SELECT NAV_PER_UNIT
+        FROM (
+            SELECT NAV_PER_UNIT
+            FROM FUND_DAILY_HISTORY
+            WHERE FUND_CODE = #{fundCode}
+            ORDER BY TRADE_DATE DESC
+        )
+        WHERE ROWNUM = 1
+    </select>
+
 
 </mapper>

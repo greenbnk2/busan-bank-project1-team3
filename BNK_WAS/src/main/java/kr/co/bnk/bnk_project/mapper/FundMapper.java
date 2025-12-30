@@ -54,6 +54,13 @@ public interface FundMapper {
 
     List<ProductDTO> getYearNav(String fundCode);
 
+    /**
+     * 펀드의 현재 NAV 조회 (최신 기준가)
+     * @param fundCode 펀드 코드
+     * @return 현재 NAV (없으면 null)
+     */
+    Double getCurrentNav(@Param("fundCode") String fundCode);
+
 }
 
 

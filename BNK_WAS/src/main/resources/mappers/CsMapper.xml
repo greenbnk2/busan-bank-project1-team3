@@ -304,4 +304,50 @@
           AND CATEGORY_ID = 9
     </delete>
 
+    <!-- ============================================ -->
+    <!-- Flutter API용 쿼리 -->
+    <!-- ============================================ -->
+
+    <!-- Flutter: 내 문의 내역 조회 (CATEGORY JOIN 포함) -->
+    <select id="selectMyInquiries"
+            parameterType="map"
+            resultMap="CsResultMap">
+        SELECT
+            cs.CS_ID,
+            cs.CATEGORY_ID,
+            cs.TITLE,
+            cs.QUESTION,
+            cs.ANSWER,
+            cs.STATUS,
+            cs.USER_ID,
+            cs.CREATED_AT,
+            cs.ANSWERED_AT,
+            c.NAME_KO AS CATEGORY_NAME
+        FROM CS cs
+        LEFT JOIN CATEGORY c ON cs.CATEGORY_ID = c.CATEGORY_ID
+        WHERE cs.USER_ID = #{userId}
+        ORDER BY cs.CREATED_AT DESC
+    </select>
+
+    <!-- Flutter: 문의 등록 (동적 CATEGORY_ID) -->
+    <insert id="insertInquiry" parameterType="kr.co.bnk.bnk_project.dto.CsDTO">
+        INSERT INTO CS (
+            CS_ID,
+            CATEGORY_ID,
+            TITLE,
+            QUESTION,
+            STATUS,
+            USER_ID,
+            CREATED_AT
+        ) VALUES (
+            CS_SEQ.NEXTVAL,
+            #{categoryId},
+            #{title, jdbcType=VARCHAR},
+            #{question, jdbcType=VARCHAR},
+            '답변대기',
+            #{userId, jdbcType=VARCHAR},
+            SYSDATE
+        )
+    </insert>
+
 </mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.mobile.FundTransactionMapper">
+
+    <!-- TRX_ID 생성 (MAX+1) -->
+    <select id="getNextTrxId" resultType="long">
+        SELECT NVL(MAX(TRX_ID), 0) + 1 FROM USER_FUND_TRANSACTION
+    </select>
+
+    <!-- 체결 내역 INSERT -->
+    <insert id="insertFundTransaction" parameterType="kr.co.bnk.bnk_project.dto.mobile.FundTransactionDTO">
+        INSERT INTO USER_FUND_TRANSACTION(
+            TRX_ID,
+            ORDER_ID,
+            TYPE,
+            TRADE_AT,
+            AMOUNT,
+            UNIT,
+            NAV
+        ) VALUES (
+            #{trxId},
+            #{orderId},
+            #{type},
+            #{tradeAt},
+            #{amount},
+            #{unit},
+            #{nav}
+        )
+    </insert>
+
+    <!-- 주문 ID로 체결 내역 조회 -->
+    <select id="getTransactionsByOrderId" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.mobile.FundTransactionDTO">
+        SELECT
+            TRX_ID AS trxId,
+            ORDER_ID AS orderId,
+            TYPE AS type,
+            TRADE_AT AS tradeAt,
+            AMOUNT AS amount,
+            UNIT AS unit,
+            NAV AS nav
+        FROM USER_FUND_TRANSACTION
+        WHERE ORDER_ID = #{orderId}
+        ORDER BY TRADE_AT DESC
+    </select>
+
+    <!-- 고객의 체결 내역 조회 -->
+    <select id="getTransactionsByCustNo" parameterType="long" resultType="kr.co.bnk.bnk_project.dto.mobile.FundTransactionDTO">
+        SELECT
+            t.TRX_ID AS trxId,
+            t.ORDER_ID AS orderId,
+            t.TYPE AS type,
+            t.TRADE_AT AS tradeAt,
+            t.AMOUNT AS amount,
+            t.UNIT AS unit,
+            t.NAV AS nav
+        FROM USER_FUND_TRANSACTION t
+        INNER JOIN USER_FUND_ORDER o ON t.ORDER_ID = o.ORDER_ID
+        WHERE o.CUST_NO = #{custNo}
+        ORDER BY t.TRADE_AT DESC
+    </select>
+
+</mapper>
+
