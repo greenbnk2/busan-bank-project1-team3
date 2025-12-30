@@ -377,13 +377,16 @@ public class FlutterFundController {
                 custNo = 18; // 기본값
             }
         }
-        
+
         try {
             List<Map<String, Object>> transactions = myFundService.getMyFundTransactions(custNo, fundCode);
             return ResponseEntity.ok(transactions);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+     /*
      * 주문 상태 조회
      * 주문 ID로 주문의 현재 상태와 상세 정보를 조회합니다.
      */
