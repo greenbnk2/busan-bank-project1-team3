@@ -159,7 +159,9 @@ public class FlutterCsController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            response.put("reply", "죄송합니다. 일시적인 오류가 발생했습니다.");
+            System.err.println("챗봇 컨트롤러 예외 발생: " + e.getMessage());
+            e.printStackTrace();
+            response.put("reply", "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
             return ResponseEntity.status(500).body(response);
         }
     }

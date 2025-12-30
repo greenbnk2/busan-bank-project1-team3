@@ -87,3 +87,7 @@ file:
   doc-path: /home/rsa-key-20251117/upload
   upload:
     path: upload
+
+groq:
+  api:
+    key: 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

@@ -14,22 +14,32 @@ public class Cs {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "CS_ID")
     private Long csId;
 
+    @Column(name = "CATEGORY_ID")
     private Long categoryId;
 
+    @Column(name = "TITLE")
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "QUESTION", columnDefinition = "TEXT")
     private String question;
 
     @Lob
+    @Column(name = "ANSWER")
     private String answer;
 
+    @Column(name = "STATUS")
     private String status;
+    
+    @Column(name = "USER_ID")
     private String userId;
 
+    @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
+    
+    @Column(name = "ANSWERED_AT")
     private LocalDateTime answeredAt;
 
 }
