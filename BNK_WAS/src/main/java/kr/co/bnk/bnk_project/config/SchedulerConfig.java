@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 배치 작업을 위한 스케줄링 활성화
  */
 @Configuration
-@EnableScheduling
+//@EnableScheduling
 public class SchedulerConfig {
 }
 
