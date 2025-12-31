@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-@EnableScheduling
+//@EnableScheduling
 @RequiredArgsConstructor
 public class ReserveBatchConfig {
 
