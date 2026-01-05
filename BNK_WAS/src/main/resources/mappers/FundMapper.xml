@@ -460,6 +460,7 @@
 
     <!-- 보유펀드 목록 조회 (보유중 + 신청중) -->
     <select id="findMyFundsByCustNo" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.MyFundResponse">
+        <![CDATA[
         SELECT
             x.fund_code AS fundCode,
             MAX(x.fund_name) AS fundName,
@@ -519,10 +520,12 @@
         GROUP BY x.fund_code
         ORDER BY MAX(CASE WHEN x.view_status='HOLDING' THEN 1 ELSE 0 END) DESC,
                  MAX(x.fund_name)
+        ]]>
     </select>
 
     <!-- 보유펀드 상세 정보 조회 -->
     <select id="findMyFundDetail" resultType="map">
+        <![CDATA[
         SELECT
             p.fund_code AS fundCode,
             fm.fund_name AS fundName,
@@ -553,10 +556,12 @@
             AND p.fund_code = #{fundCode}
             AND p.hold_unit > 0
         FETCH FIRST 1 ROW ONLY
+        ]]>
     </select>
 
     <!-- 보유펀드 수익률 히스토리 조회 -->
     <select id="findMyFundProfitHistory" resultType="map">
+        <![CDATA[
         SELECT
             TO_CHAR(h.trade_date, 'YYYY-MM-DD') AS "date",
             CASE 
@@ -572,6 +577,7 @@
             AND h.trade_date <= TO_DATE(#{endDate}, 'YYYY-MM-DD')
             AND p.hold_unit > 0
         ORDER BY h.trade_date ASC
+        ]]>
     </select>
 
     <!-- 보유펀드 거래 내역 조회 -->
