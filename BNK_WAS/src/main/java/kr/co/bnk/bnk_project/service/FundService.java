@@ -2,8 +2,10 @@ package kr.co.bnk.bnk_project.service;
 
 import kr.co.bnk.bnk_project.dto.*;
 import kr.co.bnk.bnk_project.dto.FundPeriodDTO;
+import kr.co.bnk.bnk_project.entity.FundMaster;
 import kr.co.bnk.bnk_project.mapper.FundMapper;
 import kr.co.bnk.bnk_project.mapper.admin.ProductMapper;
+import kr.co.bnk.bnk_project.repository.FundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -18,6 +21,7 @@ import java.util.List;
 public class FundService {
 
     private final FundMapper productMapper;
+    private final FundRepository fundRepository;
 
     public List<ProductDTO> getProductList() {
         // 매퍼가 int 파라미터를 받도록 변경되었으므로,
@@ -232,6 +236,40 @@ public class FundService {
 
     public List<ProductDTO> getLastYearNav(String fundCode) {
         return productMapper.getYearNav(fundCode);
+    }
+
+    /**
+     * 키워드로 펀드 검색 (FundMaster 테이블 사용)
+     * 펀드명, 특징에서 키워드 검색
+     */
+    public List<FundMasterDTO> searchFundsFromMaster(String keyword) {
+        // 키워드가 비어있으면 빈 리스트 반환
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of();
+        }
+        
+        // FundMaster에서 펀드명 또는 특징으로 검색
+        List<FundMaster> funds = fundRepository.findByFundNameContainingIgnoreCaseOrFundFeatureContainingIgnoreCase(
+                keyword.trim(), 
+                keyword.trim()
+        );
+        
+        // Entity를 DTO로 변환
+        return funds.stream()
+                .map(this::toFundMasterDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * FundMaster Entity를 FundMasterDTO로 변환
+     */
+    private FundMasterDTO toFundMasterDto(FundMaster fund) {
+        FundMasterDTO dto = new FundMasterDTO();
+        dto.setFundCode(fund.getFundId());
+        dto.setFundName(fund.getFundName());
+        // fundType은 FundMaster에 없으므로 null 또는 다른 값으로 설정
+        dto.setFundType(null);
+        return dto;
     }
 
     public interface ProductService {

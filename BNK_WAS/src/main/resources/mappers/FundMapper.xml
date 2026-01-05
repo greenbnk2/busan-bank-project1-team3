@@ -458,5 +458,134 @@
         WHERE ROWNUM = 1
     </select>
 
+    <!-- 보유펀드 목록 조회 (보유중 + 신청중) -->
+    <select id="findMyFundsByCustNo" parameterType="int" resultType="kr.co.bnk.bnk_project.dto.MyFundResponse">
+        SELECT
+            x.fund_code AS fundCode,
+            MAX(x.fund_name) AS fundName,
+            MAX(x.view_status) AS viewStatus,
+            SUM(x.hold_unit) AS holdUnit,
+            SUM(x.invested_amt) AS investedAmt,
+            SUM(x.pending_amount) AS pendingAmount,
+            SUM(x.profit_amount) AS profitAmount,
+            CASE 
+                WHEN SUM(x.invested_amt) > 0 
+                THEN ROUND((SUM(x.profit_amount) * 100.0 / SUM(x.invested_amt)), 2)
+                ELSE 0.0
+            END AS profitRate
+        FROM (
+            -- 1) 보유중(체결 반영 완료)
+            SELECT
+                p.fund_code,
+                fm.fund_name,
+                'HOLDING' AS view_status,
+                p.hold_unit,
+                p.invested_amt,
+                0 AS pending_amount,
+                CASE 
+                    WHEN latest_nav.nav_per_unit > 0 AND p.hold_unit > 0
+                    THEN (p.hold_unit * latest_nav.nav_per_unit - p.invested_amt)
+                    ELSE 0
+                END AS profit_amount
+            FROM bnk.user_fund_position p
+            JOIN bnk.fund_master fm ON fm.fund_code = p.fund_code
+            LEFT JOIN (
+                SELECT fund_code, nav_per_unit,
+                       ROW_NUMBER() OVER (PARTITION BY fund_code ORDER BY trade_date DESC) AS rn
+                FROM bnk.fund_daily_history
+            ) latest_nav ON latest_nav.fund_code = p.fund_code AND latest_nav.rn = 1
+            WHERE p.cust_no = #{custNo}
+                AND p.hold_unit > 0
+            
+            UNION ALL
+            
+            -- 2) 신청/진행중(체결 전) : 주문에서 끌어오기
+            SELECT
+                o.fund_code,
+                fm.fund_name,
+                'PENDING' AS view_status,
+                0 AS hold_unit,
+                0 AS invested_amt,
+                SUM(o.req_amount) AS pending_amount,
+                0 AS profit_amount
+            FROM bnk.user_fund_order o
+            JOIN bnk.fund_master fm ON fm.fund_code = o.fund_code
+            WHERE o.cust_no = #{custNo}
+                AND o.type = 'BUY'
+                AND o.status IN ('REQUESTED','FIXED','STARTED')
+                AND o.cancel_at IS NULL
+            GROUP BY o.fund_code, fm.fund_name
+        ) x
+        GROUP BY x.fund_code
+        ORDER BY MAX(CASE WHEN x.view_status='HOLDING' THEN 1 ELSE 0 END) DESC,
+                 MAX(x.fund_name)
+    </select>
+
+    <!-- 보유펀드 상세 정보 조회 -->
+    <select id="findMyFundDetail" resultType="map">
+        SELECT
+            p.fund_code AS fundCode,
+            fm.fund_name AS fundName,
+            p.invested_amt AS investedAmt,
+            CASE 
+                WHEN latest_nav.nav_per_unit > 0 AND p.hold_unit > 0
+                THEN (p.hold_unit * latest_nav.nav_per_unit - p.invested_amt)
+                ELSE 0
+            END AS profitAmount,
+            CASE 
+                WHEN p.invested_amt > 0 AND latest_nav.nav_per_unit > 0 AND p.hold_unit > 0
+                THEN ROUND(((p.hold_unit * latest_nav.nav_per_unit - p.invested_amt) * 100.0 / p.invested_amt), 2)
+                ELSE 0.0
+            END AS profitRate,
+            CASE 
+                WHEN latest_nav.nav_per_unit > 0 AND p.hold_unit > 0
+                THEN (p.hold_unit * latest_nav.nav_per_unit)
+                ELSE p.invested_amt
+            END AS currentValue
+        FROM bnk.user_fund_position p
+        JOIN bnk.fund_master fm ON fm.fund_code = p.fund_code
+        LEFT JOIN (
+            SELECT fund_code, nav_per_unit,
+                   ROW_NUMBER() OVER (PARTITION BY fund_code ORDER BY trade_date DESC) AS rn
+            FROM bnk.fund_daily_history
+        ) latest_nav ON latest_nav.fund_code = p.fund_code AND latest_nav.rn = 1
+        WHERE p.cust_no = #{custNo}
+            AND p.fund_code = #{fundCode}
+            AND p.hold_unit > 0
+        FETCH FIRST 1 ROW ONLY
+    </select>
+
+    <!-- 보유펀드 수익률 히스토리 조회 -->
+    <select id="findMyFundProfitHistory" resultType="map">
+        SELECT
+            TO_CHAR(h.trade_date, 'YYYY-MM-DD') AS "date",
+            CASE 
+                WHEN p.invested_amt > 0 AND h.nav_per_unit > 0 AND p.hold_unit > 0
+                THEN ROUND(((p.hold_unit * h.nav_per_unit - p.invested_amt) * 100.0 / p.invested_amt), 2)
+                ELSE 0.0
+            END AS profitRate
+        FROM bnk.fund_daily_history h
+        JOIN bnk.user_fund_position p ON p.fund_code = h.fund_code
+        WHERE p.cust_no = #{custNo}
+            AND p.fund_code = #{fundCode}
+            AND h.trade_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+            AND h.trade_date <= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+            AND p.hold_unit > 0
+        ORDER BY h.trade_date ASC
+    </select>
+
+    <!-- 보유펀드 거래 내역 조회 -->
+    <select id="findMyFundTransactions" resultType="map">
+        SELECT
+            TO_CHAR(o.request_at, 'YYYY-MM-DD') AS "date",
+            o.req_amount AS amount
+        FROM bnk.user_fund_order o
+        WHERE o.cust_no = #{custNo}
+            AND o.fund_code = #{fundCode}
+            AND o.type = 'BUY'
+            AND o.cancel_at IS NULL
+        ORDER BY o.request_at DESC
+    </select>
+
 
 </mapper>
