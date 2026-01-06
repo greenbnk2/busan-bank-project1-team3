@@ -90,4 +90,4 @@ file:
 
 groq:
   api:
-    key: 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
+    key: ${GROQ_API_KEY}
