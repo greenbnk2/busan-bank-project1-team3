@@ -1,5 +1,6 @@
 package kr.co.bnk.bnk_project.controller;
 
+import kr.co.bnk.bnk_project.dto.FundMasterDTO;
 import kr.co.bnk.bnk_project.dto.MyFundResponse;
 import kr.co.bnk.bnk_project.dto.ProductDTO;
 import kr.co.bnk.bnk_project.dto.RiskTestResultDTO;
@@ -86,16 +87,18 @@ public class FlutterFundController {
     public ResponseEntity<List<ProductDTO>> getYieldFunds() {
         List<ProductDTO> funds = fundService.getFundYieldBest();
         
-        // 디버깅: 처음 3개 펀드의 fundcode 확인
-        if (!funds.isEmpty()) {
-            log.info("=== 펀드 목록 응답 디버깅 (yield) ===");
-            for (int i = 0; i < Math.min(3, funds.size()); i++) {
-                ProductDTO fund = funds.get(i);
-                log.info("펀드 #{}: fundcode={}, fundNm={}", i, fund.getFundcode(), fund.getFundNm());
-            }
-            log.info("======================================");
-        }
-        
+        return ResponseEntity.ok(funds);
+    }
+
+    /**
+     * 펀드 검색 API (FundMaster 테이블 사용)
+     * GET /api/funds/search?keyword={keyword}
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<FundMasterDTO>> searchFunds(
+            @RequestParam String keyword
+    ) {
+        List<FundMasterDTO> funds = fundService.searchFundsFromMaster(keyword);
         return ResponseEntity.ok(funds);
     }
 
@@ -377,13 +380,16 @@ public class FlutterFundController {
                 custNo = 18; // 기본값
             }
         }
-        
+
         try {
             List<Map<String, Object>> transactions = myFundService.getMyFundTransactions(custNo, fundCode);
             return ResponseEntity.ok(transactions);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+     /*
      * 주문 상태 조회
      * 주문 ID로 주문의 현재 상태와 상세 정보를 조회합니다.
      */

@@ -82,6 +82,10 @@ spring:
         - classpath:/public/
         - classpath:/resources/
         - classpath:/META-INF/resources/
+  ai:
+    google:
+      ai:
+        api-key: ${GEMINI_API_KEY:AI}
 
 file:
   doc-path: /home/rsa-key-20251117/upload
@@ -91,3 +95,4 @@ file:
 groq:
   api:
     key: ${GROQ_API_KEY}
+

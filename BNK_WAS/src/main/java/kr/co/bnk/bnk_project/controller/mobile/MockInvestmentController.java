@@ -2,6 +2,7 @@ package kr.co.bnk.bnk_project.controller.mobile;
 
 import kr.co.bnk.bnk_project.dto.mobile.MockAccountDTO;
 import kr.co.bnk.bnk_project.mapper.mobile.MockAccountMapper;
+import kr.co.bnk.bnk_project.service.mobile.MockAiDiagnosisService;
 import kr.co.bnk.bnk_project.service.mobile.MockInvestmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/mock/account")
 public class MockInvestmentController {
-
 
     private final MockInvestmentService mockInvestmentService;
     private final MockAccountMapper mockAccountMapper;

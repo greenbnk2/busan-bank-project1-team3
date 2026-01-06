@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.bnk.bnk_project.mapper.mobile.MockInvestmentMapper">
+
+    <select id="getMockUserPortfolio" parameterType="string" resultType="kr.co.bnk.bnk_project.dto.mobile.MockUserInvestmentDto">
+        SELECT
+            u.CUST_NAME as userName,
+            r.RISK_TYPE as propensity,
+            f.FUND_NAME as fundName,
+            m.TOTAL_ASSET as purchaseAmount,
+            t.APPLY_NAV as currentReturn,
+            (m.TOTAL_ASSET - m.BALANCE) as evaluationAmount
+        FROM BNK_USER u
+                 JOIN MOCK_ACCOUNT m ON u.CUST_NO = m.CUST_NO
+                 JOIN MOCK_FUND_TRANSACTION t ON m.MOCK_ACCT_NO = t.MOCK_ACCT_NO
+                 JOIN FUND_MASTER f ON t.FUND_CODE = f.FUND_CODE
+                 LEFT JOIN (
+            SELECT CUST_NO, RISK_TYPE
+            FROM RISK_TEST_RESULT
+            WHERE (CUST_NO, TEST_DATE) IN (
+                SELECT CUST_NO, MAX(TEST_DATE) FROM RISK_TEST_RESULT GROUP BY CUST_NO
+            )
+        ) r ON u.CUST_NO = r.CUST_NO
+        WHERE u.CUST_NO = #{userId}
+        GROUP BY u.CUST_NAME, r.RISK_TYPE, f.FUND_NAME, m.TOTAL_ASSET, t.APPLY_NAV, m.BALANCE
+    </select>
+
+</mapper>

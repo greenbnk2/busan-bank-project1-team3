@@ -5,9 +5,10 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/3.5.7/18e7a39068a84cd401d758162a5a23a8b8b47b22/spring-boot-configuration-processor-3.5.7.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.42/8365263844ebb62398e0dc33057ba10ba472d3b8/lombok-1.18.42.jar" />
         </processorPath>
-        <module name="ap.main" />
+        <module name="BNK_PROJECT.main" />
       </profile>
     </annotationProcessing>
   </component>

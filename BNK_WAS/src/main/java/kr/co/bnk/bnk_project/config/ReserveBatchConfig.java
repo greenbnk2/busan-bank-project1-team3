@@ -533,189 +533,189 @@ public class ReserveBatchConfig {
     //  자동이체 실행 배치 Job
     // ==========================
 
-    @Bean
-    public Job fundAutoInvestmentJob() {
-        return new JobBuilder("fundAutoInvestmentJob", jobRepository)
-                .start(fundAutoInvestmentStep())
-                .build();
-    }
-
-    @Bean
-    public Step fundAutoInvestmentStep() {
-        return new StepBuilder("fundAutoInvestmentStep", jobRepository)
-                .<FundPlanDTO, FundPlanDTO>chunk(100, transactionManager)
-                .reader(fundAutoInvestmentReader())
-                .processor(fundAutoInvestmentProcessor())
-                .writer(fundAutoInvestmentWriter())
-                .build();
-    }
-
-    @Bean
-    public ItemReader<FundPlanDTO> fundAutoInvestmentReader() {
-        return new ItemReader<>() {
-            private Iterator<FundPlanDTO> iterator;
-
-            @Override
-            public FundPlanDTO read() {
-                if (iterator == null || !iterator.hasNext()) {
-                    log.info("[fundAutoInvestmentReader] ===== 오늘 실행할 자동이체 계획 조회 시작 =====");
-                    try {
-                        List<FundPlanDTO> list = fundPlanMapper.selectPlansToExecuteToday();
-                        log.info("[fundAutoInvestmentReader] 조회 결과: {}건", list != null ? list.size() : 0);
-
-                        if (list != null && !list.isEmpty()) {
-                            log.info("[fundAutoInvestmentReader] 조회된 계획 목록:");
-                            for (FundPlanDTO plan : list) {
-                                log.info("[fundAutoInvestmentReader]   - PLAN_ID={}, CYCLE_TYPE={}, AMOUNT={}, FUND_CODE={}",
-                                        plan.getPlanId(), plan.getCycleType(), plan.getAmount(), plan.getFundCode());
-                            }
-                        }
-
-                        if (list == null || list.isEmpty()) {
-                            log.info("[fundAutoInvestmentReader] 조회 결과 없음 - Reader 종료 예정");
-                            iterator = null;
-                            return null;
-                        }
-
-                        iterator = list.iterator();
-                        log.info("[fundAutoInvestmentReader] ===== 데이터 조회 완료 =====");
-                    } catch (Exception e) {
-                        log.error("[fundAutoInvestmentReader] 데이터 조회 중 오류 발생", e);
-                        throw e;
-                    }
-                }
-
-                if (iterator != null && iterator.hasNext()) {
-                    FundPlanDTO plan = iterator.next();
-                    log.info("[fundAutoInvestmentReader] 계획 읽기: PLAN_ID={}, CYCLE_TYPE={}",
-                            plan.getPlanId(), plan.getCycleType());
-                    return plan;
-                }
-
-                log.info("[fundAutoInvestmentReader] 읽을 데이터 없음 - 조회 완료");
-                return null;
-            }
-        };
-    }
-
-    @Bean
-    public ItemProcessor<FundPlanDTO, FundPlanDTO> fundAutoInvestmentProcessor() {
-        return plan -> {
-            if (plan == null || plan.getPlanId() == null) {
-                log.warn("[fundAutoInvestmentProcessor] 유효하지 않은 계획 데이터 스킵");
-                return null;
-            }
-
-            // 여기서는 검증만 수행 (계좌 잔액 확인 등은 추후 추가)
-            // 현재는 모든 계획을 처리 대상으로 함
-            log.debug("[fundAutoInvestmentProcessor] 계획 검증 통과: PLAN_ID={}", plan.getPlanId());
-            return plan;
-        };
-    }
-
-    @Bean
-    public ItemWriter<FundPlanDTO> fundAutoInvestmentWriter() {
-        return items -> {
-            log.info("[fundAutoInvestmentWriter] 처리 시작: {}건", items.size());
-            for (FundPlanDTO plan : items) {
-                try {
-                    if (plan == null || plan.getPlanId() == null) {
-                        log.warn("[fundAutoInvestmentWriter] 유효하지 않은 계획 데이터 스킵");
-                        continue;
-                    }
-
-                    Long planId = plan.getPlanId();
-                    log.info("[fundAutoInvestmentWriter] 자동이체 주문 생성 시작: PLAN_ID={}, FUND_CODE={}, AMOUNT={}",
-                            planId, plan.getFundCode(), plan.getAmount());
-
-                    // 1. USER_FUND_ORDER 생성 (자동이체 주문)
-                    Long orderId = fundOrderMapper.getNextOrderId();
-
-                    FundOrderDTO orderDTO = new FundOrderDTO();
-                    orderDTO.setOrderId(orderId);
-                    orderDTO.setCustNo(plan.getCustNo());
-                    orderDTO.setAcctNo(plan.getAcctNo());
-                    orderDTO.setFundCode(plan.getFundCode());
-                    orderDTO.setType("BUY");
-                    orderDTO.setStatus("REQUESTED");
-                    orderDTO.setRequestAt(LocalDateTime.now());
-                    orderDTO.setReqAmount(plan.getAmount());
-                    orderDTO.setPlanId(planId); // 자동이체 계획과 연결
-
-                    fundOrderMapper.insertFundOrder(orderDTO);
-                    log.debug("[fundAutoInvestmentWriter] 주문 생성 완료: ORDER_ID={}", orderId);
-
-                    // 2. NEXT_RUN_AT 업데이트 (다음 실행 예정일 설정)
-                    fundPlanMapper.updateNextRunAt(planId);
-                    log.debug("[fundAutoInvestmentWriter] 다음 실행 예정일 업데이트 완료: PLAN_ID={}", planId);
-
-                    log.info("[fundAutoInvestmentWriter] 자동이체 처리 완료: PLAN_ID={}, ORDER_ID={}", planId, orderId);
-                } catch (Exception e) {
-                    log.error("[fundAutoInvestmentWriter] 자동이체 처리 중 오류 발생: PLAN_ID={}",
-                            plan != null ? plan.getPlanId() : "null", e);
-                    throw e;
-                }
-            }
-            log.info("[fundAutoInvestmentWriter] 처리 완료");
-        };
-    }
-
-    /**
-     * 자동이체 배치 Job 실행 스케줄러
-     * 매일 오전 9시에 실행
-     * - 매일: 매일 9시
-     * - 매주: 선택한 요일 9시 (예: 월요일 선택 시 매주 월요일 9시)
-     * - 매월: 선택한 일자 9시 (예: 1일 선택 시 매월 1일 9시)
-     */
-    @Scheduled(cron = "0 0 9 * * *")  // 매일 오전 9시에 실행
-    public void runFundAutoInvestmentJob() {
-        log.info("[runFundAutoInvestmentJob] 스케줄러 실행 시작");
-        try {
-            Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions("fundAutoInvestmentJob");
-            if (runningExecutions != null && !runningExecutions.isEmpty()) {
-                log.info("[runFundAutoInvestmentJob] 실행 중인 Job 확인: {}건", runningExecutions.size());
-                LocalDateTime currentDateTime = LocalDateTime.now();
-                long timeoutMs = 30 * 60 * 1000; // 30분
-                boolean hasRunningJob = false;
-
-                for (JobExecution execution : runningExecutions) {
-                    if (execution.isRunning()) {
-                        LocalDateTime startDateTime = execution.getStartTime();
-                        if (startDateTime != null) {
-                            long elapsedTime = java.time.Duration.between(startDateTime, currentDateTime).toMillis();
-                            if (elapsedTime > timeoutMs) {
-                                log.warn("[runFundAutoInvestmentJob] 타임아웃된 작업 감지: executionId={}, elapsed={}ms",
-                                        execution.getId(), elapsedTime);
-                                // 타임아웃된 작업은 무시하고 새 Job 실행 계속 진행
-                            } else {
-                                log.info("[runFundAutoInvestmentJob] 아직 진행 중인 Job 존재: executionId={}, elapsed={}ms",
-                                        execution.getId(), elapsedTime);
-                                hasRunningJob = true;
-                            }
-                        } else {
-                            // startTime이 없는 이상한 경우는 실행 중으로 간주
-                            hasRunningJob = true;
-                        }
-                    }
-                }
-
-                if (hasRunningJob) {
-                    log.info("[runFundAutoInvestmentJob] 실행 중인 Job이 있어 스킵");
-                    return;
-                }
-            }
-
-            log.info("[runFundAutoInvestmentJob] fundAutoInvestmentJob 실행 시작");
-            Job job = fundAutoInvestmentJob();
-            org.springframework.batch.core.JobParameters params =
-                    new org.springframework.batch.core.JobParametersBuilder()
-                            .addLong("time", System.currentTimeMillis())
-                            .toJobParameters();
-
-            jobLauncher.run(job, params);
-            log.info("[runFundAutoInvestmentJob] fundAutoInvestmentJob 실행 완료");
-        } catch (Exception e) {
-            log.error("[runFundAutoInvestmentJob] Job 실행 중 오류 발생", e);
-        }
-    }
+//    @Bean
+//    public Job fundAutoInvestmentJob() {
+//        return new JobBuilder("fundAutoInvestmentJob", jobRepository)
+//                .start(fundAutoInvestmentStep())
+//                .build();
+//    }
+//
+//    @Bean
+//    public Step fundAutoInvestmentStep() {
+//        return new StepBuilder("fundAutoInvestmentStep", jobRepository)
+//                .<FundPlanDTO, FundPlanDTO>chunk(100, transactionManager)
+//                .reader(fundAutoInvestmentReader())
+//                .processor(fundAutoInvestmentProcessor())
+//                .writer(fundAutoInvestmentWriter())
+//                .build();
+//    }
+//
+//    @Bean
+//    public ItemReader<FundPlanDTO> fundAutoInvestmentReader() {
+//        return new ItemReader<>() {
+//            private Iterator<FundPlanDTO> iterator;
+//
+//            @Override
+//            public FundPlanDTO read() {
+//                if (iterator == null || !iterator.hasNext()) {
+//                    log.info("[fundAutoInvestmentReader] ===== 오늘 실행할 자동이체 계획 조회 시작 =====");
+//                    try {
+//                        List<FundPlanDTO> list = fundPlanMapper.selectPlansToExecuteToday();
+//                        log.info("[fundAutoInvestmentReader] 조회 결과: {}건", list != null ? list.size() : 0);
+//
+//                        if (list != null && !list.isEmpty()) {
+//                            log.info("[fundAutoInvestmentReader] 조회된 계획 목록:");
+//                            for (FundPlanDTO plan : list) {
+//                                log.info("[fundAutoInvestmentReader]   - PLAN_ID={}, CYCLE_TYPE={}, AMOUNT={}, FUND_CODE={}",
+//                                        plan.getPlanId(), plan.getCycleType(), plan.getAmount(), plan.getFundCode());
+//                            }
+//                        }
+//
+//                        if (list == null || list.isEmpty()) {
+//                            log.info("[fundAutoInvestmentReader] 조회 결과 없음 - Reader 종료 예정");
+//                            iterator = null;
+//                            return null;
+//                        }
+//
+//                        iterator = list.iterator();
+//                        log.info("[fundAutoInvestmentReader] ===== 데이터 조회 완료 =====");
+//                    } catch (Exception e) {
+//                        log.error("[fundAutoInvestmentReader] 데이터 조회 중 오류 발생", e);
+//                        throw e;
+//                    }
+//                }
+//
+//                if (iterator != null && iterator.hasNext()) {
+//                    FundPlanDTO plan = iterator.next();
+//                    log.info("[fundAutoInvestmentReader] 계획 읽기: PLAN_ID={}, CYCLE_TYPE={}",
+//                            plan.getPlanId(), plan.getCycleType());
+//                    return plan;
+//                }
+//
+//                log.info("[fundAutoInvestmentReader] 읽을 데이터 없음 - 조회 완료");
+//                return null;
+//            }
+//        };
+//    }
+//
+//    @Bean
+//    public ItemProcessor<FundPlanDTO, FundPlanDTO> fundAutoInvestmentProcessor() {
+//        return plan -> {
+//            if (plan == null || plan.getPlanId() == null) {
+//                log.warn("[fundAutoInvestmentProcessor] 유효하지 않은 계획 데이터 스킵");
+//                return null;
+//            }
+//
+//            // 여기서는 검증만 수행 (계좌 잔액 확인 등은 추후 추가)
+//            // 현재는 모든 계획을 처리 대상으로 함
+//            log.debug("[fundAutoInvestmentProcessor] 계획 검증 통과: PLAN_ID={}", plan.getPlanId());
+//            return plan;
+//        };
+//    }
+//
+//    @Bean
+//    public ItemWriter<FundPlanDTO> fundAutoInvestmentWriter() {
+//        return items -> {
+//            log.info("[fundAutoInvestmentWriter] 처리 시작: {}건", items.size());
+//            for (FundPlanDTO plan : items) {
+//                try {
+//                    if (plan == null || plan.getPlanId() == null) {
+//                        log.warn("[fundAutoInvestmentWriter] 유효하지 않은 계획 데이터 스킵");
+//                        continue;
+//                    }
+//
+//                    Long planId = plan.getPlanId();
+//                    log.info("[fundAutoInvestmentWriter] 자동이체 주문 생성 시작: PLAN_ID={}, FUND_CODE={}, AMOUNT={}",
+//                            planId, plan.getFundCode(), plan.getAmount());
+//
+//                    // 1. USER_FUND_ORDER 생성 (자동이체 주문)
+//                    Long orderId = fundOrderMapper.getNextOrderId();
+//
+//                    FundOrderDTO orderDTO = new FundOrderDTO();
+//                    orderDTO.setOrderId(orderId);
+//                    orderDTO.setCustNo(plan.getCustNo());
+//                    orderDTO.setAcctNo(plan.getAcctNo());
+//                    orderDTO.setFundCode(plan.getFundCode());
+//                    orderDTO.setType("BUY");
+//                    orderDTO.setStatus("REQUESTED");
+//                    orderDTO.setRequestAt(LocalDateTime.now());
+//                    orderDTO.setReqAmount(plan.getAmount());
+//                    orderDTO.setPlanId(planId); // 자동이체 계획과 연결
+//
+//                    fundOrderMapper.insertFundOrder(orderDTO);
+//                    log.debug("[fundAutoInvestmentWriter] 주문 생성 완료: ORDER_ID={}", orderId);
+//
+//                    // 2. NEXT_RUN_AT 업데이트 (다음 실행 예정일 설정)
+//                    fundPlanMapper.updateNextRunAt(planId);
+//                    log.debug("[fundAutoInvestmentWriter] 다음 실행 예정일 업데이트 완료: PLAN_ID={}", planId);
+//
+//                    log.info("[fundAutoInvestmentWriter] 자동이체 처리 완료: PLAN_ID={}, ORDER_ID={}", planId, orderId);
+//                } catch (Exception e) {
+//                    log.error("[fundAutoInvestmentWriter] 자동이체 처리 중 오류 발생: PLAN_ID={}",
+//                            plan != null ? plan.getPlanId() : "null", e);
+//                    throw e;
+//                }
+//            }
+//            log.info("[fundAutoInvestmentWriter] 처리 완료");
+//        };
+//    }
+//
+//    /**
+//     * 자동이체 배치 Job 실행 스케줄러
+//     * 매일 오전 9시에 실행
+//     * - 매일: 매일 9시
+//     * - 매주: 선택한 요일 9시 (예: 월요일 선택 시 매주 월요일 9시)
+//     * - 매월: 선택한 일자 9시 (예: 1일 선택 시 매월 1일 9시)
+//     */
+//    @Scheduled(cron = "0 0 9 * * *")  // 매일 오전 9시에 실행
+//    public void runFundAutoInvestmentJob() {
+//        log.info("[runFundAutoInvestmentJob] 스케줄러 실행 시작");
+//        try {
+//            Set<JobExecution> runningExecutions = jobExplorer.findRunningJobExecutions("fundAutoInvestmentJob");
+//            if (runningExecutions != null && !runningExecutions.isEmpty()) {
+//                log.info("[runFundAutoInvestmentJob] 실행 중인 Job 확인: {}건", runningExecutions.size());
+//                LocalDateTime currentDateTime = LocalDateTime.now();
+//                long timeoutMs = 30 * 60 * 1000; // 30분
+//                boolean hasRunningJob = false;
+//
+//                for (JobExecution execution : runningExecutions) {
+//                    if (execution.isRunning()) {
+//                        LocalDateTime startDateTime = execution.getStartTime();
+//                        if (startDateTime != null) {
+//                            long elapsedTime = java.time.Duration.between(startDateTime, currentDateTime).toMillis();
+//                            if (elapsedTime > timeoutMs) {
+//                                log.warn("[runFundAutoInvestmentJob] 타임아웃된 작업 감지: executionId={}, elapsed={}ms",
+//                                        execution.getId(), elapsedTime);
+//                                // 타임아웃된 작업은 무시하고 새 Job 실행 계속 진행
+//                            } else {
+//                                log.info("[runFundAutoInvestmentJob] 아직 진행 중인 Job 존재: executionId={}, elapsed={}ms",
+//                                        execution.getId(), elapsedTime);
+//                                hasRunningJob = true;
+//                            }
+//                        } else {
+//                            // startTime이 없는 이상한 경우는 실행 중으로 간주
+//                            hasRunningJob = true;
+//                        }
+//                    }
+//                }
+//
+//                if (hasRunningJob) {
+//                    log.info("[runFundAutoInvestmentJob] 실행 중인 Job이 있어 스킵");
+//                    return;
+//                }
+//            }
+//
+//            log.info("[runFundAutoInvestmentJob] fundAutoInvestmentJob 실행 시작");
+//            Job job = fundAutoInvestmentJob();
+//            org.springframework.batch.core.JobParameters params =
+//                    new org.springframework.batch.core.JobParametersBuilder()
+//                            .addLong("time", System.currentTimeMillis())
+//                            .toJobParameters();
+//
+//            jobLauncher.run(job, params);
+//            log.info("[runFundAutoInvestmentJob] fundAutoInvestmentJob 실행 완료");
+//        } catch (Exception e) {
+//            log.error("[runFundAutoInvestmentJob] Job 실행 중 오류 발생", e);
+//        }
+//    }
 }

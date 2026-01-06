@@ -61,6 +61,29 @@ public interface FundMapper {
      */
     Double getCurrentNav(@Param("fundCode") String fundCode);
 
+    // 보유펀드 목록 조회 (보유중 + 신청중)
+    List<MyFundResponse> findMyFundsByCustNo(@Param("custNo") Integer custNo);
+
+    // 보유펀드 상세 정보 조회
+    java.util.Map<String, Object> findMyFundDetail(
+        @Param("custNo") Integer custNo, 
+        @Param("fundCode") String fundCode
+    );
+
+    // 보유펀드 수익률 히스토리 조회
+    List<java.util.Map<String, Object>> findMyFundProfitHistory(
+        @Param("custNo") Integer custNo, 
+        @Param("fundCode") String fundCode,
+        @Param("startDate") String startDate,
+        @Param("endDate") String endDate
+    );
+
+    // 보유펀드 거래 내역 조회
+    List<java.util.Map<String, Object>> findMyFundTransactions(
+        @Param("custNo") Integer custNo, 
+        @Param("fundCode") String fundCode
+    );
+
 }
 
 

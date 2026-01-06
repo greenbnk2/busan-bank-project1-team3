@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * 펀드 주문 배치 스케줄러
  * 매일 오전 9시에 금액 확정 및 투자 시작 배치 실행
  */
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class FundOrderScheduler {
@@ -24,7 +24,7 @@ public class FundOrderScheduler {
      * 매일 오전 9시에 실행
      * REQUESTED 상태의 주문을 FIXED 상태로 전환
      */
-    @Scheduled(cron = "0 0 9 * * ?") // 매일 오전 9시
+    //@Scheduled(cron = "0 0 9 * * ?") // 매일 오전 9시
     public void fixOrders() {
         log.info("=== 금액 확정 배치 스케줄러 시작 ===");
         try {
@@ -40,7 +40,7 @@ public class FundOrderScheduler {
      * 매일 오전 9시 30분에 실행
      * FIXED 상태의 주문을 STARTED 상태로 전환하고 체결 내역 생성
      */
-    @Scheduled(cron = "0 30 9 * * ?") // 매일 오전 9시 30분
+    //@Scheduled(cron = "0 30 9 * * ?") // 매일 오전 9시 30분
     public void startInvestments() {
         log.info("=== 투자 시작 배치 스케줄러 시작 ===");
         try {

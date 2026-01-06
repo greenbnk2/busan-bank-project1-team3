@@ -57,6 +57,7 @@
         FROM USER_FUND_PLAN
         WHERE STATUS = 'ACTIVE'
           AND TRUNC(START_AT) &lt;= TRUNC(SYSDATE)  -- 시간 제거하고 날짜만 비교
+          AND (NEXT_RUN_AT IS NULL OR NEXT_RUN_AT &lt;= SYSDATE)  -- 다음 실행 예정일 체크 (시간까지 비교)
           AND (
               -- 매일: 항상 실행 (9시에 실행되므로 당일이면 실행)
               (CYCLE_TYPE = 'DAILY')
